@@ -1,0 +1,65 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/Azure/azure-dev/main/schemas/v1.0/azure.yaml.json
+
+name: ai-autonomous-agent
+metadata:
+  template: ai-autonomous-agent@0.0.1
+
+#
+# Use layered provisioning to first deploy main infrastructure and then identity resources
+# - https://learn.microsoft.com/en-us/azure/developer/azure-developer-cli/layered-provisioning
+#
+infra:
+  layers:
+    - name: base
+      path: ./infra/base
+    - name: identity
+      path: ./infra/identity
+
+#
+# Hooks are invoked once per provisioning layer
+#
+hooks:
+  preprovision:
+    shell: sh
+    run: ./infra/hooks/preprovision.sh
+    interactive: true
+  predown:
+    shell: sh
+    run: ./infra/hooks/predown.sh
+    interactive: true
+
+#
+# When 'azd deploy' runs, it builds a Docker image with a timestamp-based tag and pushes it the Azure container registry
+# It then finds a matching 'azd-service-name' tag in bicep files, which causes services to get deployed as container apps
+#
+services:
+  
+  #
+  # Build and deploy the Portfolio MCP Server from its Dockerfile
+  #
+  portfolio-mcp-server:  
+    project: src/PortfolioMcpServer
+    host: containerapp
+    language: csharp
+    docker:
+      path: ./Dockerfile
+  
+  #
+  # Build and deploy the Autonomous Agent from its Dockerfile
+  #
+  autonomous-agent:  
+    project: src/AutonomousAgent
+    host: containerapp
+    language: csharp
+    docker:
+      path: ./Dockerfile
+
+  #
+  # Build and deploy a utility container with which to test internal connections
+  #
+  utility:
+    project: tools/utility
+    host: containerapp
+    language: docker
+    docker:
+      path: ./Dockerfile

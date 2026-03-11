@@ -1,0 +1,45 @@
+<config xmlns="http://tail-f.com/ns/config/1.0">
+  <profiles xmlns="https://curity.se/ns/conf/base">
+    <profile>
+      <id>authentication-service</id>
+      <type xmlns:auth="https://curity.se/ns/conf/profile/authentication">auth:authentication-service</type>
+      <settings>
+        <authentication-service xmlns="https://curity.se/ns/conf/profile/authentication">
+          <persisted-sso-session>true</persisted-sso-session>
+          <authenticators>
+            <authenticator>
+              <id>entra</id>
+              <authentication-actions>
+                <login>post-login</login>
+              </authentication-actions>
+              <oidc xmlns="https://curity.se/ns/conf/authenticators/oidc">
+                <configuration-url>#{ENTRA_OIDC_METADATA_URL}</configuration-url>
+                <client-id>#{ENTRA_CLIENT_ID}</client-id>
+                <client-secret>#{ENTRA_CLIENT_SECRET}</client-secret>
+                <fetch-userinfo>
+                </fetch-userinfo>
+                <prompt-login>if-requested-by-client</prompt-login>
+              </oidc>
+            </authenticator>
+            <include-attributes-of-all-authenticators/>
+          </authenticators>
+        </authentication-service>
+      </settings>
+    </profile>
+  </profiles>
+  <facilities xmlns="https://curity.se/ns/conf/base">
+    <data-sources>
+      <data-source>
+        <id>default-datasource</id>
+        <jdbc xmlns="https://curity.se/ns/ext-conf/jdbc">
+          <connection-string>jdbc:sqlserver://#{SQL_SERVER_NAME}.database.windows.net:1433;database=curity-db;encrypt=true;trustServerCertificate=false;hostNameInCertificate=*.database.windows.net;loginTimeout=30;sendStringParametersAsUnicode=false;</connection-string>
+          <standard-credentials-mode>
+          </standard-credentials-mode>
+          <driver>com.microsoft.sqlserver.jdbc.SQLServerDriver</driver>
+          <password>#{SQL_ADMIN_PASSWORD}</password>
+          <username>#{SQL_ADMIN_USERNAME}@#{SQL_SERVER_NAME}</username>
+        </jdbc>
+      </data-source>
+    </data-sources>
+  </facilities>
+</config>

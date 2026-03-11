@@ -1,0 +1,34 @@
+_format_version: '2.1'
+_transform: true
+services:
+
+#
+# Handles local computer requests from the autonomous agent to the secured MCP server
+#
+- name: portfolio-mcp-server-resource-metadata
+  url: http://host.docker.internal:3001/.well-known/oauth-protected-resource
+  routes:
+  - name: portfolio-mcp-server-resource-metadata
+    hosts:
+    - localhost:81
+    paths:
+    - /mcp/.well-known/oauth-protected-resource
+
+#
+# The gateway uses a plugin to write an audit log with token details for secured agent requests
+#
+- name: portfolio-mcp-server
+  url: http://host.docker.internal:3001
+  routes:
+  - name: portfolio-mcp-server
+    hosts:
+    - localhost:81
+    paths:
+    - /mcp
+  plugins:
+  - name: request-transformer
+    config:
+      replace:
+        uri: "/$(uri_captures[1])"
+  - name: token-audit
+ 

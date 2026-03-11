@@ -1,0 +1,39 @@
+_format_version: '2.1'
+_transform: true
+services:
+
+#
+# Handles requests from the console client to the autonomous agent's internet URL
+#
+- name: autonomous-agent-card
+  url: http://autonomous-agent-$AZURE_ENV_NAME/.well-known/agent-card.json
+  routes:
+  - name: autonomous-agent-card
+    hosts:
+    - gateway-external-$AZURE_ENV_NAME.$EXTERNAL_DOMAIN_NAME
+    paths:
+    - /a2a/.well-known/agent-card.json
+
+#
+# The gateway uses token exchange to deliver a JWT access token with reduced scopes to the autonomous agent
+#
+- name: autonomous-agent
+  url: http://autonomous-agent-$AZURE_ENV_NAME
+  routes:
+  - name: autonomous-agent
+    hosts:
+    - gateway-external-$AZURE_ENV_NAME.$EXTERNAL_DOMAIN_NAME
+    paths:
+    - /a2a
+  plugins:
+  - name: request-transformer
+    config:
+      replace:
+        uri: "/$(uri_captures[1])"
+  - name: token-exchange
+    config:
+      token_endpoint: http://idsvr-runtime-$AZURE_ENV_NAME/oauth/v2/oauth-token
+      client_id: external-gateway-client
+      client_secret: $GATEWAY_TOKEN_EXCHANGE_SECRET
+      token_cache_seconds: 900
+      target_scope: 'stocks/read'

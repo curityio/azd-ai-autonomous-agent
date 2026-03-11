@@ -1,0 +1,37 @@
+<config xmlns="http://tail-f.com/ns/config/1.0">
+  <profiles xmlns="https://curity.se/ns/conf/base">
+    <profile>
+      <id>authentication-service</id>
+      <type xmlns:auth="https://curity.se/ns/conf/profile/authentication">auth:authentication-service</type>
+      <settings>
+        <authentication-service xmlns="https://curity.se/ns/conf/profile/authentication">
+          <authenticators>
+            <authenticator>
+              <id>username</id>
+              <authentication-actions>
+                <login>post-login</login>
+              </authentication-actions>
+              <username xmlns="https://curity.se/ns/ext-conf/username">
+              </username>
+            </authenticator>
+          </authenticators>
+        </authentication-service>
+      </settings>
+    </profile>
+  </profiles>
+  <facilities xmlns="https://curity.se/ns/conf/base">
+    <data-sources>
+      <data-source>
+        <id>default-datasource</id>
+        <jdbc xmlns="https://curity.se/ns/ext-conf/jdbc">
+          <connection-string>data:text/plain;aes,v:S.TDJGU092em1YTTJleGQwcw==.gNxswcUPaLqXUccEsx0Iuw==.irCwtG5E-mCmmYtGCACKu9BbL_5BODiIcBT1xQnaiHC0MFQzjHj2cA5VAECUMLdNkiJfH6sw8AzK32qLLyFg4Yh2ybtRx2kdugYjCJqfwFoJuFrH-yVTsY7ocRIubiuM.A_zgq-YY26ADWSB9RC4EG7XCLTuQftrguySCa96LhTY=</connection-string>
+          <standard-credentials-mode>
+          </standard-credentials-mode>
+          <driver>org.hsqldb.jdbc.JDBCDriver</driver>
+          <password>data:text/plain;aes,v:S.WDZYNDFpRVNFR1ZLWlV0bw==.JvCoeg0yXmZIQFso3b8Z1Q==.dUIdoxblXEb0vvi2YD-0XA==.3A3yDeRLkQnwMk77qE8LHTO-bC15_JBIJxKBd1_K5As=</password>
+          <username>SA</username>
+        </jdbc>
+      </data-source>
+    </data-sources>
+  </facilities>
+</config>
