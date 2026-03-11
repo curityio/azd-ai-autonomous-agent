@@ -13,6 +13,4 @@ echo 'Running predown logic ...'
 # Run the Entra ID cleanup script if the environment variable exists
 #
 eval $(azd env get-values 2>/dev/null) || true
-if [ ! -z "${ENTRA_CLIENT_ID:-}" ]; then
-  ./idsvr/predown.sh
-fi
+./idsvr/predown.sh
