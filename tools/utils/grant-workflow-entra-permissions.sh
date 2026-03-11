@@ -55,7 +55,6 @@ fi
 echo "Granting the GitHub workflow identity permissions to create an Entra ID client ..."
 URL="https://graph.windows.net/$TENANT_DOMAIN/servicePrincipals/$MANAGED_IDENTITY_ID/appRoleAssignments?api-version=1.6"
 BODY="{ \"principalId\": \"$MANAGED_IDENTITY_ID\", \"resourceId\": \"$GRAPH_SPN_ID\", \"id\": \"$GRAPH_ROLE_ID\"  }"
-echo "$BODY" | jq
 az rest --method POST --uri "$URL" --body "$BODY"
 if [ $? -ne 0 ]; then
   exit 1
