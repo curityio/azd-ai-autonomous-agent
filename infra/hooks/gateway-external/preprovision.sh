@@ -10,7 +10,10 @@ cd "$(dirname "${BASH_SOURCE[0]}")"
 echo 'Running preprovision logic for the external gateway ...'
 export AZURE_ENV_NAME=$(azd env get-value AZURE_ENV_NAME)
 export EXTERNAL_DOMAIN_NAME=$(azd env get-value EXTERNAL_DOMAIN_NAME)
-export GATEWAY_TOKEN_EXCHANGE_SECRET=$(azd env get-value GATEWAY_TOKEN_EXCHANGE_SECRET)
+
+if [ -z "${GATEWAY_TOKEN_EXCHANGE_SECRET:-}" ]; then
+  export GATEWAY_TOKEN_EXCHANGE_SECRET=$(azd env get-value GATEWAY_TOKEN_EXCHANGE_SECRET)
+fi
 
 #
 # Update gateway hostname based routes
