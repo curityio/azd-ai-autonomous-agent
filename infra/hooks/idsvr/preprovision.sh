@@ -88,6 +88,7 @@ if [ ! -f cluster.xml ]; then
 
   echo 'Generating cluster.xml with keystore using Docker...'
 
+  ADMIN_WORKLOAD_NAME="idsvr-admin-${AZURE_ENV_NAME}"
   CLUSTER_XML=$(docker run --rm curity.azurecr.io/curity/idsvr:latest \
       genclust -c "$ADMIN_WORKLOAD_NAME" 2>/dev/null)
 
