@@ -11,7 +11,7 @@ The deployment uses bicep, so install the Visual Studio code extensions:
 ## Deployment Mechanics
 
 By default, call `azd up`, which is equivalent to running the following commands in sequence.  
-In larger setups, you could split each distinct deployment into its own GitHub repository.
+In larger setups, you could split each of these deployments into its own GitHub repository.
 
 ```bash
 azd provision base

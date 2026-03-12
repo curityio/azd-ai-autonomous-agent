@@ -36,7 +36,7 @@ fi
 
 #
 # During identity provisioning from a local computer, generate some secrets
-# GitHub workflows use configured secrets instead
+# GitHub workflows instead use secrets configured within GitHub
 #
 if [ "$PROVISIONING_STAGE" == 'IDENTITY' ]; then
 

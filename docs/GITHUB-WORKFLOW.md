@@ -11,8 +11,9 @@ Then use the following command to configure a GitHub workflow for your cloned re
 azd pipeline config --auth-type federated
 ```
 
-You may need to temporarily comment out the identity layer in the `azure.yaml` file first.  
-Doing so avoids prompts for parameters generated later in the installation.
+The deployment uses [layered provisioning](https://learn.microsoft.com/en-us/azure/developer/azure-developer-cli/layered-provisioning), which `azd pipeline config` may not yet fully support.  
+Running `azd pipeline config` may trigger a prompt for secrets used during the identity provisioning stage.  
+If so, comment out the identity layer in the `azure.yaml` file to work around that issue, and re-run the command.
 
 ```yaml
 infra:
@@ -24,7 +25,6 @@ infra:
 ```
 
 Set up the `dev` stage of the deployment pipeline, with outputs of the following form.  
-Follow all prompts and check in changes.
 
 - Enter a unique environment name: `dev`
 - Select Azure subscription: `<your subscription>`
@@ -34,6 +34,8 @@ Follow all prompts and check in changes.
 - Select the location to create the managed service identity. `<your preferred region>`
 - Pick a resource group to use: `Create a new resource group`
 - Enter a name for the new resource group: `rg-dev`
+
+Follow all prompts, undo the `azure.yaml` workaround, then commit all changes when prompted to do so.
 
 ## View GitHub Workflow Variables
 

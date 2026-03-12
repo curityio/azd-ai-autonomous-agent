@@ -1,7 +1,7 @@
 # Secured Autonomous Agent
 
-An azd template to showcase an enterprise AI security architecture with token intelligence.  
-Agents can act autonomously, with limits defined by administrators and with runtime human approvals.
+An azd template to showcase an enterprise AI security architecture with OAuth 2.0 token intelligence.  
+Agents can act autonomously, and resource servers enforce administrator controls and human approvals.
 
 Enables customer users to run internet applications that integrate with Azure AI Foundry and enterprise data.  
 Users can manipulate authorized data in flexible ways, with [rich responses](docs/AI-DATA-REPORTING.md) from the AI model.
@@ -16,7 +16,7 @@ The repository demonstrates the following main features:
 
 - C# application code to integrate a backend agent with Azure AI Foundry.
 - C# application code to use OpenID Connect to authenticate users and get initial access tokens.
-- C# A2A server and MCP server code to validate and exchange access tokens.
+- C# A2A server and MCP server code to use OAuth 2.0 to validate and exchange access tokens.
 - Configuration and deployment of identity systems and API gateways.
 
 ## Resources
@@ -29,14 +29,14 @@ The code provides 3 applications, developed with Microsoft SDKs:
 
 The resources support multiple deployment scenarios:
 
-- Local Xunit security testing of the MCP server as a standalone component.
-- A local deployment to promote token understanding.
+- Xunit test driven development to verify MCP server security as a standalone component.
+- A local end-to-end deployment with user authentication, to promote token understanding.
 - An Azure deployment that can be triggered from the local computer or a GitHub workflow.
 
 ## Architecture
 
 Enterprises use productive programming languages to build applications that use Microsoft AI technology.  
-Optimal access tokens restrict privileges and can enable dynamic access controls for AI use cases.
+Resource servers authorize using access token attributes and can apply dynamic runtime access controls.
 
 ![Initial Technical Flow](docs/images/initial-technical-flow.png)
 
@@ -166,7 +166,7 @@ Use the following guidance to choose an Azure region and to plan costs.
 
 This template uses **gpt-4.1-mini** which may not be available in all Azure regions.  
 Check for [up-to-date region availability](https://learn.microsoft.com/azure/ai-services/openai/concepts/models#standard-deployment-model-availability) and select a region during deployment accordingly.  
-Consider using **East US 2**, **Sweden Central** or ***UK South**.
+Consider using **East US 2**, **Sweden Central** or **UK South**.
 
 ### Costs
 
@@ -175,7 +175,7 @@ You can estimate the cost of this project's architecture with [Azure's pricing c
 
 * [Azure AI Services](https://azure.microsoft.com/pricing/details/cognitive-services/openai-service/)
 * [Container Apps](https://azure.microsoft.com/en-us/pricing/details/container-apps/)
-* [Virtual Network](https://azure.microsoft.com/pricing/details/virtual-network/)
+* [Virtual Networks](https://azure.microsoft.com/pricing/details/virtual-network/)
 
 ## Token Intelligence
 
@@ -184,7 +184,7 @@ The deeper behaviors are a future-proof backend AI deployment with security cont
 ### API Gateways
 
 - An external gateway delivers downscoped JWT access tokens to agents.
-- An internal gateway sits between agents and resource servers, as a pattern to govern agent access.
+- An internal gateway runs between agents and resource servers, as a pattern to govern agent access.
 
 ### Curity Identity Server
 
