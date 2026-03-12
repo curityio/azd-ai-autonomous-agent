@@ -3,14 +3,11 @@
 load-secrets.sh
 cdb
 mssql-create_database.sql
-cluster.xml
 curity-license-cli*
 license.json
 *.sln
 bin
 obj
-tools/gateway-external/local-routes.yml
-tools/gateway-external/azure-external-routes.yml
-tools/gateway-internal/azure-internal-routes.yml
+local-routes.yml
 tools/idsvr/docker/*.xml
 src/PortfolioMcpServer/.env

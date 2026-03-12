@@ -26,25 +26,25 @@ if [ $? -ne 0 ]; then
 fi
 
 #
-# Log in to the registry
+# Build and push Docker containers
 #
-CONTAINER_REGISTRY_NAME=$(azd env get-value CONTAINER_REGISTRY_NAME)
-az acr login --name "$CONTAINER_REGISTRY_NAME"
+if [ -z "${GATEWAY_EXTERNAL_IMAGE_NAME:-}" ]; then
+  
+  CONTAINER_REGISTRY_NAME=$(azd env get-value CONTAINER_REGISTRY_NAME)
+  az acr login --name "$CONTAINER_REGISTRY_NAME"
 
-#
-# Build and push the container image
-#
-TAG="$(date +%Y%m%d%H%M%S)"
-docker build --no-cache --platform linux/amd64 -t "gateway-external:$TAG" .
-if [ $? -ne 0 ]; then
-  exit 1
-fi 
+  TAG="$(date +%Y%m%d%H%M%S)"
+  docker build --no-cache --platform linux/amd64 -t "gateway-external:$TAG" .
+  if [ $? -ne 0 ]; then
+    exit 1
+  fi 
 
-IMAGE="$CONTAINER_REGISTRY_NAME.azurecr.io/gateway-external:$TAG"
-docker tag "gateway-external:$TAG" "$IMAGE"
-docker push "$IMAGE"
-if [ $? -ne 0 ]; then
-  exit 1
-fi 
+  IMAGE="$CONTAINER_REGISTRY_NAME.azurecr.io/gateway-external:$TAG"
+  docker tag "gateway-external:$TAG" "$IMAGE"
+  docker push "$IMAGE"
+  if [ $? -ne 0 ]; then
+    exit 1
+  fi 
 
-azd env set GATEWAY_EXTERNAL_IMAGE_NAME "$IMAGE" >/dev/null
+  azd env set GATEWAY_EXTERNAL_IMAGE_NAME "$IMAGE" >/dev/null
+fi

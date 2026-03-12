@@ -28,6 +28,23 @@ jobs:
       - name: Install azd
         uses: Azure/setup-azd@v2
 
+      # Uncomment the following steps and comment out all deployment steps to perform template validation
+      #- uses: microsoft/template-validation-action@Latest
+      #  id: validation
+      #  with:
+      #    validateAzd: true
+      #    useDevContainer: false
+      #  env:
+      #    AZURE_CLIENT_ID: ${{ vars.AZURE_CLIENT_ID }}
+      #    AZURE_TENANT_ID: ${{ vars.AZURE_TENANT_ID }}
+      #    AZURE_SUBSCRIPTION_ID: ${{ vars.AZURE_SUBSCRIPTION_ID }}
+      #    AZURE_ENV_NAME: ${{ vars.AZURE_ENV_NAME }}
+      #    AZURE_LOCATION: ${{ vars.AZURE_LOCATION }}
+      #    GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      #- name: print result
+      #  run: cat ${{ steps.validation.outputs.resultFile }}
+      
       # Log in to az with a managed identity
       - name: Log in to az
         uses: azure/login@v2

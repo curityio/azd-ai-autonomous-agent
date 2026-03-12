@@ -26,11 +26,20 @@ function generatePassword() {
 }
 
 #
-# Scripted automation for the identity layer
+# Work out the provisioning stage from environment variables
 #
-if [ ! -z "${EXTERNAL_DOMAIN_NAME:-}" ]; then
+if [ -z "${EXTERNAL_DOMAIN_NAME:-}" ]; then
+  PROVISIONING_STAGE='BASE'
+else
+  PROVISIONING_STAGE='IDENTITY'
+fi
 
-  # For deployments triggered locally, generate some strong secrets
+#
+# During identity provisioning from a local computer, generate some secrets
+# GitHub workflows use configured secrets instead
+#
+if [ "$PROVISIONING_STAGE" == 'IDENTITY' ]; then
+
   if [ -z "${SQL_ADMIN_PASSWORD:-}" ]; then
     azd env set SQL_ADMIN_PASSWORD "$(generatePassword)"
   fi
@@ -51,17 +60,13 @@ if [ ! -z "${EXTERNAL_DOMAIN_NAME:-}" ]; then
     fi
     azd env set LICENSE_KEY "$LICENSE_KEY"
   fi
+fi
 
-  # Preprovisioning for the external gateway
-  if [ -z "${GATEWAY_EXTERNAL_IMAGE_NAME:-}" ]; then
-    ./gateway-external/preprovision.sh
-  fi
-
-  # Preprovisioning for the internal gateway
-  if [ -z "${GATEWAY_INTERNAL_IMAGE_NAME:-}" ]; then
-    ./gateway-internal/preprovision.sh
-  fi
-
-  # Preprovisioning for the Curity Identity Server
+#
+# Do extra work at the start of identity provisioning
+#
+if [ "$PROVISIONING_STAGE" == 'IDENTITY' ]; then
+  ./gateway-external/preprovision.sh
+  ./gateway-internal/preprovision.sh
   ./idsvr/preprovision.sh
 fi

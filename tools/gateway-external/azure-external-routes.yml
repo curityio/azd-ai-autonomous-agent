@@ -1,0 +1,4 @@
+# This file gets created dynamically during identity provisioning.
+# However, bicep validation requires it to exist at the start of a deployment.
+# To resolve that, this empty file is checked in and gets rewritten later.
+# - https://github.com/Azure/bicep/issues/3816
