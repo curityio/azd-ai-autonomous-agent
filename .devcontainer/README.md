@@ -18,4 +18,4 @@ Developers run the following frontend component that uses tokens to connect to b
 
 ## End-to-End Flow
 
-The use of the local computer enables an interactive user flow with understandable connections.
+Local computer execution enables an interactive user flow with the most understandable connections.

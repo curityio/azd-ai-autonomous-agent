@@ -150,6 +150,7 @@ module sqlServer 'idsvr/sqlserver.bicep' = {
 // Container app for the internal gateway
 module dbinitContainerApp 'idsvr/dbinit-container-app.bicep' = {
   name: 'container-app-dbinit'
+  dependsOn: [sqlServer]
   params: {
     name: 'dbinit-${environmentName}'
     location: location
