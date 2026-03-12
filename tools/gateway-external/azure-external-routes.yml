@@ -1,4 +1,7 @@
 # This file gets created dynamically during identity provisioning.
 # However, bicep validation requires it to exist at the start of a deployment.
-# To resolve that, this empty file is checked in and gets rewritten later.
 # - https://github.com/Azure/bicep/issues/3816
+#
+# To resolve that, this empty file is checked in and gets rewritten later.
+# If required, use the following command to prevent runtime updates causing checkins
+# - git update-index --assume-unchanged tools/gateway-external/azure-external-routes.yml
