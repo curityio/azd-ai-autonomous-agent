@@ -22,17 +22,31 @@ For example, use Azure workload identities for Curity Identity Server database c
 
 ## Features
 
-The repository demonstrates how to use OAuth security to protect enterprise data during AI flows.  
-The code provides 3 applications developed with C# and Microsoft SDKs.
+The repository demonstrates the following main features:
+
+- C# application code to integrate a backend agent with Azure AI Foundry.
+- C# application code to use OpenID Connect to authenticate users and get initial access tokens.
+- C# A2A server and MCP server code to validate access tokens and implement token exchange.
+- Configuration and deployment of identity systems and API gateways.
+
+## Resources
+
+The code provides 3 applications, developed with Microsoft SDKs:
 
 - A console client serves as a secured internet application that uses A2A to send customer support requests.
 - A secured backend agent processes customer support requests and integrates with Azure AI Foundry.
 - An MCP server uses optimal access tokens and claims-based authorization to protect enterprise resources.
 
+The resources support multiple deployment scenarios:
+
+- Local Xunit security testing of the MCP server as a standalone component.
+- A local deployment to promote token understanding.
+- An Azure deployment that can be triggered from the local computer or a GitHub workflow.
+
 ## Architecture Diagram
 
-The architecture includes API gateways and identity systems to comprise an end-to-end flow.  
-Enterprises develop applications, while tokens restrict privileges and enable dynamic access controls.
+Enterprises build applications with high level productive programming languages.  
+Optimal access tokens restrict privileges and can enable dynamic access controls.
 
 ![Initial Technical Flow](docs/images/initial-technical-flow.png)
 
@@ -176,5 +190,5 @@ In the example deployment, Entra ID is used for all user account storage and use
 
 ## License
 
-This project is licensed under the [Apache License 2.0](LICENSE).
+This project is licensed under the [Apache License 2.0](LICENSE.md).
  

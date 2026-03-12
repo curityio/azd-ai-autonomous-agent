@@ -20,7 +20,7 @@ resource aiFoundry 'Microsoft.CognitiveServices/accounts@2025-06-01' = {
   properties: {
     allowProjectManagement: true
     customSubDomainName: name
-    disableLocalAuth: false
+    disableLocalAuth: true
   }
 }
 

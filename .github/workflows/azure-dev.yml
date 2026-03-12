@@ -29,11 +29,12 @@ jobs:
         uses: Azure/setup-azd@v2
 
       # Uncomment the following steps and comment out all deployment steps to perform template validation
+      # Set validateAsd
       #- uses: microsoft/template-validation-action@Latest
       #  id: validation
       #  with:
-      #    validateAzd: true
       #    useDevContainer: false
+      #    validateAzd: true
       #  env:
       #    AZURE_CLIENT_ID: ${{ vars.AZURE_CLIENT_ID }}
       #    AZURE_TENANT_ID: ${{ vars.AZURE_TENANT_ID }}
