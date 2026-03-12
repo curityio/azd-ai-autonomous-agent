@@ -3,6 +3,7 @@ targetScope = 'resourceGroup'
 param storageAccountName string
 param fileShareName string
 param location string
+param tags object = {}
 param utcTime string = utcNow()
 
 @secure()
@@ -16,6 +17,7 @@ resource uploadScript 'Microsoft.Resources/deploymentScripts@2023-08-01' = {
   name: 'upload-config-files'
   location: location
   kind: 'AzureCLI'
+  tags: tags
   properties: {
     azCliVersion: '2.52.0'
     retentionInterval: 'PT1H'

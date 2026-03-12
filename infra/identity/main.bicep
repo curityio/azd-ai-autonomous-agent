@@ -19,6 +19,8 @@ var tags = {
   'azd-env-name': environmentName
 }
 
+//azd config set alpha.deployment.stacks on
+
 @description('A unique prefix for resources that must be globally unique')
 param uniquePrefix string
 
@@ -86,6 +88,7 @@ param agentTokenExchangeClientSecret string
 module externalGatewayConfiguration 'gateway-external/upload-configuration.bicep' = {
   name: 'upload-gateway-external-configuration'
   params: {
+    tags: tags
     storageAccountName: storageAccountName
     fileShareName: 'config-files'
     location: location
@@ -111,6 +114,7 @@ module externalGatewayContainerApp 'gateway-external/container-app.bicep' = {
 module internalGatewayConfiguration 'gateway-internal/upload-configuration.bicep' = {
   name: 'upload-gateway-internal-configuration'
   params: {
+    tags: tags
     storageAccountName: storageAccountName
     fileShareName: 'config-files'
     location: location
@@ -170,6 +174,7 @@ module dbinitContainerApp 'idsvr/dbinit-container-app.bicep' = {
 module uploadConfigFiles 'idsvr/upload-configuration.bicep' = {
   name: 'upload-config-files'
   params: {
+    tags: tags
     storageAccountName: storageAccountName
     fileShareName: 'config-files'
     location: location
