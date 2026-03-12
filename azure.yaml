@@ -2,7 +2,7 @@
 
 name: ai-autonomous-agent
 metadata:
-  template: ai-autonomous-agent@0.0.1
+  template: ai-autonomous-agent@1.0.0
 
 #
 # Use layered provisioning to first deploy main infrastructure and then identity resources

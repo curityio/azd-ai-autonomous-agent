@@ -27,8 +27,7 @@ Ensure that Azure CLI users are assigned the `Azure AI User` role.
 
 ## Configure the Autonomous Agent
 
-Edit the `.env` file in the `src/AutonomousAgent` folder.  
-Update the environment variables to match your Foundry project URL and model name.  
+Edit the `src/AutonomousAgent/.env` file and update settings to match your Foundry project URL and model name:
 
 ```bash
 export AZURE_AI_FOUNDRY_PROJECT_URL='https://curity-demo.cognitiveservices.azure.com/api/projects/proj-default'

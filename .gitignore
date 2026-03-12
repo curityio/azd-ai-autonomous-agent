@@ -1,9 +1,6 @@
 .DS_Store
 .azure
 load-secrets.sh
-#azure-external-routes.yml
-#azure-internal-routes.yml
-#cluster.xml
 cdb
 mssql-create_database.sql
 curity-license-cli*

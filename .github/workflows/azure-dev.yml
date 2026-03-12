@@ -29,12 +29,12 @@ jobs:
         uses: Azure/setup-azd@v2
 
       # Uncomment the following steps and comment out all deployment steps to perform template validation
-      # Set validateAsd
+      # Set validateAzd to true to validate the GitHub workflow deployment
       #- uses: microsoft/template-validation-action@Latest
       #  id: validation
       #  with:
       #    useDevContainer: false
-      #    validateAzd: true
+      #    validateAzd: false
       #  env:
       #    AZURE_CLIENT_ID: ${{ vars.AZURE_CLIENT_ID }}
       #    AZURE_TENANT_ID: ${{ vars.AZURE_TENANT_ID }}
@@ -45,7 +45,7 @@ jobs:
 
       #- name: print result
       #  run: cat ${{ steps.validation.outputs.resultFile }}
-      
+
       # Log in to az with a managed identity
       - name: Log in to az
         uses: azure/login@v2

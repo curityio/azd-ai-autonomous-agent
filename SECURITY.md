@@ -1,17 +1,35 @@
 # Security
 
-The repository covers both infrastructure security and data security.
+The repository uses both infrastructure security and enterprise data security.
 
 ## Infrastructure Security
 
-Azure deployment best practices provide strong security for Azure infrastructure resources:
+Azure deployment best practices provide strong Azure infrastructure security:
 
 - [Azure Deployment](docs/AZURE-DEPLOYMENT.md)
 - [Azure Endpoints](docs/AZURE-ENDPOINTS.md)
+- [GitHub Workflow](docs/GITHUB-WORKFLOW.md)
 
-## Data Security
+## Enterprise Data Security
 
-OAuth 2.0 provides end-to-end strong security for APIs, applications and users, to protect enterprise data:
+OAuth 2.0 provides future-proof strong security for enterprise data, APIs, applications and users: 
 
 - [OAuth Configuration](docs/OAUTH-CONFIGURATION.md)
 - [Token Flow](docs/TOKEN-FLOW.md)
+- [Advanced Use Cases](docs/ADVANCED-USE-CASES.md)
+
+## Managed Identities
+
+The deployment uses the following managed identities:
+
+- The GitHub workflow uses a managed identity to run Azure deployments
+- The Autonomous Agent uses a managed identity to connect to Azure AI Foundry
+
+## Password Credentials
+
+For developer convenience, the following connections use simple passwords.  
+Harden these connections for production deployments.  
+
+- The Admin UI for the Curity Identity Server could be updated to use Entra ID logins.
+- The JDBC connection from the Curity Identity Server to Azure SQL could use managed identity and strict firewall rules.
+- Token exchange could use Azure JWT client assertions instead of client secrets.
