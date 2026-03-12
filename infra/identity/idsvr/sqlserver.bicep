@@ -56,8 +56,3 @@ resource firewallRuleAll 'Microsoft.Sql/servers/firewallRules@2024-11-01-preview
   }
 }
 
-output serverName string = sqlServer.name
-output databaseName string = sqlDatabase.name
-output fullyQualifiedDomainName string = sqlServer.properties.fullyQualifiedDomainName
-output connectionString string = 'Server=tcp:${sqlServer.properties.fullyQualifiedDomainName},1433;Initial Catalog=${sqlDatabase.name};Persist Security Info=False;User ID=${administratorLogin};Password=${administratorLoginPassword};MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;'
-

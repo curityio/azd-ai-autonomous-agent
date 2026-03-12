@@ -134,6 +134,7 @@ module internalGatewayContainerApp 'gateway-internal/container-app.bicep' = {
 
 // Create a SQL Server and database for the Curity Identity Server
 var sqlServerName = uniquePrefix
+var databaseName = 'curity-db'
 module sqlServer 'idsvr/sqlserver.bicep' = {
   name: 'sql-server'
   params: {
@@ -142,7 +143,7 @@ module sqlServer 'idsvr/sqlserver.bicep' = {
     tags: tags
     administratorLogin: sqlAdminUsername
     administratorLoginPassword: sqlAdminPassword
-    databaseName: 'curity-db'
+    databaseName: databaseName
   }
 }
 
@@ -158,7 +159,7 @@ module dbinitContainerApp 'idsvr/dbinit-container-app.bicep' = {
     containerRegistryName: containerRegistryName
     imageName: dbinitImageName
     sqlServerName: sqlServerName
-    sqlDatabaseName: sqlServer.outputs.databaseName
+    sqlDatabaseName: databaseName
     sqlAdminUsername: sqlAdminUsername
     sqlAdminPassword: sqlAdminPassword
   }
@@ -245,7 +246,11 @@ module containerAppAdmin 'idsvr/idsvr-container-app.bicep' = {
       }
       {
         name: 'SQL_SERVER_NAME'
-        value: sqlServer.outputs.serverName
+        value: sqlServerName
+      }
+      {
+        name: 'SQL_DATABASE_NAME'
+        value: databaseName
       }
       {
         name: 'SQL_ADMIN_PASSWORD'
@@ -348,7 +353,11 @@ module containerAppRuntime 'idsvr/idsvr-container-app.bicep' = {
       }
       {
         name: 'SQL_SERVER_NAME'
-        value: sqlServer.outputs.serverName
+        value: sqlServerName
+      }
+      {
+        name: 'SQL_DATABASE_NAME'
+        value: databaseName
       }
       {
         name: 'SQL_ADMIN_PASSWORD'
@@ -385,7 +394,4 @@ module containerAppRuntime 'idsvr/idsvr-container-app.bicep' = {
 // Outputs are written to a location like .azure/dev/.env and can be used for subsequent service deployments
 output IDSVR_ADMIN_URL string = '${containerAppAdmin.outputs.uri}/admin'
 output IDSVR_RUNTIME_URL string = containerAppRuntime.outputs.uri
-output SQL_SERVER_NAME string = sqlServer.outputs.serverName
-output SQL_DATABASE_NAME string = sqlServer.outputs.databaseName
-output SQL_CONNECTION_STRING string = sqlServer.outputs.connectionString
 output A2A_EXTERNAL_URL string = externalGatewayContainerApp.outputs.uri

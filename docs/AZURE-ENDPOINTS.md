@@ -122,10 +122,10 @@ Get a shell to the dbinit container:
 az containerapp exec --name dbinit-dev --resource-group rg-dev --command bash
 ```
 
-Connect to the Curity Identity Server's Azure SQL database with the following command:
+Get the SQL admin password and connect with the following command:
 
 ```bash
-/opt/mssql-tools/bin/sqlcmd -S "$SQL_SERVER_NAME.database.windows.net" -d "$SQL_DATABASE_NAME" -U "$SQL_ADMIN_USERNAME" -P "$SQL_ADMIN_PASSWORD" -C
+/opt/mssql-tools/bin/sqlcmd -S "$UNIQUE_PREFIX.database.windows.net" -d "curity-db" -U "sqladmin" -P "$SQL_ADMIN_PASSWORD" -C
 ```
 
 Then run SQL commands to view token-related data that gets stored in Azure SQL:

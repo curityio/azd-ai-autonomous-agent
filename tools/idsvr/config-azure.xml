@@ -32,7 +32,7 @@
       <data-source>
         <id>default-datasource</id>
         <jdbc xmlns="https://curity.se/ns/ext-conf/jdbc">
-          <connection-string>jdbc:sqlserver://#{SQL_SERVER_NAME}.database.windows.net:1433;database=curity-db;encrypt=true;trustServerCertificate=false;hostNameInCertificate=*.database.windows.net;loginTimeout=30;sendStringParametersAsUnicode=false;</connection-string>
+          <connection-string>jdbc:sqlserver://#{SQL_SERVER_NAME}.database.windows.net:1433;database=#{SQL_DATABASE_NAME};encrypt=true;trustServerCertificate=false;hostNameInCertificate=*.database.windows.net;loginTimeout=30;sendStringParametersAsUnicode=false;</connection-string>
           <standard-credentials-mode>
           </standard-credentials-mode>
           <driver>com.microsoft.sqlserver.jdbc.SQLServerDriver</driver>
