@@ -15,6 +15,7 @@ Developers run the following backend components:
 Developers run the following frontend component that uses tokens to connect to backend components:
 
 - The [Console Client](../src/ConsoleClient) runs on the local computer, with fast feedback on C# code changes.
+- The console client invokes the system browser, which may not exist in a dev container.
 
 ## End-to-End Flow
 
