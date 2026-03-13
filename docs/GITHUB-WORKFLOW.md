@@ -12,7 +12,7 @@ azd pipeline config --auth-type federated
 ```
 
 The deployment uses [layered provisioning](https://learn.microsoft.com/en-us/azure/developer/azure-developer-cli/layered-provisioning), which `azd pipeline config` may not yet fully support.  
-Running `azd pipeline config` may trigger a prompt for secrets used during the identity provisioning stage.  
+Running `azd pipeline config` may prompt for many parameters that are set later in the deployment.  
 If so, comment out the identity layer in the `azure.yaml` file to work around that issue, and re-run the command.
 
 ```yaml
