@@ -8,9 +8,13 @@ cd "$(dirname "${BASH_SOURCE[0]}")"
 #####################################################################
 
 echo 'Running preprovision logic for the external gateway ...'
-export AZURE_ENV_NAME=$(azd env get-value AZURE_ENV_NAME)
-export EXTERNAL_DOMAIN_NAME=$(azd env get-value EXTERNAL_DOMAIN_NAME)
+export AZURE_ENV_NAME
+export EXTERNAL_DOMAIN_NAME
 
+#
+# In GitHub workflows, this value is provided as a GitHub secret
+# In local Azure deployments, get it from the environment file
+#
 if [ -z "${GATEWAY_TOKEN_EXCHANGE_SECRET:-}" ]; then
   export GATEWAY_TOKEN_EXCHANGE_SECRET=$(azd env get-value GATEWAY_TOKEN_EXCHANGE_SECRET)
 fi
@@ -30,7 +34,6 @@ fi
 #
 if [ -z "${GATEWAY_EXTERNAL_IMAGE_NAME:-}" ]; then
   
-  CONTAINER_REGISTRY_NAME=$(azd env get-value CONTAINER_REGISTRY_NAME)
   az acr login --name "$CONTAINER_REGISTRY_NAME"
 
   TAG="$(date +%Y%m%d%H%M%S)"

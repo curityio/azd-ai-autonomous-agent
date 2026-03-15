@@ -34,11 +34,10 @@ Entra ID then issues claims to ID tokens with the current user's attribute value
 
 ## Admin UI
 
-After deployment, run the Admin UI for the Curity Identity Server:
+After deployment, run the Admin UI for the Curity Identity Server, e.g.:
 
 ```bash
-eval $(azd env get-values)
-Open a browser at $IDSVR_ADMIN_URL
+start $(azd env get-value IDSVR_ADMIN_URL)
 ```
 
 Sign in with the following details:

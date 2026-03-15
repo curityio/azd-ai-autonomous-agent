@@ -37,7 +37,7 @@ services:
   #
   # Build and deploy the Portfolio MCP Server from its Dockerfile
   #
-  portfolio-mcp-server:  
+  portfolio-mcp-server:
     project: src/PortfolioMcpServer
     host: containerapp
     language: csharp

@@ -1,7 +1,7 @@
 # Open Issues
 
 This document highlights some technical issues that may need further actions.  
-In places we may add Microsoft issues and in others this repo may need to change.
+In places we may add Microsoft GitHub issues and in others this repo may need to change.
 
 ## 1. Layered Provisioning
 
@@ -11,17 +11,21 @@ The deployment uses [layered provisioning](https://devblogs.microsoft.com/azure-
 - [Azure Developer CLI Example](https://github.com/puicchan/azd-dev-prod-aca-storage)
 
 Layered provisioning deploys supporting infrastructure first.  
-The azd services then showcase applications, developer experience and business value.
+The `azure.yaml` services then showcase applications, developer experience and business value.
 
 ### 1.1. azd up
 
-The first time you run `azd up` on a local computer, the `preprovision.sh` hook does not get called correctly.  
-It only gets called for the base layer, not the identity layer, leading to unnecessary user prompts.  
-E.g. the user is prompted for `CONTAINER_APPS_ENVIRONMENT_ID` from [infra/identity/main.parameters.json](infra/identity/main.parameters.json).  
+Create a new environment on a local computer, then run `azd up` for the first time.  
+The `preprovision.sh` hook gets called during `base` provisioning but not during `identity` provisioning.  
+
+Also, the user gets prompted for technical parameters like `CONTAINER_APPS_ENVIRONMENT_ID`.  
+These values do not seem to get picked up from [infra/identity/main.parameters.json](infra/identity/main.parameters.json).  
+
+If you quit the deployment and re-run `azd up` again, everything works OK, so there is an easy workaround.
 
 ### 1.2. azd pipeline config
 
-Similarly, when `azd pipeline config` is run, the user is prompted for parameters output from the `base` layer.  
+Similarly, when `azd pipeline config` is run, the user is prompted for parameters that the `base` layer outputs.  
 Again, the user is prompted for values like `CONTAINER_APPS_ENVIRONMENT_ID`, which does not exist yet.  
 We can work around this by temporarily commenting out the identity layer in `azure.yaml`.
 
@@ -60,7 +64,7 @@ The infrastructure layer uses three dynamically created files, created in a `pre
 - A cluster configuration file for the Curity Identity Server.
 
 The validation requires `loadTextContent` paths in [infra/identity/main.bicep](infra/identity/main.bicep) to exist before deployment begins.  
-This seems to be a [azd current limitation](https://github.com/Azure/bicep/issues/3816), which I work around by checking in files with dummy content.  
+This seems to be a [azd current limitation](https://github.com/Azure/bicep/issues/3816), which we work around by checking in files with dummy content.  
 
 ### 2.3. Automated Deployment and Teardown
 
@@ -75,7 +79,7 @@ With the following options, the validation runs deployment with `azd up` and the
 ```
 
 The automated deployment succeeds, but only deploys the base provisioning layer and services.  
-For the identity layer, it is unclear how to perform [manual prerequisite actions](docs/GITHUB-WORKFLOW.md):
+For the identity layer, it is unclear how the validator should handle [manual prerequisite actions](docs/GITHUB-WORKFLOW.md):
 
 - Configure GitHub secrets that the deployment needs.
 - Grant the GitHub workflow permissions to create an Entra ID app registration.
@@ -83,4 +87,47 @@ For the identity layer, it is unclear how to perform [manual prerequisite action
 ### 2.4. Dev Containers
 
 We did not feel that a dev container environment would provide value for our [use case](.devcontainer/README.md).  
-If this is a problem we can add artifacts, but the user may not be able to run an end-to-end flow.
+If this is a problem we can add artifacts, but the dev container may not enable an end-to-end flow.
+
+## 3. Alternative Deployments
+
+It would be straightforward to deploy the identity layer as services rather than a provisioning layer.  
+The `azure.yaml` file would then look similar to the following:
+
+
+```yaml
+services:
+  # Identity Services
+  gateway-external:
+    hooks:
+      predeploy:
+  gateway-internal:
+    hooks:
+      predeploy:
+  dbinit:
+    hooks:
+      predeploy:
+  idsvr:
+    hooks:
+      predeploy:
+
+  # Application services
+  portfolio-mcp-server:
+  autonomous-agent:
+```
+
+The `infra` folder would then contain all of the following files and be less application-focused.
+Therefore, layered provisioning felt like a cleaner option.
+
+- gateway-external.bicep
+- gateway-external.parameters.json
+- gateway-internal.bicep
+- gateway-internal.parameters.json
+- dbinit.bicep
+- dbinit.parameters.json
+- idsvr.bicep
+- idsvr.parameters.json
+- portfolio-mcp-server.bicep
+- portfolio-mcp-server.parameters.json
+- autonomous-agent.bicep
+- autonomous-agent.parameters.json

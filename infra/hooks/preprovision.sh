@@ -12,9 +12,22 @@ echo 'Running preprovision logic ...'
 #
 # Get environment variables to understand the stage of processing and ensure that azd env new has been run
 #
-eval $(azd env get-values 2>/dev/null) || true
+source <(azd env get-values)
+
+#
+# Use environment variables to work out the provisioning layer
+#
+if [ -z "${EXTERNAL_DOMAIN_NAME:-}" ]; then
+  PROVISIONING_STAGE='BASE'
+else
+  PROVISIONING_STAGE='IDENTITY'
+fi
+
+#
+# Validate any required environment variables
+#
 if [ -z "${AZURE_ENV_NAME:-}" ]; then
-  echo "Preprovision error: AZURE_ENV_NAME not set. Please run 'azd env new' first."
+  echo "Preprovision error: AZURE_ENV_NAME not set - please create an environment before running azd up."
   exit 1
 fi
 
@@ -24,15 +37,6 @@ fi
 function generatePassword() {
   openssl rand 32 | base64 | tr '/+' '_-' | tr -d '='
 }
-
-#
-# Work out the provisioning stage from environment variables
-#
-if [ -z "${EXTERNAL_DOMAIN_NAME:-}" ]; then
-  PROVISIONING_STAGE='BASE'
-else
-  PROVISIONING_STAGE='IDENTITY'
-fi
 
 #
 # During identity provisioning from a local computer, generate some secrets
