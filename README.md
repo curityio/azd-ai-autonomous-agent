@@ -115,12 +115,15 @@ Deploy backend components to the Azure cloud and wait a few minutes for the depl
 azd up
 ```
 
-You may run into an issue where the very first `azd up` prompts for parameters.  
+### Deployment Parameters
+
+The deployment generates its own parameters and you should not receive any user prompts.  
+However, you may experience an issue where the very first `azd up` prompts for secrets and other parameters.  
 If so, quit the azd deployment and re-run `azd up` to work around the issue.
 
 ### Test the Deployment
 
-Then, re-run the console application, pointing it the Azure backend.  
+Once the deployment completes, re-run the console application, pointing it the Azure backend.  
 Sign in with an Entra ID user account and the user's Entra ID user authentication method:
 
 ```bash
@@ -138,14 +141,12 @@ azd down --purge
 
 ### Create a Deployment Pipeline
 
-Once you have finished working on deployments locally, create a GitHub workflow:
+Once you have finished working on deployments locally, follow the [GitHub Workflow](docs/GITHUB-WORKFLOW.md) instructions:
 
-```bash
-azd pipeline config
-```
+- Run `azd pipeline config` to populate variables stored in the GitHub repository.
+- Manually enter secrets stored in the GitHub repository.
 
-The project includes an [azure-dev.yml file](.github/workflows/azure-dev.yml), to deploy all components.  
-Once configured, all future checkins to `main` will trigger Azure deployment upgrades.  
+All future checkins to the `main` branch can then trigger Azure deployment upgrades.  
 
 ### Further Information
 
@@ -153,7 +154,6 @@ The following documents explain more about deployments, endpoints and troublesho
 
 - [Azure Deployment](docs/AZURE-DEPLOYMENT.md)
 - [Azure Endpoints](docs/AZURE-ENDPOINTS.md)
-- [GitHub Workflow](docs/GITHUB-WORKFLOW.md)
 
 ## Important Security Notice
 
