@@ -7,7 +7,7 @@ cd "$(dirname "${BASH_SOURCE[0]}")"
 # Also push Docker containers using the newly created Docker registry
 #####################################################################
 
-export AZURE_ENV_NAME=$(azd env get-value AZURE_ENV_NAME)
+export AZURE_ENV_NAME
 echo 'Running preprovision logic for the internal gateway ...'
 
 #
@@ -26,7 +26,6 @@ fi
 if [ -z "${GATEWAY_INTERNAL_IMAGE_NAME:-}" ]; then
 
   az acr login --name "$CONTAINER_REGISTRY_NAME"
-  CONTAINER_REGISTRY_NAME=$(azd env get-value CONTAINER_REGISTRY_NAME)
 
   TAG="$(date +%Y%m%d%H%M%S)"
   docker build --no-cache --platform linux/amd64 -t "gateway-internal:$TAG" .

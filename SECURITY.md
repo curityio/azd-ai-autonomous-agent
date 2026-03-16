@@ -27,9 +27,9 @@ The deployment uses the following managed identities:
 
 ## Password Credentials
 
-For developer convenience, the following connections use simple passwords.  
-Harden these connections for production deployments.  
+For developer convenience, and to reduce scope / complexity, some connections use simple passwords.  
+Harden at least the first of these connections for production deployments.  
 
-- The Admin UI for the Curity Identity Server could be updated to use Entra ID logins.
-- The JDBC connection from the Curity Identity Server to Azure SQL could use managed identity and strict firewall rules.
+- The JDBC connection from the Curity Identity Server to Azure SQL could use a managed identity and strict firewall rules.
+- The Admin UI for the Curity Identity Server could use an Entra ID federated login.
 - Token exchange could use Azure JWT client assertions instead of client secrets.

@@ -94,7 +94,7 @@ curl -i http://gateway-internal-dev/mcp
 After deployment, run commands such as the following, to reference outputs from the end of the `main.bicep` file.
 
 ```bash
-eval $(azd env get-values)
+source <(azd env get-values)
 ```
 
 Internet applications will connect to external endpoints:

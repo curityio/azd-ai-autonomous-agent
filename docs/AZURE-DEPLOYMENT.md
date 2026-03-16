@@ -18,7 +18,6 @@ azd provision base
 azd provision identity
 azd deploy autonomous-agent
 azd deploy portfolio-mcp-server
-azd deploy utility
 ```
 
 The following hook runs before each provisioning stage:

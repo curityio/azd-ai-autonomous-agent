@@ -12,5 +12,5 @@ echo 'Running predown logic ...'
 #
 # Run the Entra ID cleanup script if the environment variable exists
 #
-eval $(azd env get-values 2>/dev/null) || true
+source <(azd env get-values)
 ./idsvr/predown.sh
