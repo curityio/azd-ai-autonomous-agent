@@ -20,10 +20,13 @@ Select a low cost model, like `gpt-4.1-mini`, select `Use this model` and deploy
 
 ## Grant AI Permissions
 
-In the Foundry Portal, edit the resource, navigate to `Identity` and selecet `Azure role assignements`.  
-Ensure that Azure CLI users are assigned the `Azure AI User` role.
+In the Foundry Portal, edit the resource, navigate to `Identity` and select `Azure role assignements`.  
+Add the `Azure AI User` role assignment to the Azure AI Foundry project, as shown below:
 
 <img src="images/azure-ai-role.png" alt="Azure AI Role" style="width:50%;" />
+
+Then, ensure that your Azure user account is granted the `Azure AI User` role.  
+When you run a local agent, your CLI account will have permissions to call the Azure AI Foundry project.  
 
 ## Configure the Autonomous Agent
 

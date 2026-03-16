@@ -64,7 +64,7 @@ Install the following local computer tools:
 - **Azure CLI** (`az`) - to connect to Azure AI Foundry with an Azure CLI credential
 - **Azure Developer CLI** (`azd`) to use higher level commands to manage projects and deploy to Azure
 - **.NET SDK 10+** (to build and run C# applications)
-- **Docker** (to build custom Docker images for identity components)
+- **Docker** and **Docker Compose** (to build custom Docker images for identity components)
 - **openssl** (to create runtime secrets)
 - **envsubst** (to configure dynamically generated parameter values)
 - **jq** (to read JSON in bash scripts)
@@ -114,6 +114,9 @@ Deploy backend components to the Azure cloud and wait a few minutes for the depl
 ```bash
 azd up
 ```
+
+You may run into an issue where the very first `azd up` prompts for parameters.  
+If so, quit the azd deployment and re-run `azd up` to work around the issue.
 
 ### Test the Deployment
 

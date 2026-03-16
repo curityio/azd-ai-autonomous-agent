@@ -36,7 +36,7 @@ resource aiProject 'Microsoft.CognitiveServices/accounts/projects@2025-06-01' = 
   properties: {}
 }
 
-// Deploy a LLM
+// Deploy the foundry resource
 resource modelDeployment 'Microsoft.CognitiveServices/accounts/deployments@2025-06-01'= {
   parent: aiFoundry
   name: 'gpt-4.1-mini'
