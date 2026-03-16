@@ -118,8 +118,10 @@ azd up
 ### Deployment Parameters
 
 The deployment generates its own parameters and you should not receive any user prompts.  
-However, you may experience an issue where the very first `azd up` prompts for secrets and other parameters.  
-If so, quit the azd deployment and re-run `azd up` to work around the issue.
+However, you may experience a local layered provisioning issue the first time you run `azd up`:
+
+- After running base provisioning, `azd up` incorrectly prompts for secrets and other parameters.  
+- To work around this issue, quit the deployment and re-run `azd up`, after which it will not happen again.
 
 ### Test the Deployment
 
