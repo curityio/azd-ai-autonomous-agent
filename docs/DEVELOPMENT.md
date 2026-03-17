@@ -58,14 +58,24 @@ Wait a few seconds and you will get a report that the Azure LLM produces.
 ## Use Test-Driven Development
 
 MCP or A2A server developers do not have to run local end-to-end flows as part of normal development.  
-Instead, use test driven development to work on a single component at a time.
+Instead, they can work on a single component at a time, using test-driven development.
 
-When required, server developers can use test-driven development with mock access tokens.  
-The [Portfolio MCP Server Tests](../src/PortfolioMcpServer/security-tests/src/SecurityTests.cs) demonstrates a local integration test for sending access tokens to servers.
+To demonstrate test-driven development, first stop the local backend if it is running.  
+Then, use the following commands to run the API with a test configuration and run some integration tests:
 
 ```bash
 cd src/PortfolioMcpServer
 ./test.sh
+```
+
+The [OAuth integration tests](../src/PortfolioMcpServer/security-tests/src/SecurityTests.cs) send mock JWT access tokens tp the Portfolio MCP Server.  
+Developers could extend tests to enable productive testing of many access token security conditions:
+
+```text
+[xUnit.net 00:00:00.26] SecurityTests: >>> Starting mock authorization server ...
+[xUnit.net 00:00:00.47] SecurityTests: >>> Stopping mock authorization server ...
+  Passed SecureMcpRequest_GetAvailableStocks_SucceedsWithValidAccessToken [178 ms]
+  Passed SecureMcpRequest_ListTools_Returns401ForAccessTokenWithInvalidAudience [9 ms]
 ```
 
 ## Microsoft .NET AI Libraries
