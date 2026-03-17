@@ -118,12 +118,18 @@ ENTRA_APP_DISPLAY_NAME="curity-idsvr-${AZURE_ENV_NAME}"
 IDSVR_RUNTIME_URL="https://idsvr-runtime-${AZURE_ENV_NAME}.${EXTERNAL_DOMAIN_NAME}"
 ENTRA_CLIENT_ID="$(az ad app list --display-name "$ENTRA_APP_DISPLAY_NAME" --query "[0].appId" -o tsv 2>/dev/null || true)"
 if [ -z "$ENTRA_CLIENT_ID" ]; then
+
   echo "Creating Entra app registration: $ENTRA_APP_DISPLAY_NAME"
   ENTRA_CLIENT_ID="$(az ad app create \
     --display-name "$ENTRA_APP_DISPLAY_NAME" \
     --sign-in-audience AzureADMyOrg \
     --web-redirect-uris "${IDSVR_RUNTIME_URL}/authn/authentication/entra/callback" \
     --query appId -o tsv)"
+  if [ $? -ne 0 ]; then
+    echo 'Unable to create Entra ID app registration'
+    exit 1
+  fi
+
 else
   echo "Reusing existing Entra app registration: $ENTRA_APP_DISPLAY_NAME ($ENTRA_CLIENT_ID)"
 fi
@@ -143,6 +149,7 @@ fi
 # Create a client secret, if not already present in the azd environment
 ENTRA_CLIENT_SECRET="${ENTRA_CLIENT_SECRET:-}"
 if [ -z "$ENTRA_CLIENT_SECRET" ]; then
+  
   echo "Creating Entra client secret (stored in azd env as ENTRA_CLIENT_SECRET)..."
   ENTRA_CLIENT_SECRET="$(az ad app credential reset \
     --id "$ENTRA_CLIENT_ID" \
@@ -150,6 +157,10 @@ if [ -z "$ENTRA_CLIENT_SECRET" ]; then
     --display-name "azd-${AZURE_ENV_NAME}" \
     --years 1 \
     --query password -o tsv)"
+  if [ $? -ne 0 ]; then
+    echo 'Unable to reset the client credential for the Entra ID app registration'
+    exit 1
+  fi
 else
   echo "ENTRA_CLIENT_SECRET already set in azd env; leaving it unchanged."
 fi

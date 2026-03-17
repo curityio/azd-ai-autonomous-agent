@@ -89,8 +89,8 @@ For the identity layer, it is unclear how the validator should handle [manual pr
 We did not feel that a dev container environment would provide value for our [use case](.devcontainer/README.md).  
 If this is a problem we can add artifacts, but the dev container may not enable an end-to-end flow.
 
-## 3. Alternative Deployments
+## 3. Alternative Deployments?
 
 If reviewers consider layered provisioning issues to be blocking issue, we could remove it.  
-The identity components would then be deployed as services instead of a provisioning layer.
-That might introduce its own issues though, like having to output the SQL admin password during provisioning.
+The identity components would then be deployed as services instead of a provisioning layer.  
+That might introduce its own conformance issues, like needing to output the SQL admin password after provisioning.
