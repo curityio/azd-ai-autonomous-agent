@@ -91,43 +91,6 @@ If this is a problem we can add artifacts, but the dev container may not enable 
 
 ## 3. Alternative Deployments
 
-It would be straightforward to deploy the identity layer as services rather than a provisioning layer.  
-The `azure.yaml` file would then look similar to the following:
-
-
-```yaml
-services:
-  # Identity Services
-  gateway-external:
-    hooks:
-      predeploy:
-  gateway-internal:
-    hooks:
-      predeploy:
-  dbinit:
-    hooks:
-      predeploy:
-  idsvr:
-    hooks:
-      predeploy:
-
-  # Application services
-  portfolio-mcp-server:
-  autonomous-agent:
-```
-
-The `infra` folder would then contain all of the following files and be less application-focused.
-Therefore, layered provisioning felt like a cleaner option.
-
-- gateway-external.bicep
-- gateway-external.parameters.json
-- gateway-internal.bicep
-- gateway-internal.parameters.json
-- dbinit.bicep
-- dbinit.parameters.json
-- idsvr.bicep
-- idsvr.parameters.json
-- portfolio-mcp-server.bicep
-- portfolio-mcp-server.parameters.json
-- autonomous-agent.bicep
-- autonomous-agent.parameters.json
+If reviewers consider layered provisioning issues to be blocking issue, we could remove it.  
+The identity components would then be deployed as services instead of a provisioning layer.
+That might introduce its own issues though, like having to output the SQL admin password during provisioning.
