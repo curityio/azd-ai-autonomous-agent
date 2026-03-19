@@ -133,14 +133,6 @@ export A2A_EXTERNAL_URL=$(azd env get-value A2A_EXTERNAL_URL)
 ./src/ConsoleClient/run.sh
 ```
 
-### Tear Down the Deployment
-
-Later, when you have finished with the deployment, free resources:
-
-```bash
-azd down --purge
-```
-
 ### Create a GitHub Workflow Deployment
 
 Once you have verified the deployment locally, create a GitHub workflow.  
@@ -172,6 +164,15 @@ Navigate to the following locations in the GitHub repository to view variables a
 
 ```text
 https://github.com/<organization>/<repository>/settings/variables/actions
+```
+
+
+### Tear Down the Deployment
+
+Later, when you have finished with the deployment, free resources:
+
+```bash
+azd down --purge
 ```
 
 ### Further Information
