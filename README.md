@@ -141,14 +141,38 @@ Later, when you have finished with the deployment, free resources:
 azd down --purge
 ```
 
-### Create a Deployment Pipeline
+### Create a GitHub Workflow Deployment
 
-Once you have finished working on deployments locally, follow the [GitHub Workflow](docs/GITHUB-WORKFLOW.md) instructions:
+Once you have verified the deployment locally, create a GitHub workflow.  
+The command will copy variable and secrets values referenced in the `.env` file to GitHub.
 
-- Run `azd pipeline config` to populate variables stored in the GitHub repository.
-- Manually enter secrets stored in the GitHub repository.
+```bash
+azd pipeline config --auth-type federated
+```
 
-All future checkins to the `main` branch can then trigger Azure deployment upgrades.  
+Commit changes when prompted, which will create an Azure managed identity to run the GitHub workflow.  
+Run the following script to grant the managed identity permissions to create an [Entra ID App Registration](docs/OAUTH-CONFIGURATION.md):
+
+```bash
+./tools/utils/grant-workflow-entra-permissions.sh
+```
+
+In the Azure Portal, browse to Entra ID, navigate to `Enterprise Applications` and choose `Application Type = Managed Identities`.  
+View the managed identity properties and it will have the `Application.ReadWrite.All` permission.
+
+![GitHub Workflow Client](docs/images/github-workflow-identity.png)
+
+Navigate to the following locations in the GitHub repository to run the workflow:
+
+```text
+https://github.com/<account>/<repository>/actions/workflows/azure-<stage>.yml
+```
+
+Navigate to the following locations in the GitHub repository to view variables and secrets:
+
+```text
+https://github.com/<organization>/<repository>/settings/variables/actions
+```
 
 ### Further Information
 

@@ -92,6 +92,8 @@ Typically though, you need to understand endpoints, configuration and know how t
 
 - **Azure AI Foundry Resource**, including a foundry project and a low cost `gpt-4.1-mini` model
 
+- **Key Vault**, to store secrets during local deployments to Azure and to enable secrets to be copied to a GitHub workflow
+
 ## Identity Infrastructure
 
 - **Storage Account** + **Azure Files Share** `config-files`
