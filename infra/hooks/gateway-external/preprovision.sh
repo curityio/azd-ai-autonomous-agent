@@ -12,15 +12,11 @@ export AZURE_ENV_NAME
 export EXTERNAL_DOMAIN_NAME
 
 #
-# In GitHub workflows, this value is provided as an environment variable.
-# In local deployments to Azure, read the value from the Azure key vault.
+# In GitHub workflows, this value is provided as a GitHub secret.
+# In local Azure deployments, we need to read the value from the Azure key vault
 #
-if [ -z "${GATEWAY_TOKEN_EXCHANGE_SECRET:-}" ]; then
+if [ -z "${GATEWAY_TOKEN_EXCHANGE_SECRET:-}" ] || [[ ${GATEWAY_TOKEN_EXCHANGE_SECRET} == akvs* ]]; then
   export GATEWAY_TOKEN_EXCHANGE_SECRET=$(az keyvault secret show --vault-name "$KEY_VAULT_NAME" --name "GATEWAY-TOKEN-EXCHANGE-SECRET" --query "value" -o tsv)
-  if [ $? -ne 0 ] || [ "$GATEWAY_TOKEN_EXCHANGE_SECRET" == '' ]; then
-    echo 'Unable to read the API gateway token exchange secret'
-    exit 1
-  fi
 fi
 
 #

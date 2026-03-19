@@ -61,22 +61,42 @@ function setSecret() {
 }
 
 #
-# Implement identity provisioning logic to generate strong secrets, create Docker containers etc
+# Implement identity provisioning logic
 #
 if [ "$PROVISIONING_STAGE" == 'IDENTITY' ]; then
 
-  setSecret 'SQL-ADMIN-PASSWORD' "$(generatePassword)"
-  setSecret 'ADMIN-PASSWORD' "$(generatePassword)"
-  setSecret 'GATEWAY-TOKEN-EXCHANGE-SECRET' "$(generatePassword)"
-  setSecret 'AGENT-TOKEN-EXCHANGE-SECRET' "$(generatePassword)"
-  
-  LICENSE_KEY="$(cat ../../tools/idsvr/license.json | jq -r .License)"
-  if [ "$LICENSE_KEY" == '' ]; then
-    echo 'Unable to find a license key for the Curity Identity Server'
-    exit 1
+  #
+  # In GitHub workflows, secrets are supplied as environment variables
+  # In local Azure deployments, we create them on the first deployment
+  #
+  if [ -z "${SQL_ADMIN_PASSWORD:-}" ]; then
+    setSecret 'SQL-ADMIN-PASSWORD' "$(generatePassword)"
   fi
-  setSecret 'LICENSE-KEY' "$LICENSE_KEY"
 
+  if [ -z "${ADMIN_PASSWORD:-}" ]; then
+    setSecret 'ADMIN-PASSWORD' "$(generatePassword)"
+  fi
+
+  if [ -z "${GATEWAY_TOKEN_EXCHANGE_SECRET:-}" ]; then
+    setSecret 'GATEWAY-TOKEN-EXCHANGE-SECRET' "$(generatePassword)"
+  fi
+
+  if [ -z "${AGENT_TOKEN_EXCHANGE_SECRET:-}" ]; then
+    setSecret 'AGENT-TOKEN-EXCHANGE-SECRET' "$(generatePassword)"
+  fi
+  
+  if [ -z "${LICENSE_KEY:-}" ]; then
+    LICENSE_KEY="$(cat ../../tools/idsvr/license.json | jq -r .License)"
+    if [ "$LICENSE_KEY" == '' ]; then
+      echo 'Unable to find a license key for the Curity Identity Server'
+      exit 1
+    fi
+    setSecret 'LICENSE-KEY' "$LICENSE_KEY"
+  fi
+
+  #
+  # Run other logic, to configure each component and deploy custom Docker containers
+  #
   ./gateway-external/preprovision.sh
   ./gateway-internal/preprovision.sh
   ./idsvr/preprovision.sh

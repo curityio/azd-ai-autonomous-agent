@@ -146,31 +146,35 @@ if ! az ad sp show --id "$ENTRA_CLIENT_ID" -o none 2>/dev/null; then
   done
 fi
 
-# Set the Entra client secret if required
-KEY='ENTRA-CLIENT-SECRET'
-EXISTS=$(az keyvault secret list --vault-name "$KEY_VAULT_NAME" --query "contains([].id, 'https://$KEY_VAULT_NAME.vault.azure.net/secrets/$KEY')")
-if [ $EXISTS == false ]; then
-  
-  echo "Creating secret: $KEY ..."
-  ENTRA_CLIENT_SECRET="$(az ad app credential reset \
-    --id "$ENTRA_CLIENT_ID" \
-    --append \
-    --display-name "azd-${AZURE_ENV_NAME}" \
-    --years 1 \
-    --query password -o tsv)"
-  if [ $? -ne 0 ]; then
-    echo 'Unable to reset the client credential for the Entra ID app registration'
-    exit 1
-  fi
-  
-  az keyvault secret set --vault-name "$KEY_VAULT_NAME" --name "$KEY" --value "$ENTRA_CLIENT_SECRET" 1>/dev/null
-  if [ $? -ne 0 ]; then
-    exit 1
-  fi
+# The Entra client secret is an environment variable in GitHub workflows
+# In local Azure deployments we must create the secret on the first deployment
+ENTRA_CLIENT_SECRET="${ENTRA_CLIENT_SECRET:-}"
+if [ -z "$ENTRA_CLIENT_SECRET" ]; then
 
-  ENV_KEY="${KEY//-/_}"
-  ENV_VALUE="akvs://${AZURE_SUBSCRIPTION_ID}/${KEY_VAULT_NAME}/${KEY}"
-  echo "$ENV_KEY=\"$ENV_VALUE\"" >> ../../.azure/${AZURE_ENV_NAME}/.env
+  SECRET_KEY='ENTRA-CLIENT-SECRET'
+  EXISTS=$(az keyvault secret list --vault-name "$KEY_VAULT_NAME" --query "contains([].id, 'https://$KEY_VAULT_NAME.vault.azure.net/secrets/$SECRET_KEY')")
+  if [ $EXISTS == false ]; then
+  
+    echo "Creating secret: ENTRA_CLIENT_SECRET ..."
+    ENTRA_CLIENT_SECRET="$(az ad app credential reset \
+      --id "$ENTRA_CLIENT_ID" \
+      --append \
+      --display-name "azd-${AZURE_ENV_NAME}" \
+      --years 1 \
+      --query password -o tsv)"
+    if [ $? -ne 0 ]; then
+      echo 'Unable to reset the client credential for the Entra ID app registration'
+      exit 1
+    fi
+    
+    az keyvault secret set --vault-name "$KEY_VAULT_NAME" --name "$SECRET_KEY" --value "$ENTRA_CLIENT_SECRET" 1>/dev/null
+    if [ $? -ne 0 ]; then
+      exit 1
+    fi
+
+    SECRET_REF="akvs://${AZURE_SUBSCRIPTION_ID}/${KEY_VAULT_NAME}/${$SECRET_KEY}"
+    echo "ENTRA_CLIENT_SECRET=\"$SECRET_REF\"" >> ../../.azure/${AZURE_ENV_NAME}/.env
+  fi
 fi
 
 ENTRA_OIDC_METADATA_URL="https://login.microsoftonline.com/${TENANT_ID}/v2.0/.well-known/openid-configuration"

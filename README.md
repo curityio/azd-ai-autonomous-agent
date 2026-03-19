@@ -99,7 +99,10 @@ See the [Development README](docs/DEVELOPMENT.md) to learn more about local deve
 ## Deployment
 
 This template includes an infrastructure-as-code (IaC) deployment to Azure.   
-Continue to use an Azure development account and ensure that it has an Entra ID tenant.  
+Continue to use an Azure development account and ensure that you also have Entra ID resources:
+
+- A tenant to which the deployment adds an app registration.
+- At least one user account with which to test Entra ID logins.
 
 ### Run the Deployment
 
@@ -135,14 +138,34 @@ export A2A_EXTERNAL_URL=$(azd env get-value A2A_EXTERNAL_URL)
 
 ### Create a GitHub Workflow Deployment
 
-Once you have verified the deployment locally, create a GitHub workflow.  
-The command will copy variable and secrets values referenced in the `.env` file to GitHub.
+Once you have verified the Azure deployment, create a GitHub workflow to deploy C# code changes.  
 
 ```bash
 azd pipeline config --auth-type federated
 ```
 
-Commit changes when prompted, which will create an Azure managed identity to run the GitHub workflow.  
+Select the following options to configure your GitHub pipeline:
+
+- Federated User Managed Identity (MSI + OIDC)
+- Create new User Managed Identity (MSI)
+- Select your preferred region
+- Use the existing `rg-dev` resource group
+
+If prompted about unused variables, select the option `Ignore and keep ALL`.  
+The command will copy variable and secrets values referenced in the `.env` file to GitHub.  
+Navigate to the following location in the GitHub repository to view imported variables and secrets:
+
+```text
+https://github.com/<organization>/<repository>/settings/variables/actions
+```
+
+Commit changes to create a GitHub pipeline at the following location in the GitHub repository:
+
+```text
+https://github.com/<account>/<repository>/actions/workflows/azure-<stage>.yml
+```
+
+The `azd pipeline config` command creates an Azure managed identity that runs the GitHub workflow.  
 Run the following script to grant the managed identity permissions to create an [Entra ID App Registration](docs/OAUTH-CONFIGURATION.md):
 
 ```bash
@@ -155,17 +178,7 @@ View the managed identity properties and it will have the `Application.ReadWrite
 
 ![GitHub Workflow Client](docs/images/github-workflow-identity.png)
 
-Navigate to the following location in the GitHub repository to run the workflow:
-
-```text
-https://github.com/<account>/<repository>/actions/workflows/azure-<stage>.yml
-```
-
-Navigate to the following location in the GitHub repository to view imported variables and secrets:
-
-```text
-https://github.com/<organization>/<repository>/settings/variables/actions
-```
+You can then run the workflow from GitHub or it will run whenever you commit C# code changes to the `main` branch.  
 
 ### Tear Down the Deployment
 
