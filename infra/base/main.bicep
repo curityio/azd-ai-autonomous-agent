@@ -26,16 +26,16 @@ resource rg 'Microsoft.Resources/resourceGroups@2025-04-01' = {
   tags: tags
 }
 
-// Get a prefix for resources that need to be globally unique, which is different per user who spins up the deployment
-param uuid string = newGuid()
-var uniquePrefix = uniqueString(uuid)
+// Get a unique prefix for resources that need to be globally unique, which stays the same on redeployments
+var uniquePrefix = toLower('${replace(environmentName, '-', '')}${uniqueString(rg.id)}')
 
 // Create a key vault in which to store deployment secrets, and grant the deployment access to it
+var keyVaultName = 'kv-${uniquePrefix}'
 module keyVault 'storage/key-vault.bicep' = {
   name: 'keyvault'
   scope: rg
   params: {
-    name: 'vault-${uniquePrefix}'
+    name: keyVaultName
     location: location
     objectId: deployer().objectId
     tags: tags
@@ -43,7 +43,7 @@ module keyVault 'storage/key-vault.bicep' = {
 }
 
 // Add a storage account with which to deploy files
-var storageAccountName = uniquePrefix
+var storageAccountName = 'sa-${uniquePrefix}'
 module storageAccount 'storage/storage-account.bicep' = {
   name: 'storage-account'
   scope: rg
@@ -86,14 +86,14 @@ module identity 'environment/deployment-identity.bicep' = {
   scope: rg
   name: 'deployment-identity'
   params: {
-    name: 'deployment-identity'
+    name: 'id-${environmentName}'
     location: location
     tags: tags
   }
 }
 
 // Create an Azure container registry
-var registryName = uniquePrefix
+var registryName = 'rg-${uniquePrefix}'
 module containerRegistry 'environment/container-registry.bicep' = {
   scope: rg
   name: registryName
@@ -106,14 +106,16 @@ module containerRegistry 'environment/container-registry.bicep' = {
 }
 
 // Create the Azure AI Foundry resource, project and model
+var aiFoundryName = 'ai-${uniquePrefix}'
 module aiFoundry 'ai/foundry.bicep' = {
   scope: rg
   params: {
-    name: 'ai-${uniquePrefix}'
+    name: aiFoundryName
     location: location
     tags: tags
   }
 }
+*/
 
 // Outputs are written to a location like .azure/dev/.env and can be used for subsequent infrastructure layers and service deployments
 output AZURE_RESOURCE_GROUP string = rg.name
@@ -126,4 +128,5 @@ output STORAGE_FILE_SHARE_NAME string = 'config-files'
 output CONTAINER_APPS_ENVIRONMENT_ID string = containerAppsEnvironment.outputs.id
 output CONTAINER_REGISTRY_NAME string = containerRegistry.outputs.name
 output DEPLOYMENT_IDENTITY_ID string = identity.outputs.id
+output AI_FOUNDRY_NAME string = aiFoundryName
 output EXTERNAL_DOMAIN_NAME string = containerAppsEnvironment.outputs.defaultDomain

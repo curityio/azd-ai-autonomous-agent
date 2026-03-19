@@ -40,7 +40,7 @@ function generatePassword() {
 
 #
 # A utility to store secrets in the deployment's Azure key vault
-# Use az to avoid prompts and update the .env file so that azd pipeline config can copy the secret to GitHub
+# Use az to avoid prompts and update the .env file so that 'azd pipeline config' can copy the secret to GitHub
 # - https://github.com/Azure/azure-dev/blob/main/cli/azd/docs/using-environment-secrets.md
 #
 function setSecret() {
@@ -63,8 +63,7 @@ function setSecret() {
 }
 
 #
-# During identity provisioning from a local computer, generate some secrets
-# GitHub workflows instead use secrets configured within GitHub
+# Implement identity provisioning logic to generate strong secrets, create Docker containers etc
 #
 if [ "$PROVISIONING_STAGE" == 'IDENTITY' ]; then
 
@@ -79,14 +78,9 @@ if [ "$PROVISIONING_STAGE" == 'IDENTITY' ]; then
     exit 1
   fi
   setSecret 'LICENSE-KEY' "$LICENSE_KEY"
-fi
-
-#
-# Do extra work at the start of identity provisioning
-#
-if [ "$PROVISIONING_STAGE" == 'IDENTITY' ]; then
 
   ./gateway-external/preprovision.sh
   ./gateway-internal/preprovision.sh
   ./idsvr/preprovision.sh
 fi
+

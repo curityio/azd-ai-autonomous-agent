@@ -12,8 +12,8 @@ infra:
   layers:
     - name: base
       path: ./infra/base
-    #- name: identity
-    #  path: ./infra/identity
+    - name: identity
+      path: ./infra/identity
 
 #
 # Hooks are invoked once per provisioning layer
@@ -35,6 +35,7 @@ hooks:
 pipeline:
   variables:
     - A2A_EXTERNAL_URL
+    - AI_FOUNDRY_NAME
     - AZURE_CONTAINER_ENVIRONMENT_NAME
     - AZURE_CONTAINER_REGISTRY_ENDPOINT
     - AZURE_RESOURCE_GROUP
@@ -54,7 +55,6 @@ pipeline:
     - IDSVR_RUNTIME_URL
     - KEY_VAULT_NAME
     - SERVICE_AUTONOMOUS_AGENT_IMAGE_NAME
-    - SERVICE_AUTONOMOUS_AGENT_RESOURCE_EXISTS
     - SERVICE_PORTFOLIO_MCP_SERVER_IMAGE_NAME
     - SERVICE_UTILITY_IMAGE_NAME
     - STORAGE_ACCOUNT_NAME

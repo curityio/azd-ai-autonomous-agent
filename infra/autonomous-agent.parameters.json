@@ -8,8 +8,8 @@
         "location": {
             "value": "${AZURE_LOCATION}"
         },
-        "uniquePrefix": {
-            "value": "${UNIQUE_PREFIX}"
+        "aiFoundryName": {
+            "value": "${AI_FOUNDRY_NAME}"
         },
         "containerAppsEnvironmentId": {
             "value": "${CONTAINER_APPS_ENVIRONMENT_ID}"

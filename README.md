@@ -149,23 +149,23 @@ Run the following script to grant the managed identity permissions to create an 
 ./tools/utils/grant-workflow-entra-permissions.sh
 ```
 
-In the Azure Portal, browse to Entra ID, navigate to `Enterprise Applications` and choose `Application Type = Managed Identities`.  
+In the Azure Portal, browse to Entra ID, navigate to `Enterprise Applications`.  
+Choose `Application Type = Managed Identities` and find the `msi-ai-autonomous-agent` identity.  
 View the managed identity properties and it will have the `Application.ReadWrite.All` permission.
 
 ![GitHub Workflow Client](docs/images/github-workflow-identity.png)
 
-Navigate to the following locations in the GitHub repository to run the workflow:
+Navigate to the following location in the GitHub repository to run the workflow:
 
 ```text
 https://github.com/<account>/<repository>/actions/workflows/azure-<stage>.yml
 ```
 
-Navigate to the following locations in the GitHub repository to view variables and secrets:
+Navigate to the following location in the GitHub repository to view imported variables and secrets:
 
 ```text
 https://github.com/<organization>/<repository>/settings/variables/actions
 ```
-
 
 ### Tear Down the Deployment
 
