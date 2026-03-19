@@ -12,8 +12,8 @@ infra:
   layers:
     - name: base
       path: ./infra/base
-    - name: identity
-      path: ./infra/identity
+    #- name: identity
+    #  path: ./infra/identity
 
 #
 # Hooks are invoked once per provisioning layer
@@ -29,7 +29,8 @@ hooks:
     interactive: true
 
 #
-# When 'azd pipeline config' is run, these variables get saved to GitHub as variables or secrets
+# When 'azd pipeline config' is run, variables and secrets get saved to the GitHub repository
+# - https://github.com/Azure/azure-dev/blob/main/cli/azd/docs/using-environment-secrets.md
 #
 pipeline:
   variables:
