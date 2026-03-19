@@ -9,10 +9,6 @@ cd "$(dirname "${BASH_SOURCE[0]}")"
 set -euo pipefail
 echo 'Running preprovision logic ...'
 
-env | sort
-exit 1
-
-
 #
 # Get environment variables to understand the stage of processing and ensure that azd env new has been run
 #
