@@ -43,7 +43,7 @@ module keyVault 'storage/key-vault.bicep' = {
 }
 
 // Add a storage account with which to deploy files
-var storageAccountName = 'sa-${uniquePrefix}'
+var storageAccountName = 'sa${uniquePrefix}'
 module storageAccount 'storage/storage-account.bicep' = {
   name: 'storage-account'
   scope: rg
@@ -115,7 +115,6 @@ module aiFoundry 'ai/foundry.bicep' = {
     tags: tags
   }
 }
-*/
 
 // Outputs are written to a location like .azure/dev/.env and can be used for subsequent infrastructure layers and service deployments
 output AZURE_RESOURCE_GROUP string = rg.name
