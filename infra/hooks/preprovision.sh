@@ -23,6 +23,7 @@ else
   PROVISIONING_STAGE='IDENTITY'
 fi
 
+
 #
 # Validate any required environment variables
 #
@@ -35,7 +36,7 @@ fi
 # A utility to generate strong passwords if they do not yet exist
 #
 function generatePassword() {
-  openssl rand 32 | base64 | tr '/+' '_-' | tr -d '='
+  openssl rand 32 | base64 | tr -d '=/_-'
 }
 
 #
@@ -47,18 +48,15 @@ function setSecret() {
   local KEY="$1"
   local VALUE="$2"
 
-  VALUE=$(az keyvault secret show --vault-name "$KEY_VAULT_NAME" --name "SQL-ADMIN-PASSWORD" --query "value" -o tsv)
-  if [ "$VALUE" == '' ]; then
-
+  EXISTS=$(az keyvault secret list --vault-name "$KEY_VAULT_NAME" --query "contains([].id, 'https://$KEY_VAULT_NAME.vault.azure.net/secrets/$KEY')")
+  if [ $EXISTS == false ]; then
+  
     echo "Creating secret: $KEY ..."
-    az keyvault secret set \
-        --vault-name "$KEY_VAULT_NAME" \
-        --name "$KEY" \
-        --value "$VALUE" 1>/dev/null
-    
+    az keyvault secret set --vault-name "$KEY_VAULT_NAME" --name "$KEY" --value "$VALUE" 1>/dev/null
+
     ENV_KEY="${KEY//-/_}"
-    ENV_VALUE="akvs://${AZURE_SUBSCRIPTION_ID}/${$KEY_VAULT_NAME}/$KEY"
-    echo "$ENV_KEY=$ENV_VALUE" >> ../../.azure/${AZURE_ENV_NAME}/.env 
+    ENV_VALUE="akvs://${AZURE_SUBSCRIPTION_ID}/${KEY_VAULT_NAME}/${KEY}"
+    echo "$ENV_KEY=\"$ENV_VALUE\"" >> ../../.azure/${AZURE_ENV_NAME}/.env 
   fi
 }
 
@@ -67,7 +65,7 @@ function setSecret() {
 #
 if [ "$PROVISIONING_STAGE" == 'IDENTITY' ]; then
 
-  setSecret 'SQL-ADMIN-PASSWORD' 'SQL-ADMIN-PASSWORD' "$(generatePassword)"
+  setSecret 'SQL-ADMIN-PASSWORD' "$(generatePassword)"
   setSecret 'ADMIN-PASSWORD' "$(generatePassword)"
   setSecret 'GATEWAY-TOKEN-EXCHANGE-SECRET' "$(generatePassword)"
   setSecret 'AGENT-TOKEN-EXCHANGE-SECRET' "$(generatePassword)"

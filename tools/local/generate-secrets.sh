@@ -7,7 +7,7 @@ cd "$(dirname "${BASH_SOURCE[0]}")"
 ###########################################
 
 function generatePassword() {
-  openssl rand 32 | base64 | tr '/+' '_-' | tr -d '='
+  openssl rand 32 | base64 | tr -d '=/_-'
 }
 
 #

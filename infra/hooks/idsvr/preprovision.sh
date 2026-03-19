@@ -146,11 +146,12 @@ if ! az ad sp show --id "$ENTRA_CLIENT_ID" -o none 2>/dev/null; then
   done
 fi
 
-# Get the Entra client secret from the vault or use Entra to generate a secret
-ENTRA_CLIENT_SECRET=$(az keyvault secret show --vault-name "$KEY_VAULT_NAME" --name "ENTRA-CLIENT-SECRET" --query "value" -o tsv)
-if [ "$ENTRA_CLIENT_SECRET" == '' ]; then
+# Set the Entra client secret if required
+KEY='ENTRA-CLIENT-SECRET'
+EXISTS=$(az keyvault secret list --vault-name "$KEY_VAULT_NAME" --query "contains([].id, 'https://$KEY_VAULT_NAME.vault.azure.net/secrets/$KEY')")
+if [ $EXISTS == false ]; then
   
-  echo "Creating secret: ENTRA-CLIENT-SECRET ..."
+  echo "Creating secret: $KEY ..."
   ENTRA_CLIENT_SECRET="$(az ad app credential reset \
     --id "$ENTRA_CLIENT_ID" \
     --append \
@@ -162,14 +163,14 @@ if [ "$ENTRA_CLIENT_SECRET" == '' ]; then
     exit 1
   fi
   
-  az keyvault secret set --vault-name "$KEY_VAULT_NAME" --name "ENTRA-CLIENT-SECRET" --value "$ENTRA_CLIENT_SECRET" 1>/dev/null
+  az keyvault secret set --vault-name "$KEY_VAULT_NAME" --name "$KEY" --value "$ENTRA_CLIENT_SECRET" 1>/dev/null
   if [ $? -ne 0 ]; then
     exit 1
   fi
 
   ENV_KEY="${KEY//-/_}"
-  ENV_VALUE="akvs://${AZURE_SUBSCRIPTION_ID}/${$KEY_VAULT_NAME}/$KEY"
-  echo "$ENV_KEY=$ENV_VALUE" >> ../../../.azure/${AZURE_ENV_NAME}/.env 
+  ENV_VALUE="akvs://${AZURE_SUBSCRIPTION_ID}/${KEY_VAULT_NAME}/${KEY}"
+  echo "$ENV_KEY=\"$ENV_VALUE\"" >> ../../.azure/${AZURE_ENV_NAME}/.env
 fi
 
 ENTRA_OIDC_METADATA_URL="https://login.microsoftonline.com/${TENANT_ID}/v2.0/.well-known/openid-configuration"

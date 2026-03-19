@@ -119,7 +119,7 @@ module aiFoundry 'ai/foundry.bicep' = {
 // Outputs are written to a location like .azure/dev/.env and can be used for subsequent infrastructure layers and service deployments
 output AZURE_RESOURCE_GROUP string = rg.name
 output UNIQUE_PREFIX string = uniquePrefix
-output KEY_VAULT_NAME string = keyVault.name
+output KEY_VAULT_NAME string = keyVaultName
 output AZURE_CONTAINER_ENVIRONMENT_NAME string = containerAppsEnvironment.outputs.name
 output AZURE_CONTAINER_REGISTRY_ENDPOINT string = containerRegistry.outputs.endpoint
 output STORAGE_ACCOUNT_NAME string = storageAccountName
