@@ -58,7 +58,7 @@ namespace IO.Curity.AutonomousAgent
         }
 
         /*
-         * This example registers MCP tools manually to avoid a call to the MCP server
+         * Get MCP tools during the first user request, and supply an access token
          */
         private async Task<IEnumerable<AITool>> GetMcpToolsAsync()
         {
@@ -68,10 +68,6 @@ namespace IO.Curity.AutonomousAgent
                 Endpoint = new Uri(this.configuration.PortfolioMcpServerUrl),
             };
 
-            /*
-             * This code behaves like a frontend component, to make a connection and get a list of tools
-             * I would like to prevent the connection and define tools manually but the SDK does not support that
-             */
             var httpClient = new HttpClient(this.oauthHttpClientHandler);
             var mcpClient = await McpClient.CreateAsync
             (

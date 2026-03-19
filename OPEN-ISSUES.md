@@ -21,7 +21,8 @@ The `preprovision.sh` hook gets called during `base` provisioning but not during
 Also, the user gets prompted for technical parameters like `CONTAINER_APPS_ENVIRONMENT_ID`.  
 These values do not seem to get picked up from [infra/identity/main.parameters.json](infra/identity/main.parameters.json).  
 
-If you quit the deployment and re-run `azd up` again, everything works OK, so there is an easy workaround.
+If you quit the deployment and re-run `azd up` again, everything works OK, so there is an easy workaround.  
+A [GitHub issue was added to the azd repository](https://github.com/curityio/azd-ai-autonomous-agent/issues/4#issuecomment-4084268103).
 
 ### 1.2. azd pipeline config
 
@@ -37,6 +38,8 @@ infra:
     #- name: identity
     #  path: ./infra/identity
 ```
+
+A [GitHub issue was added to the azd repository](https://github.com/curityio/azd-ai-autonomous-agent/issues/4#issuecomment-4084268103).
 
 ## 2. Microsoft Conformance
 
@@ -88,15 +91,3 @@ For the identity layer, it is unclear how the validator should handle [manual pr
 
 We did not feel that a dev container environment would provide value for our [use case](.devcontainer/README.md).  
 If this is a problem we can add artifacts, but the dev container may not enable an end-to-end flow.
-
-## 3. Resolving Open Issues
-
-We think layered provisioning is a neat feature and we would like the Curity awesome-azd repo to showcase it.  
-The issues captured here seem minor, easily worked around, and do not affect GitHub deployments, once configured.
-
-Therefore, we feel that the preferred resolutions are to add issues in the azd GitHub repository.  
-Since azd is actively developed, issues should soon get fixed, to further improve azd itself. 
-
-If reviewers consider layered provisioning issues to be blocking, Curity could rework the deployment.  
-The identity components would then be deployed as services instead of a provisioning layer.  
-That might introduce its own conformance issues, like needing to output the SQL admin password after provisioning.

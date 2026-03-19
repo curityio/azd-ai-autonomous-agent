@@ -9,6 +9,10 @@ cd "$(dirname "${BASH_SOURCE[0]}")"
 set -euo pipefail
 echo 'Running preprovision logic ...'
 
+env | sort
+exit 1
+
+
 #
 # Get environment variables to understand the stage of processing and ensure that azd env new has been run
 #
@@ -39,37 +43,53 @@ function generatePassword() {
 }
 
 #
+# A utility to store secrets in the deployment's Azure key vault
+# Use az to avoid prompts and update the .env file so that azd pipeline config can copy the secret to GitHub
+# - https://github.com/Azure/azure-dev/blob/main/cli/azd/docs/using-environment-secrets.md
+#
+function setSecret() {
+  local KEY="$1"
+  local VALUE="$2"
+
+  VALUE=$(az keyvault secret show --vault-name "$KEY_VAULT_NAME" --name "SQL-ADMIN-PASSWORD" --query "value" -o tsv)
+  if [ "$VALUE" == '' ]; then
+
+    echo "Creating secret: $KEY ..."
+    az keyvault secret set \
+        --vault-name "$KEY_VAULT_NAME" \
+        --name "$KEY" \
+        --value "$VALUE" 1>/dev/null
+    
+    ENV_KEY="${KEY//-/_}"
+    ENV_VALUE="akvs://${AZURE_SUBSCRIPTION_ID}/${$KEY_VAULT_NAME}/$KEY"
+    echo "$ENV_KEY=$ENV_VALUE" >> ../../.azure/${AZURE_ENV_NAME}/.env 
+  fi
+}
+
+#
 # During identity provisioning from a local computer, generate some secrets
 # GitHub workflows instead use secrets configured within GitHub
 #
 if [ "$PROVISIONING_STAGE" == 'IDENTITY' ]; then
 
-  if [ -z "${SQL_ADMIN_PASSWORD:-}" ]; then
-    azd env set SQL_ADMIN_PASSWORD "$(generatePassword)"
+  setSecret 'SQL-ADMIN-PASSWORD' 'SQL-ADMIN-PASSWORD' "$(generatePassword)"
+  setSecret 'ADMIN-PASSWORD' "$(generatePassword)"
+  setSecret 'GATEWAY-TOKEN-EXCHANGE-SECRET' "$(generatePassword)"
+  setSecret 'AGENT-TOKEN-EXCHANGE-SECRET' "$(generatePassword)"
+  
+  LICENSE_KEY="$(cat ../../tools/idsvr/license.json | jq -r .License)"
+  if [ "$LICENSE_KEY" == '' ]; then
+    echo 'Unable to find a license key for the Curity Identity Server'
+    exit 1
   fi
-  if [ -z "${ADMIN_PASSWORD:-}" ]; then
-    azd env set ADMIN_PASSWORD "$(generatePassword)"
-  fi
-  if [ -z "${GATEWAY_TOKEN_EXCHANGE_SECRET:-}" ]; then
-    azd env set GATEWAY_TOKEN_EXCHANGE_SECRET "$(generatePassword)"
-  fi
-  if [ -z "${AGENT_TOKEN_EXCHANGE_SECRET:-}" ]; then
-    azd env set AGENT_TOKEN_EXCHANGE_SECRET "$(generatePassword)"
-  fi
-  if [ -z "${LICENSE_KEY:-}" ]; then
-    LICENSE_KEY="$(cat ../../tools/idsvr/license.json | jq -r .License)"
-    if [ "$LICENSE_KEY" == '' ]; then
-      echo 'Unable to find a license key for the Curity Identity Server'
-      exit 1
-    fi
-    azd env set LICENSE_KEY "$LICENSE_KEY"
-  fi
+  setSecret 'LICENSE-KEY' "$LICENSE_KEY"
 fi
 
 #
 # Do extra work at the start of identity provisioning
 #
 if [ "$PROVISIONING_STAGE" == 'IDENTITY' ]; then
+
   ./gateway-external/preprovision.sh
   ./gateway-internal/preprovision.sh
   ./idsvr/preprovision.sh

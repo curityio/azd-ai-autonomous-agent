@@ -109,7 +109,7 @@ resource autonomousagent 'Microsoft.App/containerApps@2025-07-01' = {
             }
             {
               name: 'AZURE_AI_FOUNDRY_PROJECT_URL'
-              value: 'https://${uniquePrefix}.cognitiveservices.azure.com/api/projects/proj-default'
+              value: 'https://ai-${uniquePrefix}.cognitiveservices.azure.com/api/projects/proj-default'
             }
             {
               name: 'AZURE_AI_MODEL_NAME'

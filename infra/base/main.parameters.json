@@ -7,6 +7,63 @@
     },
     "location": {
       "value": "${AZURE_LOCATION}"
+    },
+    "uniquePrefix": {
+      "value": "${UNIQUE_PREFIX}"
+    },
+    "storageAccountName": {
+      "value": "${STORAGE_ACCOUNT_NAME}"
+    },
+    "containerAppsEnvironmentId": {
+      "value": "${CONTAINER_APPS_ENVIRONMENT_ID}"
+    },
+    "externalDomainName": {
+      "value": "${EXTERNAL_DOMAIN_NAME}"
+    },
+    "containerRegistryName": {
+      "value": "${CONTAINER_REGISTRY_NAME}"
+    },
+    "identityId": {
+      "value": "${DEPLOYMENT_IDENTITY_ID}"
+    },
+    "gatewayExternalImageName": {
+      "value": "${GATEWAY_EXTERNAL_IMAGE_NAME}"
+    },
+    "gatewayInternalImageName": {
+      "value": "${GATEWAY_INTERNAL_IMAGE_NAME}"
+    },
+    "idsvrImageName": {
+      "value": "${IDSVR_IMAGE_NAME}"
+    },
+    "sqlAdminUsername": {
+      "value": "${SQL_ADMIN_USERNAME=sqladmin}"
+    },
+    "sqlAdminPassword": {
+      "value": "${SQL-ADMIN-PASSWORD}"
+    },
+    "dbinitImageName": {
+      "value": "${DBINIT_IMAGE_NAME}"
+    },
+    "adminPassword": {
+      "value": "${ADMIN-PASSWORD}"
+    },
+    "licenseKey": {
+      "value": "${LICENSE-KEY}"
+    },
+    "entraClientId": {
+      "value": "${ENTRA_CLIENT_ID}"
+    },
+    "entraClientSecret": {
+      "value": "${ENTRA-CLIENT-SECRET}"
+    },
+    "entraOidcMetadataUrl": {
+      "value": "${ENTRA_OIDC_METADATA_URL}"
+    },
+    "gatewayTokenExchangeClientSecret": {
+      "value": "${GATEWAY-TOKEN-EXCHANGE-SECRET}"
+    },
+    "agentTokenExchangeClientSecret": {
+      "value": "${AGENT-TOKEN-EXCHANGE-SECRET}"
     }
   }
 }

@@ -30,6 +30,18 @@ resource rg 'Microsoft.Resources/resourceGroups@2025-04-01' = {
 param uuid string = newGuid()
 var uniquePrefix = uniqueString(uuid)
 
+// Create a key vault in which to store deployment secrets, and grant the deployment access to it
+module keyVault 'storage/key-vault.bicep' = {
+  name: 'keyvault'
+  scope: rg
+  params: {
+    name: 'vault-${uniquePrefix}'
+    location: location
+    objectId: deployer().objectId
+    tags: tags
+  }
+}
+
 // Add a storage account with which to deploy files
 var storageAccountName = uniquePrefix
 module storageAccount 'storage/storage-account.bicep' = {
@@ -97,7 +109,7 @@ module containerRegistry 'environment/container-registry.bicep' = {
 module aiFoundry 'ai/foundry.bicep' = {
   scope: rg
   params: {
-    name: uniquePrefix
+    name: 'ai-${uniquePrefix}'
     location: location
     tags: tags
   }
@@ -106,6 +118,7 @@ module aiFoundry 'ai/foundry.bicep' = {
 // Outputs are written to a location like .azure/dev/.env and can be used for subsequent infrastructure layers and service deployments
 output AZURE_RESOURCE_GROUP string = rg.name
 output UNIQUE_PREFIX string = uniquePrefix
+output KEY_VAULT_NAME string = keyVault.name
 output AZURE_CONTAINER_ENVIRONMENT_NAME string = containerAppsEnvironment.outputs.name
 output AZURE_CONTAINER_REGISTRY_ENDPOINT string = containerRegistry.outputs.endpoint
 output STORAGE_ACCOUNT_NAME string = storageAccountName
