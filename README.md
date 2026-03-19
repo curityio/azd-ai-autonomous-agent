@@ -151,8 +151,8 @@ Select the following options to configure your GitHub pipeline:
 - Select your preferred region
 - Use the existing `rg-dev` resource group
 
-If prompted about unused variables, select the option `Ignore and keep ALL`.  
-The command will copy variable and secrets values referenced in the `.env` file to GitHub.  
+If prompted about existing values, select to overwrite all and keep unused variables.  
+Running `azd pipeline config` copies variable and secrets values referenced in the `.env` file to GitHub.  
 Navigate to the following location in the GitHub repository to view imported variables and secrets:
 
 ```text

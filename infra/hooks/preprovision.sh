@@ -10,11 +10,6 @@ set -euo pipefail
 echo 'Running preprovision logic ...'
 
 #
-# Get environment variables to understand the stage of processing and ensure that azd env new has been run
-#
-source <(azd env get-values)
-
-#
 # Use environment variables to work out the provisioning layer
 #
 if [ -z "${EXTERNAL_DOMAIN_NAME:-}" ]; then
@@ -22,7 +17,6 @@ if [ -z "${EXTERNAL_DOMAIN_NAME:-}" ]; then
 else
   PROVISIONING_STAGE='IDENTITY'
 fi
-
 
 #
 # Validate any required environment variables
