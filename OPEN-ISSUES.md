@@ -1,7 +1,6 @@
 # Open Issues
 
-This document highlights some technical issues that may need further actions.  
-In places we may add Microsoft GitHub issues and in others this repo may need to change.
+This document highlights some minor azd technical issues and also some conformance details.
 
 ## 1. Layered Provisioning
 
@@ -10,36 +9,15 @@ The deployment uses [layered provisioning](https://devblogs.microsoft.com/azure-
 - [Azure Developer CLI Tutorial](https://devblogs.microsoft.com/devops/azure-developer-cli-azure-container-apps-dev-to-prod-deployment-with-layered-infrastructure/)
 - [Azure Developer CLI Example](https://github.com/puicchan/azd-dev-prod-aca-storage)
 
-Layered provisioning deploys supporting infrastructure first.  
+Layered provisioning deploys supporting infrastructure before applications.  
 The `azure.yaml` services then showcase applications, developer experience and business value.
 
-### 1.1. azd up
+### 1.1. Layered Provisioning Minor Issues
 
-Create a new environment on a local computer, then run `azd up` for the first time.  
-The `preprovision.sh` hook gets called during `base` provisioning but not during `identity` provisioning.  
+A couple of GitHub issues were raised related to layered provisioning:
 
-Also, the user gets prompted for technical parameters like `CONTAINER_APPS_ENVIRONMENT_ID`.  
-These values do not seem to get picked up from [infra/identity/main.parameters.json](infra/identity/main.parameters.json).  
-
-If you quit the deployment and re-run `azd up` again, everything works OK, so there is an easy workaround.  
-A [GitHub issue was added to the azd repository](https://github.com/curityio/azd-ai-autonomous-agent/issues/4#issuecomment-4084268103).
-
-### 1.2. azd pipeline config
-
-Similarly, when `azd pipeline config` is run, the user is prompted for parameters that the `base` layer outputs.  
-Again, the user is prompted for values like `CONTAINER_APPS_ENVIRONMENT_ID`, which does not exist yet.  
-We can work around this by temporarily commenting out the identity layer in `azure.yaml`.
-
-```yaml
-infra:
-  layers:
-    - name: base
-      path: ./infra/base
-    #- name: identity
-    #  path: ./infra/identity
-```
-
-A [GitHub issue was added to the azd repository](https://github.com/curityio/azd-ai-autonomous-agent/issues/4#issuecomment-4084268103).
+- [Resolve dependencies between provisioning layers before prompting](https://github.com/Azure/azure-dev/issues/7182)
+- [Support hooks per provisioning layer](https://github.com/Azure/azure-dev/issues/7186)
 
 ## 2. Microsoft Conformance
 
@@ -48,7 +26,7 @@ GitHub workflows can run the [template-validation-action](https://github.com/mic
 
 ### 2.1. Basic Validation
 
-With the following options, READMEs and bicep are validated to get a `CONFORMING` result:
+With the following options, READMEs and bicep are validated to get a `CONFORMING` result.  
 
 ```yaml
 - uses: microsoft/template-validation-action@Latest
@@ -58,20 +36,10 @@ With the following options, READMEs and bicep are validated to get a `CONFORMING
     validateAzd: false
 ```
 
-### 2.2. Dynamically Created Files
-
-The infrastructure layer uses three dynamically created files, created in a `preprovision.sh` script:
-
-- External API gateway routes that use the deployment's external domain name.
-- Internal API gateway routes that use the deployment's environment name.
-- A cluster configuration file for the Curity Identity Server.
-
-The validation requires `loadTextContent` paths in [infra/identity/main.bicep](infra/identity/main.bicep) to exist before deployment begins.  
-This seems to be a [azd current limitation](https://github.com/Azure/bicep/issues/3816), which we work around by checking in files with dummy content.  
-
-### 2.3. Automated Deployment and Teardown
+### 2.2. Automated Deployment and Teardown
 
 With the following options, the validation runs deployment with `azd up` and then undoes it with `azd down`.  
+The automated deployment succeeds, but seems to not deploy the identity provisioning layer.
 
 ```yaml
 - uses: microsoft/template-validation-action@Latest
@@ -81,11 +49,21 @@ With the following options, the validation runs deployment with `azd up` and the
     validateAzd: true
 ```
 
-The automated deployment succeeds, but only deploys the base provisioning layer and services.  
-For the identity layer, it is unclear how the validator should handle [manual prerequisite actions](docs/GITHUB-WORKFLOW.md):
+### 2.3. Dynamically Created Files
 
-- Configure GitHub secrets that the deployment needs.
-- Grant the GitHub workflow permissions to create an Entra ID app registration.
+The infrastructure layer uses three dynamically created files, created in a `preprovision.sh` script:
+
+- External API gateway routes that use the deployment's external domain name.
+- Internal API gateway routes that use the deployment's environment name.
+- A cluster configuration file for the Curity Identity Server.
+
+The validation requires `loadTextContent` paths in [infra/identity/main.bicep](infra/identity/main.bicep) to exist before deployment begins.  
+This seems to be a [azd current limitation](https://github.com/Azure/bicep/issues/3816), which we work around by checking in files with dummy content.  
+To prevent checkins of the dummy files, you can run the following script:
+
+```bash
+./tools/utils/prevent-dynamic-file-checkins.sh
+```
 
 ### 2.4. Dev Containers
 

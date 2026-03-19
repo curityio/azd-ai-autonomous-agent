@@ -101,8 +101,8 @@ See the [Development README](docs/DEVELOPMENT.md) to learn more about local deve
 This template includes an infrastructure-as-code (IaC) deployment to Azure.   
 Continue to use an Azure development account and ensure that you also have Entra ID resources:
 
-- A tenant to which the deployment adds an app registration.
-- At least one user account with which to test Entra ID logins.
+- A tenant to which the deployment can add an app registration.
+- At least one user account with which you can test Entra ID logins.
 
 ### Run the Deployment
 
@@ -123,13 +123,13 @@ azd up
 The deployment generates its own parameters and you should not receive any user prompts.  
 However, you may experience a local layered provisioning issue the first time you run `azd up`:
 
-- After running base provisioning, `azd up` incorrectly prompts for secrets and other parameters.  
+- After running base provisioning, `azd up` may incorrectly prompt for secrets and other parameters.  
 - To work around this issue, quit the deployment and re-run `azd up`, after which it will not happen again.
 
 ### Test the Deployment
 
 Once the deployment completes, re-run the console application, pointing it the Azure backend.  
-Sign in with an Entra ID user account and the user's Entra ID user authentication method:
+Sign in with an Entra ID user account and the configured Entra ID user authentication method:
 
 ```bash
 export A2A_EXTERNAL_URL=$(azd env get-value A2A_EXTERNAL_URL)
@@ -151,7 +151,7 @@ Select the following options to configure your GitHub pipeline:
 - Select your preferred region
 - Use the existing `rg-dev` resource group
 
-If prompted about existing values, select to overwrite all and keep unused variables.  
+If prompted about existing values, select to overwrite any existing values and keep unused variables.  
 Running `azd pipeline config` copies variable and secrets values referenced in the `.env` file to GitHub.  
 Navigate to the following location in the GitHub repository to view imported variables and secrets:
 
@@ -178,7 +178,7 @@ View the managed identity properties and it will have the `Application.ReadWrite
 
 ![GitHub Workflow Client](docs/images/github-workflow-identity.png)
 
-You can then run the workflow from GitHub or it will run whenever you commit C# code changes to the `main` branch.  
+You can run the workflow from GitHub or whenever you commit C# code changes to the `main` branch.  
 
 ### Tear Down the Deployment
 

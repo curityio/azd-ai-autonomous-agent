@@ -1,6 +1,6 @@
 # AI Data Reporting
 
-The user asks a natural language question in an internet application, as in the following example:
+The user sends various natural language commands from an internet application, as in the following example:
 
 ```text
 Give me a markdown report on the last 3 months of stock transactions and the value of my portfolio

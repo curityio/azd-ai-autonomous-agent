@@ -62,7 +62,7 @@ IDSVR_IMAGE_NAME="<unique-prefix>.azurecr.io/idsvr:<timestamp>"
 
 ## Deploy Services
 
-You deploy each services from the `azure.yaml` file as a container app.  
+You deploy each service from the `azure.yaml` file as a container app.  
 These deployments run service-specific bicep files with service-specific parameter files.  
 The parameter files reference parameters that earlier provisioning added to the `./azure/dev/.env` file.
 
