@@ -29,6 +29,45 @@ hooks:
     interactive: true
 
 #
+# When 'azd pipeline config' runs, avoid prompts by copying all variables and secrets to GitHub
+# Secrets get evaluated from the Azure key vault and deployed as GitHub secrets
+# - https://github.com/Azure/azure-dev/blob/main/cli/azd/docs/using-environment-secrets.md#pipeline-config
+#
+pipeline:
+  variables:
+    - A2A_EXTERNAL_URL
+    - AI_FOUNDRY_NAME
+    - AZURE_CONTAINER_ENVIRONMENT_NAME
+    - AZURE_CONTAINER_REGISTRY_ENDPOINT
+    - AZURE_RESOURCE_GROUP
+    - CONTAINER_APPS_ENVIRONMENT_ID
+    - CONTAINER_REGISTRY_NAME
+    - DBINIT_IMAGE_NAME
+    - DEPLOYMENT_IDENTITY_ID
+    - ENTRA_APP_DISPLAY_NAME
+    - ENTRA_CLIENT_ID
+    - ENTRA_OIDC_METADATA_URL
+    - ENTRA_TENANT_ID
+    - EXTERNAL_DOMAIN_NAME
+    - GATEWAY_EXTERNAL_IMAGE_NAME
+    - GATEWAY_INTERNAL_IMAGE_NAME
+    - IDSVR_ADMIN_URL
+    - IDSVR_IMAGE_NAME
+    - IDSVR_RUNTIME_URL
+    - KEY_VAULT_NAME
+    - SERVICE_UTILITY_IMAGE_NAME
+    - STORAGE_ACCOUNT_NAME
+    - STORAGE_FILE_SHARE_NAME
+    - UNIQUE_PREFIX
+  secrets:
+    - SQL_ADMIN_PASSWORD
+    - ADMIN_PASSWORD
+    - LICENSE_KEY
+    - GATEWAY_TOKEN_EXCHANGE_SECRET
+    - AGENT_TOKEN_EXCHANGE_SECRET
+    - ENTRA_CLIENT_SECRET
+
+#
 # When 'azd deploy' runs, it builds a Docker image with a timestamp-based tag and pushes it the Azure container registry
 # It then finds a matching 'azd-service-name' tag in bicep files, which causes services to get deployed as container apps
 #

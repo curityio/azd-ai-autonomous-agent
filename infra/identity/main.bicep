@@ -19,8 +19,6 @@ var tags = {
   'azd-env-name': environmentName
 }
 
-//azd config set alpha.deployment.stacks on
-
 @description('A unique prefix for resources that must be globally unique')
 param uniquePrefix string
 
@@ -137,7 +135,7 @@ module internalGatewayContainerApp 'gateway-internal/container-app.bicep' = {
 }
 
 // Create a SQL Server and database for the Curity Identity Server
-var sqlServerName = uniquePrefix
+var sqlServerName = 'sql-${uniquePrefix}'
 var databaseName = 'curity-db'
 module sqlServer 'idsvr/sqlserver.bicep' = {
   name: 'sql-server'

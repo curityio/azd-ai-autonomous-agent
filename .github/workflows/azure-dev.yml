@@ -15,12 +15,39 @@ jobs:
   build:
     runs-on: ubuntu-latest
     env:
-      # 'azd pipeline config' writes these variables to GitHub
+      # Default values that azd pipeline config deploys to GitHub
       AZURE_CLIENT_ID: ${{ vars.AZURE_CLIENT_ID }}
       AZURE_TENANT_ID: ${{ vars.AZURE_TENANT_ID }}
-      AZURE_SUBSCRIPTION_ID: ${{ vars.AZURE_SUBSCRIPTION_ID }}
+      AZURE_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
       AZURE_LOCATION: ${{ vars.AZURE_LOCATION }}
       AZURE_ENV_NAME: ${{ vars.AZURE_ENV_NAME }}
+      
+      # Variables expressed in the azure.yaml file
+      A2A_EXTERNAL_URL: ${{ vars.A2A_EXTERNAL_URL }}
+      AI_FOUNDRY_NAME: ${{ vars.AI_FOUNDRY_NAME }}
+      AZURE_CONTAINER_ENVIRONMENT_NAME: ${{ vars.AZURE_CONTAINER_ENVIRONMENT_NAME }}
+      AZURE_CONTAINER_REGISTRY_ENDPOINT: ${{ vars.AZURE_CONTAINER_REGISTRY_ENDPOINT }}
+      AZURE_RESOURCE_GROUP: ${{ vars.AZURE_RESOURCE_GROUP }}
+      CONTAINER_APPS_ENVIRONMENT_ID: ${{ vars.CONTAINER_APPS_ENVIRONMENT_ID }}
+      CONTAINER_REGISTRY_NAME: ${{ vars.CONTAINER_REGISTRY_NAME }}
+      DBINIT_IMAGE_NAME: ${{ vars.DBINIT_IMAGE_NAME }}
+      DEPLOYMENT_IDENTITY_ID: ${{ vars.DEPLOYMENT_IDENTITY_ID }}
+      ENTRA_APP_DISPLAY_NAME: ${{ vars.ENTRA_APP_DISPLAY_NAME }}
+      ENTRA_CLIENT_ID: ${{ vars.ENTRA_CLIENT_ID }}
+      ENTRA_OIDC_METADATA_URL: ${{ vars.ENTRA_OIDC_METADATA_URL }}
+      ENTRA_TENANT_ID: ${{ vars.ENTRA_TENANT_ID }}
+      EXTERNAL_DOMAIN_NAME: ${{ vars.EXTERNAL_DOMAIN_NAME }}
+      GATEWAY_EXTERNAL_IMAGE_NAME: ${{ vars.GATEWAY_EXTERNAL_IMAGE_NAME }}
+      GATEWAY_INTERNAL_IMAGE_NAME: ${{ vars.GATEWAY_INTERNAL_IMAGE_NAME }}
+      IDSVR_ADMIN_URL: ${{ vars.IDSVR_ADMIN_URL }}
+      IDSVR_IMAGE_NAME: ${{ vars.IDSVR_IMAGE_NAME }}
+      IDSVR_RUNTIME_URL: ${{ vars.IDSVR_RUNTIME_URL }}
+      KEY_VAULT_NAME: ${{ vars.KEY_VAULT_NAME }}
+      SERVICE_UTILITY_IMAGE_NAME: ${{ vars.SERVICE_UTILITY_IMAGE_NAME }}
+      STORAGE_ACCOUNT_NAME: ${{ vars.STORAGE_ACCOUNT_NAME }}
+      STORAGE_FILE_SHARE_NAME: ${{ vars.STORAGE_FILE_SHARE_NAME }}
+      UNIQUE_PREFIX: ${{ vars.UNIQUE_PREFIX }}
+
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -38,7 +65,7 @@ jobs:
       #  env:
       #    AZURE_CLIENT_ID: ${{ vars.AZURE_CLIENT_ID }}
       #    AZURE_TENANT_ID: ${{ vars.AZURE_TENANT_ID }}
-      #    AZURE_SUBSCRIPTION_ID: ${{ vars.AZURE_SUBSCRIPTION_ID }}
+      #    AZURE_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
       #    AZURE_ENV_NAME: ${{ vars.AZURE_ENV_NAME }}
       #    AZURE_LOCATION: ${{ vars.AZURE_LOCATION }}
       #    GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -52,7 +79,7 @@ jobs:
         with:
           client-id: ${{ vars.AZURE_CLIENT_ID }}
           tenant-id: ${{ vars.AZURE_TENANT_ID }}
-          subscription-id: ${{ vars.AZURE_SUBSCRIPTION_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
 
       # Log in to azd with a managed identity
       - name: Log in to azd
@@ -73,9 +100,10 @@ jobs:
         env:
           ADMIN_PASSWORD: ${{ secrets.ADMIN_PASSWORD }}
           SQL_ADMIN_PASSWORD: ${{ secrets.SQL_ADMIN_PASSWORD }}
+          LICENSE_KEY: ${{ secrets.LICENSE_KEY }}
+          ENTRA_CLIENT_SECRET: ${{ secrets.ENTRA_CLIENT_SECRET }}
           GATEWAY_TOKEN_EXCHANGE_SECRET: ${{ secrets.GATEWAY_TOKEN_EXCHANGE_SECRET }}
           AGENT_TOKEN_EXCHANGE_SECRET: ${{ secrets.AGENT_TOKEN_EXCHANGE_SECRET }}
-          LICENSE_KEY: ${{ secrets.LICENSE_KEY }}
 
       # Deploy application components
       - name: Deploy Services
@@ -83,6 +111,6 @@ jobs:
         env:
           AGENT_TOKEN_EXCHANGE_SECRET: ${{ secrets.AGENT_TOKEN_EXCHANGE_SECRET }}
 
-      # To tear down the deployment, comment out deployment steps and uncomment this step
+      # To tear down the deployment, comment out the three deployment steps and uncomment this step
       #- name: Tear Down
       #  run: azd down --force --purge --no-prompt

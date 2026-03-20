@@ -10,7 +10,6 @@ set -euo pipefail
 echo 'Running predown logic ...'
 
 #
-# Run the Entra ID cleanup script if the environment variable exists
+# Run the Entra ID cleanup script
 #
-source <(azd env get-values)
 ./idsvr/predown.sh

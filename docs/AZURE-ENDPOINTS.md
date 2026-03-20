@@ -112,7 +112,19 @@ A2A_EXTERNAL_URL=ai.example.com
 IDSVR_RUNTIME_URL=login.example.com
 ```
 
-Follow the [OAuth Configuration README](OAUTH-CONFIGURATION.md) to sign in to the Admin UI and view configuration settings.
+## View Secret Values
+
+The deployment generates some strong secrets which are stored in the Azure Key Vault.  
+Use the Azure Portal to look up secret values, like the `ADMIN_PASSWORD` for the Admin UI:
+
+![Azure secrets](images/azure-secrets.png)
+
+## View OAuth Settings
+
+Follow the [OAuth Configuration README](OAUTH-CONFIGURATION.md) to understand OAuth settings:
+
+- Use the Azure Portal to view Entra ID configuration.
+- Use the Admin UI to view Curity Identity Server configuration.
 
 ## Connect to Identity Data
 
@@ -125,7 +137,7 @@ az containerapp exec --name dbinit-dev --resource-group rg-dev --command bash
 Get the SQL admin password and connect with the following command:
 
 ```bash
-/opt/mssql-tools/bin/sqlcmd -S "$UNIQUE_PREFIX.database.windows.net" -d "curity-db" -U "sqladmin" -P "$SQL_ADMIN_PASSWORD" -C
+/opt/mssql-tools/bin/sqlcmd -S "sql-$UNIQUE_PREFIX.database.windows.net" -d "curity-db" -U "sqladmin" -P "$SQL_ADMIN_PASSWORD" -C
 ```
 
 Then run SQL commands to view token-related data that gets stored in Azure SQL:

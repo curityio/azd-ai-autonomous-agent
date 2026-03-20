@@ -8,8 +8,8 @@
         "location": {
             "value": "${AZURE_LOCATION}"
         },
-        "uniquePrefix": {
-            "value": "${UNIQUE_PREFIX}"
+        "aiFoundryName": {
+            "value": "${AI_FOUNDRY_NAME}"
         },
         "containerAppsEnvironmentId": {
             "value": "${CONTAINER_APPS_ENVIRONMENT_ID}"
@@ -24,7 +24,12 @@
             "value": "${EXTERNAL_DOMAIN_NAME}"
         },
         "tokenExchangeClientSecret": {
-            "value": "${AGENT_TOKEN_EXCHANGE_SECRET}"
+            "reference": {
+                "keyVault": {
+                    "id": "/subscriptions/${AZURE_SUBSCRIPTION_ID}/resourceGroups/${AZURE_RESOURCE_GROUP}/providers/Microsoft.KeyVault/vaults/${KEY_VAULT_NAME}"
+                },
+                "secretName": "AGENT-TOKEN-EXCHANGE-SECRET"
+            }
         }
     }
 }

@@ -38,32 +38,62 @@
     "sqlAdminUsername": {
       "value": "${SQL_ADMIN_USERNAME=sqladmin}"
     },
-    "sqlAdminPassword": {
-      "value": "${SQL_ADMIN_PASSWORD}"
-    },
     "dbinitImageName": {
       "value": "${DBINIT_IMAGE_NAME}"
-    },
-    "adminPassword": {
-      "value": "${ADMIN_PASSWORD}"
-    },
-    "licenseKey": {
-      "value": "${LICENSE_KEY}"
     },
     "entraClientId": {
       "value": "${ENTRA_CLIENT_ID}"
     },
-    "entraClientSecret": {
-      "value": "${ENTRA_CLIENT_SECRET}"
-    },
     "entraOidcMetadataUrl": {
       "value": "${ENTRA_OIDC_METADATA_URL}"
     },
+    "sqlAdminPassword": {
+      "reference": {
+        "keyVault": {
+          "id": "/subscriptions/${AZURE_SUBSCRIPTION_ID}/resourceGroups/${AZURE_RESOURCE_GROUP}/providers/Microsoft.KeyVault/vaults/${KEY_VAULT_NAME}"
+        },
+        "secretName": "SQL-ADMIN-PASSWORD"
+      }
+    },
+    "adminPassword": {
+      "reference": {
+        "keyVault": {
+          "id": "/subscriptions/${AZURE_SUBSCRIPTION_ID}/resourceGroups/${AZURE_RESOURCE_GROUP}/providers/Microsoft.KeyVault/vaults/${KEY_VAULT_NAME}"
+        },
+        "secretName": "ADMIN-PASSWORD"
+      }
+    },
+    "licenseKey": {
+      "reference": {
+        "keyVault": {
+          "id": "/subscriptions/${AZURE_SUBSCRIPTION_ID}/resourceGroups/${AZURE_RESOURCE_GROUP}/providers/Microsoft.KeyVault/vaults/${KEY_VAULT_NAME}"
+        },
+        "secretName": "LICENSE-KEY"
+      }
+    },
     "gatewayTokenExchangeClientSecret": {
-      "value": "${GATEWAY_TOKEN_EXCHANGE_SECRET}"
+      "reference": {
+        "keyVault": {
+          "id": "/subscriptions/${AZURE_SUBSCRIPTION_ID}/resourceGroups/${AZURE_RESOURCE_GROUP}/providers/Microsoft.KeyVault/vaults/${KEY_VAULT_NAME}"
+        },
+        "secretName": "GATEWAY-TOKEN-EXCHANGE-SECRET"
+      }
     },
     "agentTokenExchangeClientSecret": {
-      "value": "${AGENT_TOKEN_EXCHANGE_SECRET}"
+      "reference": {
+        "keyVault": {
+          "id": "/subscriptions/${AZURE_SUBSCRIPTION_ID}/resourceGroups/${AZURE_RESOURCE_GROUP}/providers/Microsoft.KeyVault/vaults/${KEY_VAULT_NAME}"
+        },
+        "secretName": "AGENT-TOKEN-EXCHANGE-SECRET"
+      }
+    },
+    "entraClientSecret": {
+      "reference": {
+        "keyVault": {
+          "id": "/subscriptions/${AZURE_SUBSCRIPTION_ID}/resourceGroups/${AZURE_RESOURCE_GROUP}/providers/Microsoft.KeyVault/vaults/${KEY_VAULT_NAME}"
+        },
+        "secretName": "ENTRA-CLIENT-SECRET"
+      }
     }
   }
 }

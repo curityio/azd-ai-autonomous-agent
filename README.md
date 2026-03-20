@@ -99,7 +99,10 @@ See the [Development README](docs/DEVELOPMENT.md) to learn more about local deve
 ## Deployment
 
 This template includes an infrastructure-as-code (IaC) deployment to Azure.   
-Continue to use an Azure development account and ensure that it has an Entra ID tenant.  
+Continue to use an Azure development account and ensure that you also have Entra ID resources:
+
+- A tenant to which the deployment can add an app registration.
+- At least one user account with which you can test Entra ID logins.
 
 ### Run the Deployment
 
@@ -118,20 +121,55 @@ azd up
 ### Deployment Parameters
 
 The deployment generates its own parameters and you should not receive any user prompts.  
-However, you may experience a local layered provisioning issue the first time you run `azd up`:
+However, you may experience a [technical issue](OPEN-ISSUES.md#11-layered-provisioning-minor-issues) the first time you run `azd up`:
 
-- After running base provisioning, `azd up` incorrectly prompts for secrets and other parameters.  
+- After running base provisioning, `azd up` may incorrectly prompt for secrets and other parameters.  
 - To work around this issue, quit the deployment and re-run `azd up`, after which it will not happen again.
 
 ### Test the Deployment
 
 Once the deployment completes, re-run the console application, pointing it the Azure backend.  
-Sign in with an Entra ID user account and the user's Entra ID user authentication method:
+Sign in with an Entra ID user account and the configured Entra ID user authentication method:
 
 ```bash
 export A2A_EXTERNAL_URL=$(azd env get-value A2A_EXTERNAL_URL)
 ./src/ConsoleClient/run.sh
 ```
+
+### Create a GitHub Workflow Deployment
+
+Once you have a working Azure deployment, create a GitHub workflow to deploy C# code changes.  
+
+```bash
+azd pipeline config --auth-type federated
+```
+
+Select the following options to configure your GitHub pipeline:
+
+- Federated User Managed Identity (MSI + OIDC)
+- Create new User Managed Identity (MSI)
+- Select your preferred region
+- Use the existing `rg-dev` resource group
+
+You can run `azd pipeline config` multiple times, in which case you may receive additional prompts.  
+Choose options like the following, to keep GitHub values in sync with the local Azure deployment:
+
+- Set ALL existing variables again.
+- Set ALL existing secrets again.
+- Delete ALL unused variables from the pipeline.
+- Delete ALL unused secrets from the pipeline.
+
+Commit changes to create a GitHub workflow.  
+The `azd pipeline config` command copies variable and secret values referenced in the `.env` file to GitHub.  
+Browse to the following locations in your GitHub repository to view the details:
+
+```text
+https://github.com/<organization>/<repository>/settings/variables/actions
+https://github.com/<account>/<repository>/actions/workflows/azure-<stage>.yml
+```
+
+An Entra ID managed identity named `msi-ai-autonomous-agent` runs the deployment.  
+The GitHub workflow runs when you trigger it manually, or if you commit C# code changes to the `main` branch.  
 
 ### Tear Down the Deployment
 
@@ -140,15 +178,6 @@ Later, when you have finished with the deployment, free resources:
 ```bash
 azd down --purge
 ```
-
-### Create a Deployment Pipeline
-
-Once you have finished working on deployments locally, follow the [GitHub Workflow](docs/GITHUB-WORKFLOW.md) instructions:
-
-- Run `azd pipeline config` to populate variables stored in the GitHub repository.
-- Manually enter secrets stored in the GitHub repository.
-
-All future checkins to the `main` branch can then trigger Azure deployment upgrades.  
 
 ### Further Information
 

@@ -5,7 +5,7 @@
 targetScope = 'resourceGroup'
 param location string = resourceGroup().location
 param environmentName string
-param uniquePrefix string
+param aiFoundryName string
 param containerAppsEnvironmentId string
 param containerRegistryName string
 param externalDomainName string
@@ -17,7 +17,7 @@ param tokenExchangeClientSecret string
 var name = 'autonomous-agent-${environmentName}'
 var tags = {
   'azd-env-name': environmentName
-  'azd-service-name':  name
+  'azd-service-name': name
 }
 
 // Create a managed identity for the agent
@@ -48,7 +48,7 @@ module containerApp 'agent/container-app.bicep' = {
     containerRegistryName: containerRegistryName
     identityId: identity.outputs.id
     externalDomainName: externalDomainName
-    uniquePrefix: uniquePrefix
+    aiFoundryName: aiFoundryName
     imageName: imageName
     managedIdentityClientId: identity.outputs.clientId
     tokenExchangeClientSecret: tokenExchangeClientSecret

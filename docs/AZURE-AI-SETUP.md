@@ -10,7 +10,8 @@ Verify that the Azure region and AI model that you configure are compatible acco
 ## Create a Foundry Project
 
 Create a Foundry resource and give it a globally unique name.  
-The following example uses a unique name of `curity-demo` in a resource group `rg_local` for the `uksouth` region:
+The following example uses a name of `curity-demo` in a resource group `rg_local` for the `uksouth` region.  
+You may need to replace the name `curity-demo` with a globally unique value.
 
 <img src="images/foundry-resource.png" alt="Foundry Resource" style="width:50%;" />
 

@@ -8,12 +8,15 @@ cd "$(dirname "${BASH_SOURCE[0]}")"
 # - https://gist.github.com/garrytrinder/6352326eadbc9d00e808022ec724188e
 ###############################################################################################
 
+AZURE_CLIENT_ID=$(az ad sp list --display-name "msi-ai-autonomous-agent" --query "[0].appId" --output tsv)
 if [ "$AZURE_CLIENT_ID" == '' ]; then
-  echo 'You must supply an AZURE_CLIENT_ID parameter'
+  echo 'Unable to get the Azure Client ID for the deployment'
   exit 1
 fi
+
+TENANT_DOMAIN=$(az account show --query tenantDefaultDomain -o tsv)
 if [ "$TENANT_DOMAIN" == '' ]; then
-  echo 'You must supply a TENANT_DOMAIN parameter'
+  echo 'Unable to get your Entra ID tenant domain'
   exit 1
 fi
 
@@ -55,7 +58,7 @@ fi
 echo "Granting the GitHub workflow identity permissions to create an Entra ID client ..."
 URL="https://graph.windows.net/$TENANT_DOMAIN/servicePrincipals/$MANAGED_IDENTITY_ID/appRoleAssignments?api-version=1.6"
 BODY="{ \"principalId\": \"$MANAGED_IDENTITY_ID\", \"resourceId\": \"$GRAPH_SPN_ID\", \"id\": \"$GRAPH_ROLE_ID\"  }"
-az rest --method POST --uri "$URL" --body "$BODY"
+az rest --method POST --uri "$URL" --body "$BODY" 1>/dev/null
 if [ $? -ne 0 ]; then
   exit 1
 fi

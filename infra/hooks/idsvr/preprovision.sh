@@ -12,7 +12,7 @@ cd ../../../tools/idsvr
 # ------------------------------------------------------
 # Create a custom Docker image for the database init job
 # ------------------------------------------------------
-#if [ -z "${DBINIT_IMAGE_NAME:-}" ]; then
+if [ -z "${DBINIT_IMAGE_NAME:-}" ]; then
 
   echo 'Creating a custom Docker image for the database init job ...'
   cd dbinit
@@ -51,7 +51,7 @@ cd ../../../tools/idsvr
   fi 
   azd env set DBINIT_IMAGE_NAME "$IMAGE" >/dev/null
   cd ..
-#fi
+fi
 
 # -----------------------------------------------------------
 # Create a custom Docker image for the Curity Identity Server
@@ -97,10 +97,19 @@ fi
 
 echo "$CLUSTER_XML" > cluster.xml
 
+#
+# This deployment only creates Entra ID resources during local deployments to Azure
+# Running 'azd pipeline config' then copies Entra variables and secrets to a GitHub workflow
+# If you need to create Entra ID resources during GitHub workflows, run the following script to set grant access
+# - ./tools/utils/grant-workflow-entra-permissions.sh
+#
+if [ ! -z "${GITHUB_ACTION:-}" ]; then
+  exit 0
+fi
+
 # --------------------------------------------------------------------------
 # Create an Entra ID App Registration for OpenID Connect user authentication
 # --------------------------------------------------------------------------
-
 echo "Creating Entra ID app registration ..."
 
 # Get the tenant ID for the OIDC metadata URL configured in the Curity Identity Server
@@ -146,11 +155,12 @@ if ! az ad sp show --id "$ENTRA_CLIENT_ID" -o none 2>/dev/null; then
   done
 fi
 
-# Create a client secret, if not already present in the azd environment
-ENTRA_CLIENT_SECRET="${ENTRA_CLIENT_SECRET:-}"
-if [ -z "$ENTRA_CLIENT_SECRET" ]; then
-  
-  echo "Creating Entra client secret (stored in azd env as ENTRA_CLIENT_SECRET)..."
+# Create the secret on the first deployment
+SECRET_KEY='ENTRA-CLIENT-SECRET'
+EXISTS=$(az keyvault secret list --vault-name "$KEY_VAULT_NAME" --query "contains([].id, 'https://$KEY_VAULT_NAME.vault.azure.net/secrets/$SECRET_KEY')")
+if [ $EXISTS == false ]; then
+
+  echo "Creating secret: ENTRA_CLIENT_SECRET ..."
   ENTRA_CLIENT_SECRET="$(az ad app credential reset \
     --id "$ENTRA_CLIENT_ID" \
     --append \
@@ -161,18 +171,23 @@ if [ -z "$ENTRA_CLIENT_SECRET" ]; then
     echo 'Unable to reset the client credential for the Entra ID app registration'
     exit 1
   fi
-else
-  echo "ENTRA_CLIENT_SECRET already set in azd env; leaving it unchanged."
+  
+  az keyvault secret set --vault-name "$KEY_VAULT_NAME" --name "$SECRET_KEY" --value "$ENTRA_CLIENT_SECRET" 1>/dev/null
+  if [ $? -ne 0 ]; then
+    exit 1
+  fi
+
+  SECRET_REF="akvs://${AZURE_SUBSCRIPTION_ID}/${KEY_VAULT_NAME}/${SECRET_KEY}"
+  echo "ENTRA_CLIENT_SECRET=\"$SECRET_REF\"" >> ../../.azure/${AZURE_ENV_NAME}/.env
 fi
 
 ENTRA_OIDC_METADATA_URL="https://login.microsoftonline.com/${TENANT_ID}/v2.0/.well-known/openid-configuration"
 
-# Persist values to azd env so that the deployment can use them
+# Persist variables to azd env so that the provisioning can use them
 azd env set ENTRA_TENANT_ID "$TENANT_ID" >/dev/null
 azd env set ENTRA_APP_DISPLAY_NAME "$ENTRA_APP_DISPLAY_NAME" >/dev/null
 azd env set ENTRA_CLIENT_ID "$ENTRA_CLIENT_ID" >/dev/null
 azd env set ENTRA_OIDC_METADATA_URL "$ENTRA_OIDC_METADATA_URL" >/dev/null
-azd env set ENTRA_CLIENT_SECRET "$ENTRA_CLIENT_SECRET" >/dev/null
 
 # Indicate success
 echo "✓ Entra ID app registration is ready"

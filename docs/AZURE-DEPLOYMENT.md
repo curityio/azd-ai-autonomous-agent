@@ -62,7 +62,7 @@ IDSVR_IMAGE_NAME="<unique-prefix>.azurecr.io/idsvr:<timestamp>"
 
 ## Deploy Services
 
-You deploy each services from the `azure.yaml` file as a container app.  
+You deploy each service from the `azure.yaml` file as a container app.  
 These deployments run service-specific bicep files with service-specific parameter files.  
 The parameter files reference parameters that earlier provisioning added to the `./azure/dev/.env` file.
 
@@ -91,6 +91,8 @@ Typically though, you need to understand endpoints, configuration and know how t
 - **Container Registry** + **Deployment Identity** with permissions to pull custom Docker containers
 
 - **Azure AI Foundry Resource**, including a foundry project and a low cost `gpt-4.1-mini` model
+
+- **Key Vault**, to store secrets during local deployments to Azure and to enable secrets to be copied to a GitHub workflow
 
 ## Identity Infrastructure
 
