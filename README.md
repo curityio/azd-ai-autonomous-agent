@@ -152,12 +152,12 @@ Select the following options to configure your GitHub pipeline:
 - Use the existing `rg-dev` resource group
 
 You can run `azd pipeline config` multiple times, in which case you may receive additional prompts.  
-Always choose options like these, to supply the latest data and avoid losing values:
+Choose options like the following, to keep GitHub values in sync with the local Azure deployment:
 
 - Set ALL existing variables again.
 - Set ALL existing secrets again.
-- Ignore and keep ALL unused variables from the pipeline.
-- Ignore and keep ALL unused secrets from the pipeline.
+- Delete ALL unused variables from the pipeline.
+- Delete ALL unused secrets from the pipeline.
 
 Commit changes to create a GitHub workflow.  
 The `azd pipeline config` command copies variable and secret values referenced in the `.env` file to GitHub.  

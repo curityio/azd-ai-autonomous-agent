@@ -171,7 +171,7 @@ if [ -z "${GITHUB_ACTION:-}" ]; then
       exit 1
     fi
 
-    SECRET_REF="akvs://${AZURE_SUBSCRIPTION_ID}/${KEY_VAULT_NAME}/${$SECRET_KEY}"
+    SECRET_REF="akvs://${AZURE_SUBSCRIPTION_ID}/${KEY_VAULT_NAME}/${SECRET_KEY}"
     echo "ENTRA_CLIENT_SECRET=\"$SECRET_REF\"" >> ../../.azure/${AZURE_ENV_NAME}/.env
   fi
 fi
