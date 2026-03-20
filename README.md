@@ -168,11 +168,8 @@ https://github.com/<organization>/<repository>/settings/variables/actions
 https://github.com/<account>/<repository>/actions/workflows/azure-<stage>.yml
 ```
 
-The GitHub workflow creates a managed identity named `msi-ai-autonomous-agent` and grants it permissions.  
-In some cases, azd may not assign Azure Key Vault permissions correctly, which can lead to deployment errors.  
-If so, follow the [workaround](OPEN-ISSUES.md#22-key-vault-permissions) to fix up permissions manually and then retry.
-
-The GitHub workflow runs if you trigger it manually, or whenever you commit C# code changes to the `main` branch.  
+The `azd pipeline config` command creates a managed identity named `msi-ai-autonomous-agent` that runs the deployment.  
+The GitHub workflow runs when you trigger it manually, or if you commit C# code changes to the `main` branch.  
 
 ### Tear Down the Deployment
 

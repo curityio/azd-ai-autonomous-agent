@@ -40,21 +40,8 @@ The command writes a value of the following form to the `.env` file, to support 
 MYSECRET="akvs://3d52ec16-06b8-4b44-bdfd-9fdd056e16f1/kv-devvnfh4isv54wpu/MYSECRET"
 ```
 
-However, `azd env set-secret` always prompts the user and cannot be run silently, so I use `az` commands instead.
-
-### 2.2. Key Vault Permissions
-
-Before running `azd pipeline config`, view the Azure Key Vault access policy for your Azure CLI user:
-
-![Key vault permissions](docs/images/keyvault-permissions.png)
-
-When you run `azd pipeline config`, it may [Update Key Vault Access Incorrectly](https://github.com/Azure/azure-dev/issues/1473):
-
-- It may not add an access policy for the `msi-ai-autonomous-agent` account.
-- It may remove the access policy for your Azure CLI user account.
-
-The correct state after running `azd pipeline config` is for both accounts to have an access policy as above.  
-If required, fix up the access policies manually, so that both local and GitHub deployments work correctly.
+If I try to call `azd env set-secret` silently, it cannot work out the key vault name.  
+I work around this by calling the `az` command and updating the `.env` file manually.
 
 ## 3. Microsoft Conformance
 

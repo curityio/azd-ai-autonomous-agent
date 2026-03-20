@@ -98,7 +98,6 @@ jobs:
       - name: Provision Identity Infrastructure
         run: azd provision identity --no-prompt
         env:
-          AZURE_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
           ADMIN_PASSWORD: ${{ secrets.ADMIN_PASSWORD }}
           SQL_ADMIN_PASSWORD: ${{ secrets.SQL_ADMIN_PASSWORD }}
           LICENSE_KEY: ${{ secrets.LICENSE_KEY }}
@@ -110,7 +109,6 @@ jobs:
       - name: Deploy Services
         run: azd deploy --no-prompt
         env:
-          AZURE_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
           AGENT_TOKEN_EXCHANGE_SECRET: ${{ secrets.AGENT_TOKEN_EXCHANGE_SECRET }}
 
       # To tear down the deployment, comment out the three deployment steps and uncomment this step
