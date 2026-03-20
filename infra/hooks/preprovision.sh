@@ -56,18 +56,46 @@ function generatePassword() {
 # - https://github.com/Azure/azure-dev/blob/main/cli/azd/docs/using-environment-secrets.md
 #
 function setSecret() {
+
   local KEY="$1"
   local VALUE="$2"
 
+  echo "Creating secret: $KEY ..."
+  az keyvault secret set --vault-name "$KEY_VAULT_NAME" --name "$KEY" --value "$VALUE" 1>/dev/null
+
+  ENV_KEY="${KEY//-/_}"
+  ENV_VALUE="akvs://${AZURE_SUBSCRIPTION_ID}/${KEY_VAULT_NAME}/${KEY}"
+  echo "$ENV_KEY=\"$ENV_VALUE\"" >> ../../.azure/${AZURE_ENV_NAME}/.env 
+}
+
+#
+# Set a password secret if required
+#
+function setPasswordSecret() {
+
+  local KEY="$1"
+
   EXISTS=$(az keyvault secret list --vault-name "$KEY_VAULT_NAME" --query "contains([].id, 'https://$KEY_VAULT_NAME.vault.azure.net/secrets/$KEY')")
   if [ $EXISTS == false ]; then
-  
-    echo "Creating secret: $KEY ..."
-    az keyvault secret set --vault-name "$KEY_VAULT_NAME" --name "$KEY" --value "$VALUE" 1>/dev/null
+    setSecret "$KEY" "$(generatePassword)"
+  fi
+}
 
-    ENV_KEY="${KEY//-/_}"
-    ENV_VALUE="akvs://${AZURE_SUBSCRIPTION_ID}/${KEY_VAULT_NAME}/${KEY}"
-    echo "$ENV_KEY=\"$ENV_VALUE\"" >> ../../.azure/${AZURE_ENV_NAME}/.env 
+#
+# Set a license secret if required
+#
+function setLicenseSecret() {
+
+  local KEY='LICENSE-KEY'
+  EXISTS=$(az keyvault secret list --vault-name "$KEY_VAULT_NAME" --query "contains([].id, 'https://$KEY_VAULT_NAME.vault.azure.net/secrets/$KEY')")
+  if [ $EXISTS == false ]; then
+
+    if [ ! -f ../../tools/idsvr/license.json ]; then
+      echo 'Unable to find a license file for the Curity Identity Server'
+      exit 1
+    fi
+
+    setSecret "$KEY" "$(cat ../../tools/idsvr/license.json | jq -r .License)"
   fi
 }
 
@@ -82,16 +110,11 @@ if [ "$PROVISIONING_STAGE" == 'IDENTITY' ]; then
   #
   if [ -z "${GITHUB_ACTION:-}" ]; then
 
-    setSecret 'SQL-ADMIN-PASSWORD' "$(generatePassword)"
-    setSecret 'ADMIN-PASSWORD' "$(generatePassword)"
-    setSecret 'GATEWAY-TOKEN-EXCHANGE-SECRET' "$(generatePassword)"
-    setSecret 'AGENT-TOKEN-EXCHANGE-SECRET' "$(generatePassword)"
-    LICENSE_KEY="$(cat ../../tools/idsvr/license.json | jq -r .License)"
-    if [ "$LICENSE_KEY" == '' ]; then
-      echo 'Unable to find a license key for the Curity Identity Server'
-      exit 1
-    fi
-    setSecret 'LICENSE-KEY' "$LICENSE_KEY"
+    setPasswordSecret 'SQL-ADMIN-PASSWORD'
+    setPasswordSecret 'ADMIN-PASSWORD'
+    setPasswordSecret 'GATEWAY-TOKEN-EXCHANGE-SECRET'
+    setPasswordSecret 'AGENT-TOKEN-EXCHANGE-SECRET'
+    setLicenseSecret
   fi
 
   #
