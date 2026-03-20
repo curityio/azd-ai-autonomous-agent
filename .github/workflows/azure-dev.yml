@@ -113,6 +113,6 @@ jobs:
           AZURE_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
           AGENT_TOKEN_EXCHANGE_SECRET: ${{ secrets.AGENT_TOKEN_EXCHANGE_SECRET }}
 
-      # To tear down the deployment, comment out deployment steps and uncomment this step
+      # To tear down the deployment, comment out the three deployment steps and uncomment this step
       #- name: Tear Down
       #  run: azd down --force --purge --no-prompt

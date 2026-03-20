@@ -14,7 +14,7 @@ param imageName string
 var name = 'portfolio-mcp-server-${environmentName}'
 var tags = {
   'azd-env-name': environmentName
-  'azd-service-name':  name
+  'azd-service-name': name
 }
 
 //

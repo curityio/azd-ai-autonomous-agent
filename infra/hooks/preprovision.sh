@@ -101,4 +101,3 @@ if [ "$PROVISIONING_STAGE" == 'IDENTITY' ]; then
   ./gateway-internal/preprovision.sh
   ./idsvr/preprovision.sh
 fi
-

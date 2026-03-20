@@ -29,7 +29,8 @@ hooks:
     interactive: true
 
 #
-# When 'azd pipeline config' runs, ensure that non-built-in variables and secrets get copied to the GitHub repository
+# When 'azd pipeline config' runs, avoid prompts by copying all variables and secrets to GitHub
+# Secrets get evaluated from the Azure key vault and deployed as GitHub secrets
 # - https://github.com/Azure/azure-dev/blob/main/cli/azd/docs/using-environment-secrets.md#pipeline-config
 #
 pipeline:

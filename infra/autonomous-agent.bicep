@@ -17,7 +17,7 @@ param tokenExchangeClientSecret string
 var name = 'autonomous-agent-${environmentName}'
 var tags = {
   'azd-env-name': environmentName
-  'azd-service-name':  name
+  'azd-service-name': name
 }
 
 // Create a managed identity for the agent

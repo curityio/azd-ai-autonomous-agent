@@ -97,10 +97,19 @@ fi
 
 echo "$CLUSTER_XML" > cluster.xml
 
+#
+# This deployment only creates Entra ID resources during local deployments to Azure
+# Running 'azd pipeline config' then copies Entra variables and secrets to a GitHub workflow
+# If you need to create Entra ID resources during GitHub workflows, run the following script to set grant access
+# - ./tools/utils/grant-workflow-entra-permissions.sh
+#
+if [ ! -z "${GITHUB_ACTION:-}" ]; then
+  exit 0
+fi
+
 # --------------------------------------------------------------------------
 # Create an Entra ID App Registration for OpenID Connect user authentication
 # --------------------------------------------------------------------------
-
 echo "Creating Entra ID app registration ..."
 
 # Get the tenant ID for the OIDC metadata URL configured in the Curity Identity Server
@@ -146,34 +155,30 @@ if ! az ad sp show --id "$ENTRA_CLIENT_ID" -o none 2>/dev/null; then
   done
 fi
 
-# In local Azure deployments we must create the secret on the first deployment
-# The Entra client secret is an environment variable in GitHub workflows
-if [ -z "${GITHUB_ACTION:-}" ]; then
+# Create the secret on the first deployment
+SECRET_KEY='ENTRA-CLIENT-SECRET'
+EXISTS=$(az keyvault secret list --vault-name "$KEY_VAULT_NAME" --query "contains([].id, 'https://$KEY_VAULT_NAME.vault.azure.net/secrets/$SECRET_KEY')")
+if [ $EXISTS == false ]; then
 
-  SECRET_KEY='ENTRA-CLIENT-SECRET'
-  EXISTS=$(az keyvault secret list --vault-name "$KEY_VAULT_NAME" --query "contains([].id, 'https://$KEY_VAULT_NAME.vault.azure.net/secrets/$SECRET_KEY')")
-  if [ $EXISTS == false ]; then
-  
-    echo "Creating secret: ENTRA_CLIENT_SECRET ..."
-    ENTRA_CLIENT_SECRET="$(az ad app credential reset \
-      --id "$ENTRA_CLIENT_ID" \
-      --append \
-      --display-name "azd-${AZURE_ENV_NAME}" \
-      --years 1 \
-      --query password -o tsv)"
-    if [ $? -ne 0 ]; then
-      echo 'Unable to reset the client credential for the Entra ID app registration'
-      exit 1
-    fi
-    
-    az keyvault secret set --vault-name "$KEY_VAULT_NAME" --name "$SECRET_KEY" --value "$ENTRA_CLIENT_SECRET" 1>/dev/null
-    if [ $? -ne 0 ]; then
-      exit 1
-    fi
-
-    SECRET_REF="akvs://${AZURE_SUBSCRIPTION_ID}/${KEY_VAULT_NAME}/${SECRET_KEY}"
-    echo "ENTRA_CLIENT_SECRET=\"$SECRET_REF\"" >> ../../.azure/${AZURE_ENV_NAME}/.env
+  echo "Creating secret: ENTRA_CLIENT_SECRET ..."
+  ENTRA_CLIENT_SECRET="$(az ad app credential reset \
+    --id "$ENTRA_CLIENT_ID" \
+    --append \
+    --display-name "azd-${AZURE_ENV_NAME}" \
+    --years 1 \
+    --query password -o tsv)"
+  if [ $? -ne 0 ]; then
+    echo 'Unable to reset the client credential for the Entra ID app registration'
+    exit 1
   fi
+  
+  az keyvault secret set --vault-name "$KEY_VAULT_NAME" --name "$SECRET_KEY" --value "$ENTRA_CLIENT_SECRET" 1>/dev/null
+  if [ $? -ne 0 ]; then
+    exit 1
+  fi
+
+  SECRET_REF="akvs://${AZURE_SUBSCRIPTION_ID}/${KEY_VAULT_NAME}/${SECRET_KEY}"
+  echo "ENTRA_CLIENT_SECRET=\"$SECRET_REF\"" >> ../../.azure/${AZURE_ENV_NAME}/.env
 fi
 
 ENTRA_OIDC_METADATA_URL="https://login.microsoftonline.com/${TENANT_ID}/v2.0/.well-known/openid-configuration"

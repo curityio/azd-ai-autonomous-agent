@@ -168,21 +168,9 @@ https://github.com/<organization>/<repository>/settings/variables/actions
 https://github.com/<account>/<repository>/actions/workflows/azure-<stage>.yml
 ```
 
-The GitHub workflow uses a managed identity named `msi-ai-autonomous-agent` and grants it permissions.  
+The GitHub workflow creates a managed identity named `msi-ai-autonomous-agent` and grants it permissions.  
 In some cases, azd may not assign Azure Key Vault permissions correctly, which can lead to deployment errors.  
 If so, follow the [workaround](OPEN-ISSUES.md#22-key-vault-permissions) to fix up permissions manually and then retry.
-
-Next, run the following script to grant `msi-ai-autonomous-agent` permissions to create an [Entra ID App Registration](docs/OAUTH-CONFIGURATION.md):
-
-```bash
-./tools/utils/grant-workflow-entra-permissions.sh
-```
-
-In the Azure Portal, browse to Entra ID, navigate to `Enterprise Applications`.  
-Choose `Application Type = Managed Identities` and find the `msi-ai-autonomous-agent` identity.  
-View the managed identity properties and it will have the `Application.ReadWrite.All` permission.
-
-![GitHub Workflow Client](docs/images/github-workflow-identity.png)
 
 The GitHub workflow runs if you trigger it manually, or whenever you commit C# code changes to the `main` branch.  
 
