@@ -168,7 +168,7 @@ https://github.com/<organization>/<repository>/settings/variables/actions
 https://github.com/<account>/<repository>/actions/workflows/azure-<stage>.yml
 ```
 
-The `azd pipeline config` command creates a managed identity named `msi-ai-autonomous-agent` that runs the deployment.  
+An Entra ID managed identity named `msi-ai-autonomous-agent` runs the deployment.  
 The GitHub workflow runs when you trigger it manually, or if you commit C# code changes to the `main` branch.  
 
 ### Tear Down the Deployment
