@@ -93,7 +93,7 @@ module identity 'environment/deployment-identity.bicep' = {
 }
 
 // Create an Azure container registry
-var registryName = 'rg-${uniquePrefix}'
+var registryName = 'rg${uniquePrefix}'
 module containerRegistry 'environment/container-registry.bicep' = {
   scope: rg
   name: registryName
