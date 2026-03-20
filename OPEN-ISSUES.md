@@ -1,6 +1,7 @@
 # Open Issues
 
-This document highlights some minor azd technical issues and also some conformance details.
+This document highlights some minor `azd` technical issues and also some conformance details.  
+Generally, `azd` is a newer high level API that feels less stable and resilient than the lower level `az`.  
 
 ## 1. Layered Provisioning
 
@@ -14,17 +15,53 @@ The `azure.yaml` services then showcase applications, developer experience and b
 
 ### 1.1. Layered Provisioning Minor Issues
 
-A couple of GitHub issues were raised related to layered provisioning:
+A couple of GitHub issues were raised related to layered provisioning.  
+One of these leads to an `azd up` bug the first time you run it, which you can resolve with a retry.
 
 - [Resolve dependencies between provisioning layers before prompting](https://github.com/Azure/azure-dev/issues/7182)
 - [Support hooks per provisioning layer](https://github.com/Azure/azure-dev/issues/7186)
 
-## 2. Microsoft Conformance
+## 2. Key Vault
+
+Local deployments to Azure write secrets to an Azure key vault.  
+Doing so enables `azd pipeline config` to automatically transfer secrets to GitHub workflows later.
+
+### 2.1. Setting Secrets in Hooks
+
+The deployment uses hooks to generate strong backend secrets and I would like to use the following command:
+
+```bash
+azd env set-secret MYSECRET 'my value'
+```
+
+The command writes a value of the following form to the `.env` file, to support [transfer to GitHub](https://github.com/Azure/azure-dev/blob/main/cli/azd/docs/using-environment-secrets.md#secrets):
+
+```bash
+MYSECRET="akvs://3d52ec16-06b8-4b44-bdfd-9fdd056e16f1/kv-devvnfh4isv54wpu/MYSECRET"
+```
+
+However, `azd env set-secret` always prompts the user and cannot be run silently, so I use `az` commands instead.
+
+### 2.2. Key Vault Permissions
+
+Before running `azd pipeline config`, view the Azure Key Vault access policy for your Azure CLI user:
+
+![Key vault permissions](docs/images/keyvault-permissions.png)
+
+When you run `azd pipeline config`, it may [Update Key Vault Access Incorrectly](https://github.com/Azure/azure-dev/issues/1473):
+
+- It may not add an access policy for the `msi-ai-autonomous-agent` account.
+- It may remove the access policy for your Azure CLI user account.
+
+The correct state after running `azd pipeline config` is for both accounts to have an access policy as above.  
+If required, fix up the access policies manually, so that both local and GitHub deployments work correctly.
+
+## 3. Microsoft Conformance
 
 This GitHub repository strives to follow best practices and pass Microsoft automated checks.  
 GitHub workflows can run the [template-validation-action](https://github.com/microsoft/template-validation-action) to validate the repository.
 
-### 2.1. Basic Validation
+### 3.1. Basic Validation
 
 With the following options, READMEs and bicep are validated to get a `CONFORMING` result.  
 
@@ -36,7 +73,7 @@ With the following options, READMEs and bicep are validated to get a `CONFORMING
     validateAzd: false
 ```
 
-### 2.2. Automated Deployment and Teardown
+### 3.2. Automated Deployment and Teardown
 
 With the following options, the validation runs deployment with `azd up` and then undoes it with `azd down`.  
 The automated deployment succeeds, but seems to not deploy the identity provisioning layer.
@@ -49,7 +86,7 @@ The automated deployment succeeds, but seems to not deploy the identity provisio
     validateAzd: true
 ```
 
-### 2.3. Dynamically Created Files
+### 3.3. Dynamically Created Files
 
 The infrastructure layer uses three dynamically created files, created in a `preprovision.sh` script:
 
@@ -65,7 +102,7 @@ To prevent checkins of the dummy files, you can run the following script:
 ./tools/utils/prevent-dynamic-file-checkins.sh
 ```
 
-### 2.4. Dev Containers
+### 3.4. Dev Containers
 
 We did not feel that a dev container environment would provide value for our [use case](.devcontainer/README.md).  
 If this is a problem we can add artifacts, but the dev container may not enable an end-to-end flow.

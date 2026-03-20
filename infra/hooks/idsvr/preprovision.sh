@@ -146,10 +146,9 @@ if ! az ad sp show --id "$ENTRA_CLIENT_ID" -o none 2>/dev/null; then
   done
 fi
 
-# The Entra client secret is an environment variable in GitHub workflows
 # In local Azure deployments we must create the secret on the first deployment
-ENTRA_CLIENT_SECRET="${ENTRA_CLIENT_SECRET:-}"
-if [ -z "$ENTRA_CLIENT_SECRET" ]; then
+# The Entra client secret is an environment variable in GitHub workflows
+if [ -z "${GITHUB_ACTION:-}" ]; then
 
   SECRET_KEY='ENTRA-CLIENT-SECRET'
   EXISTS=$(az keyvault secret list --vault-name "$KEY_VAULT_NAME" --query "contains([].id, 'https://$KEY_VAULT_NAME.vault.azure.net/secrets/$SECRET_KEY')")

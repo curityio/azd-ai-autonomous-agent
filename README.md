@@ -121,7 +121,7 @@ azd up
 ### Deployment Parameters
 
 The deployment generates its own parameters and you should not receive any user prompts.  
-However, you may experience a local layered provisioning issue the first time you run `azd up`:
+However, you may experience a [technical issue](OPEN-ISSUES.md#11-layered-provisioning-minor-issues) the first time you run `azd up`:
 
 - After running base provisioning, `azd up` may incorrectly prompt for secrets and other parameters.  
 - To work around this issue, quit the deployment and re-run `azd up`, after which it will not happen again.
@@ -138,7 +138,7 @@ export A2A_EXTERNAL_URL=$(azd env get-value A2A_EXTERNAL_URL)
 
 ### Create a GitHub Workflow Deployment
 
-Once you have verified the Azure deployment, create a GitHub workflow to deploy C# code changes.  
+Once you have a working Azure deployment, create a GitHub workflow to deploy C# code changes.  
 
 ```bash
 azd pipeline config --auth-type federated
@@ -151,22 +151,28 @@ Select the following options to configure your GitHub pipeline:
 - Select your preferred region
 - Use the existing `rg-dev` resource group
 
-If prompted about existing values, select to overwrite any existing values and keep unused variables.  
-Running `azd pipeline config` copies variable and secrets values referenced in the `.env` file to GitHub.  
-Navigate to the following location in the GitHub repository to view imported variables and secrets:
+You can run `azd pipeline config` multiple times, in which case you may receive additional prompts.  
+Always choose options like these, to supply the latest data and avoid losing values:
+
+- Set ALL existing variables again.
+- Set ALL existing secrets again.
+- Ignore and keep ALL unused variables from the pipeline.
+- Ignore and keep ALL unused secrets from the pipeline.
+
+Commit changes to create a GitHub workflow.  
+The `azd pipeline config` command copies variable and secret values referenced in the `.env` file to GitHub.  
+Browse to the following locations in your GitHub repository to view the details:
 
 ```text
 https://github.com/<organization>/<repository>/settings/variables/actions
-```
-
-Commit changes to create a GitHub pipeline at the following location in the GitHub repository:
-
-```text
 https://github.com/<account>/<repository>/actions/workflows/azure-<stage>.yml
 ```
 
-The `azd pipeline config` command creates an Azure managed identity that runs the GitHub workflow.  
-Run the following script to grant the managed identity permissions to create an [Entra ID App Registration](docs/OAUTH-CONFIGURATION.md):
+The GitHub workflow uses a managed identity named `msi-ai-autonomous-agent` and grants it permissions.  
+In some cases, azd may not assign Azure Key Vault permissions correctly, which can lead to deployment errors.  
+If so, follow the [workaround](OPEN-ISSUES.md#22-key-vault-permissions) to fix up permissions manually and then retry.
+
+Next, run the following script to grant `msi-ai-autonomous-agent` permissions to create an [Entra ID App Registration](docs/OAUTH-CONFIGURATION.md):
 
 ```bash
 ./tools/utils/grant-workflow-entra-permissions.sh
@@ -178,7 +184,7 @@ View the managed identity properties and it will have the `Application.ReadWrite
 
 ![GitHub Workflow Client](docs/images/github-workflow-identity.png)
 
-You can run the workflow from GitHub or whenever you commit C# code changes to the `main` branch.  
+The GitHub workflow runs if you trigger it manually, or whenever you commit C# code changes to the `main` branch.  
 
 ### Tear Down the Deployment
 
