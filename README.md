@@ -141,7 +141,7 @@ export A2A_EXTERNAL_URL=$(azd env get-value A2A_EXTERNAL_URL)
 Once you have a working Azure deployment, create a GitHub workflow to deploy C# code changes.  
 
 ```bash
-azd pipeline config --auth-type federated
+azd pipeline config
 ```
 
 Select the following options to configure your GitHub pipeline:
@@ -181,10 +181,8 @@ azd down --purge
 
 ### Further Information
 
-The following documents explain more about deployments, endpoints and troubleshooting.
-
-- [Azure Deployment](docs/AZURE-DEPLOYMENT.md)
-- [Azure Endpoints](docs/AZURE-ENDPOINTS.md)
+- The [Azure Deployment](docs/AZURE-DEPLOYMENT.md) document explains more about the deployed resources.
+- The [Azure Endpoints](docs/AZURE-ENDPOINTS.md) document explains more about how to locate and troubleshoot connections.
 
 ## Important Security Notice
 
