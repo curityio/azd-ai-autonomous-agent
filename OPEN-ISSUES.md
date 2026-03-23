@@ -15,7 +15,9 @@ The `azure.yaml` services then showcase applications, developer experience and b
 ### 1.1. Layered Provisioning Minor Issues
 
 A couple of GitHub issues were raised related to layered provisioning.  
-One of these leads to an `azd up` bug the first time you run it, which you can resolve with a retry.
+One of these leads to an `azd up` bug the first time you run it, which prompts for parameters.  
+If you want to run `azd up`, you can resolve the issue by quitting the deployment and re-running `azd up`.
+You can resolve with a retry.
 
 - [Resolve dependencies between provisioning layers before prompting](https://github.com/Azure/azure-dev/issues/7182)
 - [Support hooks per provisioning layer](https://github.com/Azure/azure-dev/issues/7186)
@@ -41,6 +43,16 @@ MYSECRET="akvs://3d52ec16-06b8-4b44-bdfd-9fdd056e16f1/kv-devvnfh4isv54wpu/MYSECR
 
 If I try to call `azd env set-secret` silently, it cannot work out the key vault name.  
 I work around this by calling the `az` command and updating the `.env` file manually.
+
+### 2.2. Key Vault Permissions
+
+The `azd pipeline config` command adds the managed identity for the GitHub workflow identity to the Azure Key Vault.  
+The GitHub workflow account then has permissions to read secrets and copy them to GitHub.
+
+![Key vault permissions](docs/images/keyvault-permissions.png)
+
+In some cases, `azd pipeline config` may [remove your Azure CLI permissions to the Azure Key Vault](https://github.com/Azure/azure-dev/issues/1473).  
+If you run into that issue, manually create a Key Vault access policy for your user account with the above permissions.
 
 ## 3. Microsoft Conformance
 

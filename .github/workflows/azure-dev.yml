@@ -1,7 +1,6 @@
 on:
   workflow_dispatch:
   push:
-    # Run when commits are pushed to main
     branches:
       - main
 
@@ -12,41 +11,18 @@ permissions:
   contents: read
 
 jobs:
-  build:
+  #
+  # The validation job checks for Microsoft conformance
+  #
+  validate:
     runs-on: ubuntu-latest
+    if: true
     env:
-      # Default values that azd pipeline config deploys to GitHub
       AZURE_CLIENT_ID: ${{ vars.AZURE_CLIENT_ID }}
       AZURE_TENANT_ID: ${{ vars.AZURE_TENANT_ID }}
       AZURE_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
       AZURE_LOCATION: ${{ vars.AZURE_LOCATION }}
       AZURE_ENV_NAME: ${{ vars.AZURE_ENV_NAME }}
-      
-      # Variables expressed in the azure.yaml file
-      A2A_EXTERNAL_URL: ${{ vars.A2A_EXTERNAL_URL }}
-      AI_FOUNDRY_NAME: ${{ vars.AI_FOUNDRY_NAME }}
-      AZURE_CONTAINER_ENVIRONMENT_NAME: ${{ vars.AZURE_CONTAINER_ENVIRONMENT_NAME }}
-      AZURE_CONTAINER_REGISTRY_ENDPOINT: ${{ vars.AZURE_CONTAINER_REGISTRY_ENDPOINT }}
-      AZURE_RESOURCE_GROUP: ${{ vars.AZURE_RESOURCE_GROUP }}
-      CONTAINER_APPS_ENVIRONMENT_ID: ${{ vars.CONTAINER_APPS_ENVIRONMENT_ID }}
-      CONTAINER_REGISTRY_NAME: ${{ vars.CONTAINER_REGISTRY_NAME }}
-      DBINIT_IMAGE_NAME: ${{ vars.DBINIT_IMAGE_NAME }}
-      DEPLOYMENT_IDENTITY_ID: ${{ vars.DEPLOYMENT_IDENTITY_ID }}
-      ENTRA_APP_DISPLAY_NAME: ${{ vars.ENTRA_APP_DISPLAY_NAME }}
-      ENTRA_CLIENT_ID: ${{ vars.ENTRA_CLIENT_ID }}
-      ENTRA_OIDC_METADATA_URL: ${{ vars.ENTRA_OIDC_METADATA_URL }}
-      ENTRA_TENANT_ID: ${{ vars.ENTRA_TENANT_ID }}
-      EXTERNAL_DOMAIN_NAME: ${{ vars.EXTERNAL_DOMAIN_NAME }}
-      GATEWAY_EXTERNAL_IMAGE_NAME: ${{ vars.GATEWAY_EXTERNAL_IMAGE_NAME }}
-      GATEWAY_INTERNAL_IMAGE_NAME: ${{ vars.GATEWAY_INTERNAL_IMAGE_NAME }}
-      IDSVR_ADMIN_URL: ${{ vars.IDSVR_ADMIN_URL }}
-      IDSVR_IMAGE_NAME: ${{ vars.IDSVR_IMAGE_NAME }}
-      IDSVR_RUNTIME_URL: ${{ vars.IDSVR_RUNTIME_URL }}
-      KEY_VAULT_NAME: ${{ vars.KEY_VAULT_NAME }}
-      SERVICE_UTILITY_IMAGE_NAME: ${{ vars.SERVICE_UTILITY_IMAGE_NAME }}
-      STORAGE_ACCOUNT_NAME: ${{ vars.STORAGE_ACCOUNT_NAME }}
-      STORAGE_FILE_SHARE_NAME: ${{ vars.STORAGE_FILE_SHARE_NAME }}
-      UNIQUE_PREFIX: ${{ vars.UNIQUE_PREFIX }}
 
     steps:
       - name: Checkout
@@ -55,33 +31,46 @@ jobs:
       - name: Install azd
         uses: Azure/setup-azd@v2
 
-      # Uncomment the following steps and comment out all deployment steps to perform template validation
-      # Set validateAzd to true to validate the GitHub workflow deployment
-      #- uses: microsoft/template-validation-action@Latest
-      #  id: validation
-      #  with:
-      #    useDevContainer: false
-      #    validateAzd: false
-      #  env:
-      #    AZURE_CLIENT_ID: ${{ vars.AZURE_CLIENT_ID }}
-      #    AZURE_TENANT_ID: ${{ vars.AZURE_TENANT_ID }}
-      #    AZURE_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
-      #    AZURE_ENV_NAME: ${{ vars.AZURE_ENV_NAME }}
-      #    AZURE_LOCATION: ${{ vars.AZURE_LOCATION }}
-      #    GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - uses: microsoft/template-validation-action@Latest
+        id: validation
+        with:
+          useDevContainer: false
+          validateAzd: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      #- name: print result
-      #  run: cat ${{ steps.validation.outputs.resultFile }}
+      - name: print result
+        run: cat ${{ steps.validation.outputs.resultFile }}
 
-      # Log in to az with a managed identity
+  #
+  # The base provisioning job deploys core infrastructure like the container apps network 
+  #
+  deploy-base-infra:
+    runs-on: ubuntu-latest
+    if: true
+    needs: 
+      - validate
+    env:
+      AZURE_CLIENT_ID: ${{ vars.AZURE_CLIENT_ID }}
+      AZURE_TENANT_ID: ${{ vars.AZURE_TENANT_ID }}
+      AZURE_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+      AZURE_LOCATION: ${{ vars.AZURE_LOCATION }}
+      AZURE_ENV_NAME: ${{ vars.AZURE_ENV_NAME }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      
+      - name: Install azd
+        uses: Azure/setup-azd@v2
+
       - name: Log in to az
         uses: azure/login@v2
         with:
           client-id: ${{ vars.AZURE_CLIENT_ID }}
           tenant-id: ${{ vars.AZURE_TENANT_ID }}
           subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
-
-      # Log in to azd with a managed identity
+      
       - name: Log in to azd
         run: |
           azd auth login `
@@ -90,14 +79,63 @@ jobs:
             --tenant-id "$Env:AZURE_TENANT_ID"
         shell: pwsh
 
-      # Deploy the base environment
-      - name: Provision Base Infrastructure
+      - name: Deploy
         run: azd provision base --no-prompt
 
-      # Deploy identity components
-      - name: Provision Identity Infrastructure
+  #
+  # The identity provisioning job deploys the authorization server and API gateways
+  #
+  deploy-identity-infra:
+    runs-on: ubuntu-latest
+    if: true
+    needs: 
+      - deploy-base-infra
+    env:
+      AZURE_CLIENT_ID: ${{ vars.AZURE_CLIENT_ID }}
+      AZURE_TENANT_ID: ${{ vars.AZURE_TENANT_ID }}
+      AZURE_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+      AZURE_LOCATION: ${{ vars.AZURE_LOCATION }}
+      AZURE_ENV_NAME: ${{ vars.AZURE_ENV_NAME }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      
+      - name: Install azd
+        uses: Azure/setup-azd@v2
+
+      - name: Log in to az
+        uses: azure/login@v2
+        with:
+          client-id: ${{ vars.AZURE_CLIENT_ID }}
+          tenant-id: ${{ vars.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+      
+      - name: Log in to azd
+        run: |
+          azd auth login `
+            --client-id "$Env:AZURE_CLIENT_ID" `
+            --federated-credential-provider "github" `
+            --tenant-id "$Env:AZURE_TENANT_ID"
+        shell: pwsh
+
+      - name: Deploy
         run: azd provision identity --no-prompt
         env:
+          AZURE_RESOURCE_GROUP: ${{ vars.AZURE_RESOURCE_GROUP }}
+          CONTAINER_APPS_ENVIRONMENT_ID: ${{ vars.CONTAINER_APPS_ENVIRONMENT_ID }}
+          CONTAINER_REGISTRY_NAME: ${{ vars.CONTAINER_REGISTRY_NAME }}
+          DBINIT_IMAGE_NAME: ${{ vars.DBINIT_IMAGE_NAME }}
+          DEPLOYMENT_IDENTITY_ID: ${{ vars.DEPLOYMENT_IDENTITY_ID }}
+          ENTRA_CLIENT_ID: ${{ vars.ENTRA_CLIENT_ID }}
+          ENTRA_OIDC_METADATA_URL: ${{ vars.ENTRA_OIDC_METADATA_URL }}
+          EXTERNAL_DOMAIN_NAME: ${{ vars.EXTERNAL_DOMAIN_NAME }}
+          GATEWAY_EXTERNAL_IMAGE_NAME: ${{ vars.GATEWAY_EXTERNAL_IMAGE_NAME }}
+          GATEWAY_INTERNAL_IMAGE_NAME: ${{ vars.GATEWAY_INTERNAL_IMAGE_NAME }}
+          IDSVR_IMAGE_NAME: ${{ vars.IDSVR_IMAGE_NAME }}
+          KEY_VAULT_NAME: ${{ vars.KEY_VAULT_NAME }}
+          STORAGE_ACCOUNT_NAME: ${{ vars.STORAGE_ACCOUNT_NAME }}
+          UNIQUE_PREFIX: ${{ vars.UNIQUE_PREFIX }}
           ADMIN_PASSWORD: ${{ secrets.ADMIN_PASSWORD }}
           SQL_ADMIN_PASSWORD: ${{ secrets.SQL_ADMIN_PASSWORD }}
           LICENSE_KEY: ${{ secrets.LICENSE_KEY }}
@@ -105,12 +143,81 @@ jobs:
           GATEWAY_TOKEN_EXCHANGE_SECRET: ${{ secrets.GATEWAY_TOKEN_EXCHANGE_SECRET }}
           AGENT_TOKEN_EXCHANGE_SECRET: ${{ secrets.AGENT_TOKEN_EXCHANGE_SECRET }}
 
-      # Deploy application components
-      - name: Deploy Services
+  #
+  # The build job deploys applications when C# code is committed to main
+  #
+  deploy-applications:
+    runs-on: ubuntu-latest
+    if: true
+    needs: 
+      - deploy-identity-infra
+    env:
+      AZURE_CLIENT_ID: ${{ vars.AZURE_CLIENT_ID }}
+      AZURE_TENANT_ID: ${{ vars.AZURE_TENANT_ID }}
+      AZURE_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+      AZURE_LOCATION: ${{ vars.AZURE_LOCATION }}
+      AZURE_ENV_NAME: ${{ vars.AZURE_ENV_NAME }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      
+      - name: Install azd
+        uses: Azure/setup-azd@v2
+
+      - name: Log in to azd
+        run: |
+          azd auth login `
+            --client-id "$Env:AZURE_CLIENT_ID" `
+            --federated-credential-provider "github" `
+            --tenant-id "$Env:AZURE_TENANT_ID"
+        shell: pwsh
+
+      - name: Deploy
         run: azd deploy --no-prompt
         env:
+          AI_FOUNDRY_NAME: ${{ vars.AI_FOUNDRY_NAME }}
+          AZURE_RESOURCE_GROUP: ${{ vars.AZURE_RESOURCE_GROUP }}
+          CONTAINER_APPS_ENVIRONMENT_ID: ${{ vars.CONTAINER_APPS_ENVIRONMENT_ID }}
+          CONTAINER_REGISTRY_NAME: ${{ vars.CONTAINER_REGISTRY_NAME }}
+          EXTERNAL_DOMAIN_NAME: ${{ vars.EXTERNAL_DOMAIN_NAME }}
+          KEY_VAULT_NAME: ${{ vars.KEY_VAULT_NAME }}
           AGENT_TOKEN_EXCHANGE_SECRET: ${{ secrets.AGENT_TOKEN_EXCHANGE_SECRET }}
 
-      # To tear down the deployment, comment out the three deployment steps and uncomment this step
-      #- name: Tear Down
-      #  run: azd down --force --purge --no-prompt
+  #
+  # Set the 'if' flag to true for this job and to false for other jobs to tear down the deployment
+  #
+  teardown:
+    if: false
+    runs-on: ubuntu-latest
+    env:
+      AZURE_CLIENT_ID: ${{ vars.AZURE_CLIENT_ID }}
+      AZURE_TENANT_ID: ${{ vars.AZURE_TENANT_ID }}
+      AZURE_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+      AZURE_LOCATION: ${{ vars.AZURE_LOCATION }}
+      AZURE_ENV_NAME: ${{ vars.AZURE_ENV_NAME }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      
+      - name: Install azd
+        uses: Azure/setup-azd@v2
+
+      - name: Log in to az
+        uses: azure/login@v2
+        with:
+          client-id: ${{ vars.AZURE_CLIENT_ID }}
+          tenant-id: ${{ vars.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+      
+      - name: Log in to azd
+        run: |
+          azd auth login `
+            --client-id "$Env:AZURE_CLIENT_ID" `
+            --federated-credential-provider "github" `
+            --tenant-id "$Env:AZURE_TENANT_ID"
+        shell: pwsh
+
+      - name: Deploy
+        run: azd down --force --purge --no-prompt

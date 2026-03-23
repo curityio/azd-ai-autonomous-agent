@@ -25,11 +25,12 @@ The deployment uses the following managed identities:
 - The GitHub workflow uses a managed identity to run Azure deployments
 - The Autonomous Agent uses a managed identity to connect to Azure AI Foundry
 
-## Password Credentials
+## Further Security Hardening
 
-For developer convenience, and to reduce scope / complexity, some connections use simple passwords.  
+For developer convenience, and to reduce scope / complexity, some connections do not use the strongest security.  
 Harden at least the first of these connections for production deployments.  
 
-- The JDBC connection from the Curity Identity Server to Azure SQL could use a managed identity and strict firewall rules.
+- Azure SQL connections could require managed identities and could use stricter firewall rules.
+- The Azure AI Foundry could require stricter firewall rules.
 - The Admin UI for the Curity Identity Server could use an Entra ID federated login.
-- Token exchange could use Azure JWT client assertions instead of client secrets.
+- Token exchange could use JWT workload identities instead of client secrets.

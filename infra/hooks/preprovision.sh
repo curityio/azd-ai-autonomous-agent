@@ -18,29 +18,12 @@ if [ -z "${AZURE_ENV_NAME:-}" ]; then
 fi
 
 #
-# Use environment variables to work out the provisioning layer
+# During the initial base provisioning there is no EXTERNAL_DOMAIN_NAME yet
 #
-if [ -z "${GITHUB_ACTION:-}" ]; then
-
-  #
-  # During the initial base provisioning there is no EXTERNAL_DOMAIN_NAME yet
-  #
-  if [ -z "${EXTERNAL_DOMAIN_NAME:-}" ]; then
-    PROVISIONING_STAGE='BASE'
-  else
-    PROVISIONING_STAGE='IDENTITY'
-  fi
-
-else 
-
-  #
-  # GitHub workflows only supply secrets like ADMIN_PASSWORD for the identity provisioning stage
-  #
-  if [ -z "${ADMIN_PASSWORD:-}" ]; then
-    PROVISIONING_STAGE='BASE'
-  else
-    PROVISIONING_STAGE='IDENTITY'
-  fi
+if [ -z "${EXTERNAL_DOMAIN_NAME:-}" ]; then
+  PROVISIONING_STAGE='BASE'
+else
+  PROVISIONING_STAGE='IDENTITY'
 fi
 
 #

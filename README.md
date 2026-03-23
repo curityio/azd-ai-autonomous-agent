@@ -104,6 +104,7 @@ Continue to use an Azure development account and ensure that you also have Entra
 - A tenant to which the deployment can add an app registration.
 - At least one user account with which you can test Entra ID logins.
 
+
 ### Run the Deployment
 
 Log in to the Azure Developer CLI, to use azd deployment commands:
@@ -112,19 +113,23 @@ Log in to the Azure Developer CLI, to use azd deployment commands:
 azd auth login
 ```
 
-Deploy backend components to the Azure cloud and wait a few minutes for the deployment to complete.  
+The deployment uses [layered provisioning](https://devblogs.microsoft.com/azure-sdk/azure-developer-cli-azd-november-2025/), so deploy to Azure in layers, starting with the base infrastructure:
 
 ```bash
-azd up
+azd provision base
 ```
 
-### Deployment Parameters
+Next, deploy identity infrastructure:
 
-The deployment generates its own parameters and you should not receive any user prompts.  
-However, you may experience a [technical issue](OPEN-ISSUES.md#11-layered-provisioning-minor-issues) the first time you run `azd up`:
+```bash
+azd provision identity
+```
 
-- After running base provisioning, `azd up` may incorrectly prompt for secrets and other parameters.  
-- To work around this issue, quit the deployment and re-run `azd up`, after which it will not happen again.
+Finally, deploy C# applications:
+
+```bash
+azd deploy
+```
 
 ### Test the Deployment
 

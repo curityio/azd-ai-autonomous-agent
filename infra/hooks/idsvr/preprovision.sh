@@ -98,10 +98,8 @@ fi
 echo "$CLUSTER_XML" > cluster.xml
 
 #
-# This deployment only creates Entra ID resources during local deployments to Azure
-# Running 'azd pipeline config' then copies Entra variables and secrets to a GitHub workflow
-# If you need to create Entra ID resources during GitHub workflows, run the script at the below location
-# The script gives the GitHub workflow managed identity the permissions to update Entra ID
+# By default, the GitHub workflow's managed identity does not have permissions to edit Entra ID.
+# To activate the below code for a GitHub workflow, you would need to run the below script first.
 # - ./tools/utils/grant-workflow-entra-permissions.sh
 #
 if [ ! -z "${GITHUB_ACTION:-}" ]; then
@@ -178,8 +176,6 @@ fi
 
 # Persist variables to azd env so that the provisioning can use them
 ENTRA_OIDC_METADATA_URL="https://login.microsoftonline.com/${TENANT_ID}/v2.0/.well-known/openid-configuration"
-azd env set ENTRA_TENANT_ID "$TENANT_ID" >/dev/null
-azd env set ENTRA_APP_DISPLAY_NAME "$ENTRA_APP_DISPLAY_NAME" >/dev/null
 azd env set ENTRA_CLIENT_ID "$ENTRA_CLIENT_ID" >/dev/null
 azd env set ENTRA_OIDC_METADATA_URL "$ENTRA_OIDC_METADATA_URL" >/dev/null
 
