@@ -62,7 +62,7 @@ pipeline:
 #
 # When 'azd deploy' runs, it builds a Docker image with a timestamp-based tag and pushes it the Azure container registry
 # It then finds a matching 'azd-service-name' tag in bicep files, which causes services to get deployed as container apps
-# To support this, the base deployment outputs an AZURE_CONTAINER_REGISTRY_ENDPOINT variable
+# To support this, the base provisioning outputs an AZURE_CONTAINER_REGISTRY_ENDPOINT variable
 #
 services:
   
