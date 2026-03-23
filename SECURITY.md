@@ -28,9 +28,13 @@ The deployment uses the following managed identities:
 ## Further Security Hardening
 
 For developer convenience, and to reduce scope / complexity, some connections do not use the strongest security.  
-Harden at least the first of these connections for production deployments.  
+For production deployments, first tighten firewall rules:  
 
-- Azure SQL connections could require managed identities and could use stricter firewall rules.
-- The Azure AI Foundry could require stricter firewall rules.
+- Azure SQL connections.
+- Azure AI Foundry project connections.
+
+Also consider using stronger credentials for these secrets:
+
+- The JDBC connection from the Curity Identity Server to Azure SQL could use a managed identity.
 - The Admin UI for the Curity Identity Server could use an Entra ID federated login.
 - Token exchange could use JWT workload identities instead of client secrets.
