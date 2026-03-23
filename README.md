@@ -181,7 +181,7 @@ The GitHub workflow runs when you trigger it manually, or if you commit C# code 
 Later, when you have finished with the deployment, free resources:
 
 ```bash
-azd down --purge
+azd down --force --purge
 ```
 
 ### Further Information

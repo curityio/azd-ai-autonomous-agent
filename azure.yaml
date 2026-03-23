@@ -39,6 +39,7 @@ pipeline:
     - AZURE_RESOURCE_GROUP
     - CONTAINER_APPS_ENVIRONMENT_ID
     - CONTAINER_REGISTRY_NAME
+    - AZURE_CONTAINER_REGISTRY_ENDPOINT
     - DBINIT_IMAGE_NAME
     - DEPLOYMENT_IDENTITY_ID
     - ENTRA_CLIENT_ID
@@ -61,6 +62,7 @@ pipeline:
 #
 # When 'azd deploy' runs, it builds a Docker image with a timestamp-based tag and pushes it the Azure container registry
 # It then finds a matching 'azd-service-name' tag in bicep files, which causes services to get deployed as container apps
+# To support this, the base deployment outputs an AZURE_CONTAINER_REGISTRY_ENDPOINT variable
 #
 services:
   
