@@ -60,11 +60,6 @@ function setPasswordSecret() {
 
   EXISTS=$(az keyvault secret list --vault-name "$KEY_VAULT_NAME" --query "contains([].id, 'https://$KEY_VAULT_NAME.vault.azure.net/secrets/$KEY')")
   if [ $EXISTS == false ]; then
-
-  
-    echo "Creating Azure key vault secret: $KEY ..."
-    az keyvault secret set --vault-name "$KEY_VAULT_NAME" --name "$KEY" --value "$VALUE" 1>/dev/null
-
     setSecret "$KEY" "$(generatePassword)"
   fi
 }
