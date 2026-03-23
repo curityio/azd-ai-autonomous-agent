@@ -1,7 +1,6 @@
 # Open Issues
 
 This document highlights some minor `azd` technical issues and also some conformance details.  
-Generally, `azd` is a newer high level API that feels less stable and resilient than the lower level `az`.  
 
 ## 1. Layered Provisioning
 

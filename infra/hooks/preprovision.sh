@@ -47,7 +47,7 @@ fi
 # A utility to generate strong passwords if they do not yet exist
 #
 function generatePassword() {
-  openssl rand 32 | base64 | tr -d '=/_-'
+  openssl rand 32 | base64 | tr '/+' '_-' | tr -d '='
 }
 
 #
@@ -62,7 +62,7 @@ function setSecret() {
   EXISTS=$(az keyvault secret list --vault-name "$KEY_VAULT_NAME" --query "contains([].id, 'https://$KEY_VAULT_NAME.vault.azure.net/secrets/$KEY')")
   if [ $EXISTS == false ]; then
   
-    echo "Creating secret: $KEY ..."
+    echo "Creating Azure key vault secret: $KEY ..."
     az keyvault secret set --vault-name "$KEY_VAULT_NAME" --name "$KEY" --value "$VALUE" 1>/dev/null
 
     ENV_KEY="${KEY//-/_}"

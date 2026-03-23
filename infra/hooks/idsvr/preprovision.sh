@@ -100,7 +100,8 @@ echo "$CLUSTER_XML" > cluster.xml
 #
 # This deployment only creates Entra ID resources during local deployments to Azure
 # Running 'azd pipeline config' then copies Entra variables and secrets to a GitHub workflow
-# If you need to create Entra ID resources during GitHub workflows, run the following script to set grant access
+# If you need to create Entra ID resources during GitHub workflows, run the script at the below location
+# The script gives the GitHub workflow managed identity the permissions to update Entra ID
 # - ./tools/utils/grant-workflow-entra-permissions.sh
 #
 if [ ! -z "${GITHUB_ACTION:-}" ]; then
@@ -110,7 +111,6 @@ fi
 # --------------------------------------------------------------------------
 # Create an Entra ID App Registration for OpenID Connect user authentication
 # --------------------------------------------------------------------------
-echo "Creating Entra ID app registration ..."
 
 # Get the tenant ID for the OIDC metadata URL configured in the Curity Identity Server
 TENANT_ID="${AZURE_TENANT_ID:-}"
@@ -128,6 +128,7 @@ IDSVR_RUNTIME_URL="https://idsvr-runtime-${AZURE_ENV_NAME}.${EXTERNAL_DOMAIN_NAM
 ENTRA_CLIENT_ID="$(az ad app list --display-name "$ENTRA_APP_DISPLAY_NAME" --query "[0].appId" -o tsv 2>/dev/null || true)"
 if [ -z "$ENTRA_CLIENT_ID" ]; then
 
+  # Create the registration
   echo "Creating Entra app registration: $ENTRA_APP_DISPLAY_NAME"
   ENTRA_CLIENT_ID="$(az ad app create \
     --display-name "$ENTRA_APP_DISPLAY_NAME" \
@@ -139,28 +140,21 @@ if [ -z "$ENTRA_CLIENT_ID" ]; then
     exit 1
   fi
 
-else
-  echo "Reusing existing Entra app registration: $ENTRA_APP_DISPLAY_NAME ($ENTRA_CLIENT_ID)"
-fi
+  # Ensure that the service principal exists, which can take a few seconds to propagate
+  if ! az ad sp show --id "$ENTRA_CLIENT_ID" -o none 2>/dev/null; then
+    echo "Creating Entra ID service principal ..."
+    az ad sp create --id "$ENTRA_CLIENT_ID" -o none 2>/dev/null || true
+    for i in 1 2 3 4 5; do
+      if az ad sp show --id "$ENTRA_CLIENT_ID" -o none 2>/dev/null; then
+        break
+      fi
+      sleep 2
+    done
+  fi
 
-# Ensure service principal exists, which can take a few seconds to propagate
-if ! az ad sp show --id "$ENTRA_CLIENT_ID" -o none 2>/dev/null; then
-  echo "Creating service principal for app..."
-  az ad sp create --id "$ENTRA_CLIENT_ID" -o none 2>/dev/null || true
-  for i in 1 2 3 4 5; do
-    if az ad sp show --id "$ENTRA_CLIENT_ID" -o none 2>/dev/null; then
-      break
-    fi
-    sleep 2
-  done
-fi
-
-# Create the secret on the first deployment
-SECRET_KEY='ENTRA-CLIENT-SECRET'
-EXISTS=$(az keyvault secret list --vault-name "$KEY_VAULT_NAME" --query "contains([].id, 'https://$KEY_VAULT_NAME.vault.azure.net/secrets/$SECRET_KEY')")
-if [ $EXISTS == false ]; then
-
-  echo "Creating secret: ENTRA_CLIENT_SECRET ..."
+  # Generate the Entra ID client secret
+  SECRET_KEY='ENTRA-CLIENT-SECRET'
+  echo "Creating Entra ID client secret: $SECRET_KEY ..."
   ENTRA_CLIENT_SECRET="$(az ad app credential reset \
     --id "$ENTRA_CLIENT_ID" \
     --append \
@@ -172,18 +166,18 @@ if [ $EXISTS == false ]; then
     exit 1
   fi
   
+  # Store the secret in the key vault and add a reference to the local .env file
+  echo "Creating Azure key vault secret: $SECRET_KEY ..."
   az keyvault secret set --vault-name "$KEY_VAULT_NAME" --name "$SECRET_KEY" --value "$ENTRA_CLIENT_SECRET" 1>/dev/null
   if [ $? -ne 0 ]; then
     exit 1
   fi
-
   SECRET_REF="akvs://${AZURE_SUBSCRIPTION_ID}/${KEY_VAULT_NAME}/${SECRET_KEY}"
   echo "ENTRA_CLIENT_SECRET=\"$SECRET_REF\"" >> ../../.azure/${AZURE_ENV_NAME}/.env
 fi
 
-ENTRA_OIDC_METADATA_URL="https://login.microsoftonline.com/${TENANT_ID}/v2.0/.well-known/openid-configuration"
-
 # Persist variables to azd env so that the provisioning can use them
+ENTRA_OIDC_METADATA_URL="https://login.microsoftonline.com/${TENANT_ID}/v2.0/.well-known/openid-configuration"
 azd env set ENTRA_TENANT_ID "$TENANT_ID" >/dev/null
 azd env set ENTRA_APP_DISPLAY_NAME "$ENTRA_APP_DISPLAY_NAME" >/dev/null
 azd env set ENTRA_CLIENT_ID "$ENTRA_CLIENT_ID" >/dev/null
