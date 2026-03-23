@@ -18,36 +18,19 @@ if [ -z "${AZURE_ENV_NAME:-}" ]; then
 fi
 
 #
-# Use environment variables to work out the provisioning layer
+# During the initial base provisioning there is no EXTERNAL_DOMAIN_NAME yet
 #
-if [ -z "${GITHUB_ACTION:-}" ]; then
-
-  #
-  # During the initial base provisioning there is no EXTERNAL_DOMAIN_NAME yet
-  #
-  if [ -z "${EXTERNAL_DOMAIN_NAME:-}" ]; then
-    PROVISIONING_STAGE='BASE'
-  else
-    PROVISIONING_STAGE='IDENTITY'
-  fi
-
-else 
-
-  #
-  # GitHub workflows only supply secrets like ADMIN_PASSWORD for the identity provisioning stage
-  #
-  if [ -z "${ADMIN_PASSWORD:-}" ]; then
-    PROVISIONING_STAGE='BASE'
-  else
-    PROVISIONING_STAGE='IDENTITY'
-  fi
+if [ -z "${EXTERNAL_DOMAIN_NAME:-}" ]; then
+  PROVISIONING_STAGE='BASE'
+else
+  PROVISIONING_STAGE='IDENTITY'
 fi
 
 #
 # A utility to generate strong passwords if they do not yet exist
 #
 function generatePassword() {
-  openssl rand 32 | base64 | tr -d '=/_-'
+  openssl rand 32 | base64 | tr '/+' '_-' | tr -d '='
 }
 
 #
@@ -77,6 +60,11 @@ function setPasswordSecret() {
 
   EXISTS=$(az keyvault secret list --vault-name "$KEY_VAULT_NAME" --query "contains([].id, 'https://$KEY_VAULT_NAME.vault.azure.net/secrets/$KEY')")
   if [ $EXISTS == false ]; then
+
+  
+    echo "Creating Azure key vault secret: $KEY ..."
+    az keyvault secret set --vault-name "$KEY_VAULT_NAME" --name "$KEY" --value "$VALUE" 1>/dev/null
+
     setSecret "$KEY" "$(generatePassword)"
   fi
 }

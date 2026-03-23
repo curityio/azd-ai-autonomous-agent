@@ -8,28 +8,10 @@ The deployment uses bicep, so install the Visual Studio code extensions:
 
 <img src="images/bicep-extensions.png" alt="bicep extensions" style="width:50%;" />
 
-## Deployment Mechanics
-
-By default, call `azd up`, which is equivalent to running the following commands in sequence.  
-In larger setups, you could split each of these deployments into its own GitHub repository.
-
-```bash
-azd provision base
-azd provision identity
-azd deploy autonomous-agent
-azd deploy portfolio-mcp-server
-```
-
-The following hook runs before each provisioning stage:
-
-```bash
-./infra/hooks/preprovision.sh
-```
-
 ## Deploy AZD Base Infrastructure
 
 The `azd provision base` command deploys the infrastructure from the `infra/base` folder.  
-The deployment uses that folder's `main.bicep` objects, which references its `main.parameters` file.
+The deployment uses that folder's `main.bicep` objects, which references its `main.parameters` file.  
 
 ```bash
 azd provision base
@@ -46,6 +28,7 @@ EXTERNAL_DOMAIN_NAME="<generated-name>.<region>.azurecontainerapps.io"
 
 The `azd provision identity` command deploys the infrastructure from the `infra/identity` folder.  
 The deployment uses that folder's `main.bicep` objects, which references its `main.parameters` file.
+The `./infra/hooks/preprovision.sh` hook implements custom logic and sets some parameters.  
 
 ```bash
 azd provision identity
