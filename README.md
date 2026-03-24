@@ -59,7 +59,7 @@ azd env set AZURE_LOCATION='uksouth'
 ### Local Environment
 
 Use a Windows, macOS or Linux computer with a Linux-based shell (such as Git bash on Windows).  
-Install the following local computer tools:
+Install the latest versions of the following local computer tools:
 
 - **Azure CLI** (`az`) - to connect to Azure AI Foundry with an Azure CLI credential
 - **Azure Developer CLI** (`azd`) to use higher level commands to manage projects and deploy to Azure
@@ -149,7 +149,7 @@ Once you have a working Azure deployment, create a GitHub workflow to deploy C# 
 azd pipeline config
 ```
 
-Select the following options to configure your GitHub pipeline:
+Select the following options to configure your GitHub pipeline and commit changes:
 
 - Federated User Managed Identity (MSI + OIDC)
 - Create new User Managed Identity (MSI)
@@ -164,7 +164,6 @@ Choose options like the following, to keep GitHub values in sync with the local 
 - Delete ALL unused variables from the pipeline.
 - Delete ALL unused secrets from the pipeline.
 
-Commit changes to create a GitHub workflow.  
 The `azd pipeline config` command copies variable and secret values referenced in the `.env` file to GitHub.  
 Browse to the following locations in your GitHub repository to view the details:
 
@@ -178,16 +177,24 @@ The GitHub workflow runs when you trigger it manually, or if you commit C# code 
 
 ### Tear Down the Deployment
 
-Later, when you have finished with the deployment, free resources:
+To free resources after a local deployment, run the following command:
 
 ```bash
-azd down --force --purge
+azd down --force --purge --no-prompt
 ```
+
+To free resources after a GitHub workflow deployment, edit the [GitHub workflow](.github/workflows/azure.yml).  
+Set the following jobs to `if: false`, set the `teardown` job to `if: true` and re-run `azd pipeline config`.
+
+- deploy-base-infra
+- deploy-identity-infra
+- applications
 
 ### Further Information
 
 - The [Azure Deployment](docs/AZURE-DEPLOYMENT.md) document explains more about the deployed resources.
-- The [Azure Endpoints](docs/AZURE-ENDPOINTS.md) document explains more about how to locate and troubleshoot connections.
+- The [Azure Endpoints](docs/AZURE-ENDPOINTS.md) document explains more about how to locate and test connections.
+- The [azd Open Issues](OPEN-ISSUES.md) document explains more about troubleshooting azd technical issues.
 
 ## Important Security Notice
 
