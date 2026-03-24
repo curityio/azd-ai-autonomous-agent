@@ -184,7 +184,8 @@ azd down --force --purge --no-prompt
 ```
 
 To free resources after a GitHub workflow deployment, edit the [GitHub workflow](.github/workflows/azure.yml).  
-Set the following jobs to `if: false`, set the `teardown` job to `if: true` and re-run `azd pipeline config`.
+Set the following jobs to `if: false`, set the `teardown` job to `if: true`.  
+Then re-run `azd pipeline config` and commit changes to trigger the teardown.
 
 - deploy-base-infra
 - deploy-identity-infra
