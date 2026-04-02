@@ -80,6 +80,14 @@
         },
         "secretName": "AGENT-TOKEN-EXCHANGE-SECRET"
       }
+    },
+    "smtpSecret": {
+      "reference": {
+        "keyVault": {
+          "id": "/subscriptions/${AZURE_SUBSCRIPTION_ID}/resourceGroups/${AZURE_RESOURCE_GROUP}/providers/Microsoft.KeyVault/vaults/${KEY_VAULT_NAME}"
+        },
+        "secretName": "SMTP-SECRET"
+      }
     }
   }
 }

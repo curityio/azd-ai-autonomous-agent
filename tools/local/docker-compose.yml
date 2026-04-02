@@ -17,6 +17,7 @@ services:
       IDSVR_ADMIN_URL: '${IDSVR_ADMIN_URL}'
       GATEWAY_TOKEN_EXCHANGE_SECRET: '${GATEWAY_TOKEN_EXCHANGE_SECRET}'
       AGENT_TOKEN_EXCHANGE_SECRET: '${AGENT_TOKEN_EXCHANGE_SECRET}'
+      SMTP_SECRET: '${SMTP_SECRET}'
       LICENSE_KEY: '${LICENSE_KEY}'
 
   #
@@ -61,3 +62,15 @@ services:
       KONG_PLUGINS: 'bundled,token-audit'
       KONG_NGINX_HTTP_LOG_FORMAT: "json_combined escape=json '{ \"time_iso8601\": \"$$time_iso8601\", \"remote_addr\": \"$$remote_addr\", \"method\": \"$$request_method\", \"uri\": \"$$request_uri\", \"status\": $$status, \"body_bytes_sent\": $$body_bytes_sent, \"request_time\": $$request_time, \"upstream_response_time\": \"$$upstream_response_time\", \"upstream_addr\": \"$$upstream_addr\", \"http_x_forwarded_for\": \"$$http_x_forwarded_for\", \"kong_request_id\": \"$$http_kong_request_id\" }'"
       KONG_PROXY_ACCESS_LOG: "/dev/stdout json_combined"
+
+  #
+  # An email SMTP server and inbox for testing
+  #
+  smtp-server:
+    image: maildev/maildev:latest
+    hostname: smtpserver
+    environment:
+      MAILDEV_INCOMING_USER: 'noreply@curitydemo.example'
+      MAILDEV_INCOMING_PASSWORD: '${SMTP_SECRET}'
+    ports:
+      - 1080:1080

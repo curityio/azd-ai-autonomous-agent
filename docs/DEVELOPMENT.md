@@ -10,29 +10,9 @@ An organization would use .NET to develop high-level application components:
 - The [Portfolio MCP Server](../src/PortfolioMcpServer/README.md) is a resource server that the LLM instructs the agent to call.
 - The [Internet Application](../src/ConsoleClient/README.md) is any app that runs an A2A client and sends access tokens.
 
-## Development Prerequisites
+## Local Development Urls
 
-On Windows, use a Linux bash shell like Git bash.  
-Follow the [Azure AI Setup](AZURE-AI-SETUP.md) to get connected to an Azure LLM.  
-In Visual Studio Code, add the following C# extensions.  
-
-<img src="images/dotnet-extensions.png" alt=".NET extensions" style="width:50%;" />
-
-## Run a Local End-to-End Flow
-
-Log in to the Azure CLI so that the local agent can authenticate to Azure with a token credential:
-
-```bash
-az login
-```
-
-Run local backend components for the Curity Identity Server, API gateways, the autonomous agent and the MCP server:
-
-```bash
-./tools/local/backend.sh
-```
-
-After deployment, backend components run at the following URLs:
+The local end-to-end deployment spins up Docker components than run at the following URLs:
 
 - Autonomous Agent (A2A Server): `http://localhost:3000`
 - Portfolio MCP Server: `http://localhost:3001`
@@ -40,16 +20,7 @@ After deployment, backend components run at the following URLs:
 - Curity Identity Server Admin Endpoints: `http://localhost:6749/admin`
 - An external API gateway at `http://localhost` that exchanges incoming opaque access tokens for downscoped JWTs
 - An internal API gateway at `http://localhost:81` that audits secure requests from the autonomous agent
-
-Run the console client to sign in and get an access token with which to call the Anonymous Agent:
-
-```bash
-./src/ConsoleClient/run.sh
-```
-
-The default deployment uses [passkeys authentication](docs/PASSKEYS.md), e.g. you can sign in with Windows Hello on that platform.  
-The minimal client then calls the autonomous agent with a natural language command and the access token.  
-Wait a few seconds and you will get a report that the Azure LLM produces.
+- A test email inbox at `http://localhost:1080`, for email verification when a user creates a passkey
 
 ## Use Test-Driven Development
 

@@ -74,7 +74,7 @@ namespace IO.Curity.PortfolioMcpServer
             var stock1 = stocks.First(s => s.Region == region);
             var stock2 = stocks.Last(s => s.Region == region);
 
-            // Make up some transactions for the customer
+            // Make up some transactions for customers
             Transaction[] customerTransactions =
             [
                 new()

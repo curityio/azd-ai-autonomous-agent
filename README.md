@@ -81,23 +81,48 @@ Log in to the Azure CLI so that the local agent can present a CLI identity to th
 az login
 ```
 
-Run a local deployment that runs the agent and MCP server, along with Docker identity infrastructure:
+Run a local deployment that runs the agent and MCP server, along with Docker identity infrastructure.  
 
 ```bash
 ./tools/local/backend.sh
 ```
 
 The first time you run a deployment, a CLI uses the browser to sign you in at Curity.  
-The CLI then uses an access token to download a trial license for the Curity Identity Server.
+The CLI then uses an access token to download a trial license for the Curity Identity Server.  
+The [Development README](docs/DEVELOPMENT.md) explains more about the local deployment's endpoints.
 
-Then, run a console application that connects to the local backend.  
-The default deployment uses [passkeys authentication](docs/PASSKEYS.md), e.g. you can sign in with Windows Hello on that platform.
+## Authenticate Users
+
+Next, run a console application that connects to the local backend:
 
 ```bash
 ./src/ConsoleClient/run.sh
 ```
 
-See the [Development README](docs/DEVELOPMENT.md) to learn more about local development behaviors.
+By default, the console application is configured to use passkeys to authenticate users.  
+On the first login, you will be prompted to create a passkey.
+
+![create a passkey](docs/images/create-passkey.png)
+
+You must prove your email address to create a passkey and will be prompted to paste in a one-time code.  
+The deployment includes the [maildev utility](https://github.com/maildev/maildev) as a convenient email inbox for testing.  
+You can get the one-time code from the test email inbox at `http://localhost:1080`.
+
+The operating system then prompts you to create a passkey and you must provide a user gesture to use secure storage.  
+For example, on the Microsoft platform you must use Windows Hello. 
+
+![windows hello](docs/images/windows-hello.png)
+
+On all subsequent logins, select the `Sign in with a Passkey` option to authenticate with your passkey.  
+On every login you must provide the user gesture to use secure storage. 
+
+![sign in with a passkey](docs/images/signin-passkey.png)
+
+### Authorizate AI Agent Access
+
+After login, the [Token Flow](docs/TOKEN-FLOW.md) runs, to restrict the AI agent's level of access.  
+The agent is restricted to stocks that match the user's `customer_id` and `region`.  
+In the example deployment, these values are generated randomly when users get created.  
 
 ## Deployment
 
@@ -106,7 +131,6 @@ Continue to use an Azure development account and ensure that you also have Entra
 
 - A tenant to which the deployment can add an app registration.
 - At least one user account with which you can test Entra ID logins.
-
 
 ### Run the Deployment
 
@@ -241,7 +265,6 @@ The deeper behaviors are a future-proof backend AI deployment with security cont
 
 ### Learn More
 
-- See the [Token Flow README](docs/TOKEN-FLOW.md) to understand the token details for the customer support use case.
 - See the [OAuth Configuration README](docs/OAUTH-CONFIGURATION.md) to understand OAuth security settings.
 - See the [Advanced Use Cases README](docs/ADVANCED-USE-CASES.md) for flows to meet other enterprise requirements.
 

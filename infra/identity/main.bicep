@@ -64,15 +64,9 @@ param adminPassword string
 @description('License key for the Curity Identity Server')
 param licenseKey string
 
-@description('Entra ID app registration client ID')
-param entraClientId string
-
 @secure()
-@description('Entra ID app registration client secret')
-param entraClientSecret string
-
-@description('OpenID Connect metadata document URL for Entra ID (v2)')
-param entraOidcMetadataUrl string
+@description('A secret that the Curity Identity Server uses to connect t the SMTP server')
+param smtpSecret string
 
 @secure()
 @description('The token exchange client ID secret that the external gateway uses.')
@@ -180,6 +174,18 @@ module uploadConfigFiles 'idsvr/upload-configuration.bicep' = {
   }
 }
 
+// Deploy an SMTP server for testing
+module containerApp 'smtpserver/container-app.bicep' = {
+  params: {
+    name: 'smtpserver'
+    location: location
+    containerAppsEnvironmentId: containerAppsEnvironmentId
+    containerRegistryName: containerRegistryName
+    identityId: identityId
+    smtpSecret: smtpSecret
+  }
+}
+
 // Deploy the admin workload for the Curity Identity Server
 module containerAppAdmin 'idsvr/idsvr-container-app.bicep' = {
   name: 'container-app-admin'
@@ -271,6 +277,10 @@ module containerAppAdmin 'idsvr/idsvr-container-app.bicep' = {
       {
         name: 'AGENT_TOKEN_EXCHANGE_SECRET'
         value: agentTokenExchangeClientSecret
+      }
+      {
+        name: 'SMTP_SECRET'
+        value: smtpSecret
       }
     ]
   }
@@ -366,6 +376,10 @@ module containerAppRuntime 'idsvr/idsvr-container-app.bicep' = {
       {
         name: 'AGENT_TOKEN_EXCHANGE_SECRET'
         value: agentTokenExchangeClientSecret
+      }
+      {
+        name: 'SMTP_SECRET'
+        value: smtpSecret
       }
     ]
   }

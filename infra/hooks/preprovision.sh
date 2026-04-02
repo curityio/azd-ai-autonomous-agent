@@ -97,6 +97,7 @@ if [ "$PROVISIONING_STAGE" == 'IDENTITY' ]; then
     setPasswordSecret 'ADMIN-PASSWORD'
     setPasswordSecret 'GATEWAY-TOKEN-EXCHANGE-SECRET'
     setPasswordSecret 'AGENT-TOKEN-EXCHANGE-SECRET'
+    setPasswordSecret 'SMTP-SECRET'
     setLicenseSecret
   fi
 

@@ -14,6 +14,7 @@
       <services>
         <zones>
           <default-zone>
+            <email-provider>smtp</email-provider>
             <symmetric-key>data:text/plain;aes,v:S.U2ZGcUhOSHJwalVjTFhtNA==.YrpBOCXccQr-eMm9qIw-xQ==.etTZLxVsrCbhNAZ5tvlltpH7cz9IFYyS1F_qkC12f-noBl5wVd39ZMEUtG212cO2Tayr4K-CE_ifOCwfmRbUygn9Hto2QygMitAGNVaO-Vo=.KIP1ujAK16Fq1PFSjJsWfowteqc2wEvq0bdPado9VbM=</symmetric-key>
           </default-zone>
         </zones>
@@ -45,12 +46,15 @@
         <authentication-service xmlns="https://curity.se/ns/conf/profile/authentication">
           <authenticators>
             <authenticator>
-              <id>anonymous</id>
-              <anonymous xmlns="https://curity.se/ns/ext-conf/anonymous"/>
+              <id>email</id>
+              <email>
+                <account-manager>default-account-manager</account-manager>
+                <send-otp-as-code />
+              </email>
             </authenticator>
             <authenticator>
               <id>passkeys</id>
-              <required-authenticator-for-registration>anonymous</required-authenticator-for-registration>
+              <required-authenticator-for-registration>email</required-authenticator-for-registration>
               <passkeys xmlns="https://curity.se/ns/conf/authenticators/passkeys">
                 <enable-discoverable-credentials>true</enable-discoverable-credentials>
                 <account-manager>
@@ -318,6 +322,18 @@
         </signing-key>
       </signing-keys>
     </crypto>
+    <email-providers>
+      <email-provider>
+        <id>smtp</id>
+        <smtp>
+          <smtp-host>smtpserver</smtp-host>
+          <smtp-port>1025</smtp-port>
+          <default-sender>noreply@curitydemo.example</default-sender>
+          <username>noreply@curitydemo.example</username>
+          <password>#{SMTP_SECRET}</password>
+        </smtp>
+      </email-provider>
+    </email-providers>
     <caching-services>
       <default-caching-service>
         <data-source>default-datasource</data-source>

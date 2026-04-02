@@ -2,6 +2,7 @@
 
 In this deployment, the Curity Identity Server's main role is a specialist token issuer.  
 The Curity Identity Server does not need to store user accounts or authenticate users directly.   
+The example deployment highlights some behaviors that enable you to take control over tokens.
 
 ## Admin UI
 
@@ -39,20 +40,30 @@ To do so, follow the steps in the [Authenticate Using Microsoft Entra ID](https:
 
 ## User Attributes
 
-In the example deployment, the Curity Identity Server uses user attributes for `region` and `customer_id`.  
-If those values originate from an external identity system, the Curity Identity Server uses an authentication action to receive them:
+In the example deployment, the Curity Identity Server issues user attributes for `region` and `customer_id` to access tokens.  
+If you store these values against user accounts in the Curity Identity Server, you would populate them during account creation.  
+You could then use a [Script Claims Provider](https://curity.io/docs/identity-server/developer-guide/scripting/claims-value-provider-procedures/) to issue the values to access tokens.
+
+If you store user accounts in an external identity system like Entra ID, you can get those values in a [Script Authentication Action](https://curity.io/docs/identity-server/profiles/authentication-profile/authentication-actions/script-transformer/).  
 
 ![Authentication action](images/authentication-action.png)
 
-The deployment includes the following example JavaScript logic, transform external attributes and save them to the authentication context:
+The example deployment uses the following example logic to demonstrate how to save federated user attributes to the authentication context.  
+You can implement any custom logic on user attributes.
 
 ```javascript
 function result(context) {
   var attributes = context.attributeMap;
 
   if (attributes.location && attributes.employee_id) {
+
     attributes.region = attributes.location;
     attributes.customer_id = attributes.employee_id;
+
+  } else {
+
+    attributes.region = "USA"
+    attributes.customer_id = "2109"
   }
 
   return attributes;
@@ -62,10 +73,8 @@ function result(context) {
 ## Scopes and Claims
 
 Business scopes are defined in the Admin UI's token designer, with claim values evaluated at runtime.  
-For each claim, you can resolve claim values in various ways, e.g.:
-
-- An `Script Claims Provider` to apply JavaScript logic to read the value from the user's account.
-- An `Authentication Context Claims Provider` to read the value from the authentication context.
+For each claim, you can resolve claim values in various ways.  
+The example deployment shows how to use an `Authentication Context Claims Provider` to retrieve runtime values.
 
 ![Scopes and claims](images/scopes-and-claims.png)
 

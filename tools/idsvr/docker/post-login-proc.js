@@ -8,14 +8,18 @@ function result(context) {
 
   if (attributes.location && attributes.employee_id) {
 
-    // Apply your preferred logic to transform Entra ID user attributes
+    // Apply your preferred logic to transform received user attributes from external identity
     attributes.region = attributes.location;
     attributes.customer_id = attributes.employee_id;
   } else {
 
-    // The example sets some hard coded properties if Entra ID attributes are missing
+    // For demo purposes, the example deployment sets hard coded values if received attributes are missing
+    // 
     attributes.region = "USA"
-    attributes.customer_id = "2109"
+    attributes.customer_id = "178"
+    logger.error("*************** DEBUG ***")
+    logger.error(Math.floor(Math.random() * 100))
+    logger.error("*************** DEBUG ***")
   }
 
   return attributes;

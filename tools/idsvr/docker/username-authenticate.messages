@@ -1,0 +1,3 @@
+view.username=Email
+view.username.placeholder=Enter your email address
+validation.error.username.required=You have to enter your email

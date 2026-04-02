@@ -18,11 +18,20 @@ OAuth 2.0 provides future-proof strong security for enterprise data, APIs, appli
 - [Token Flow](docs/TOKEN-FLOW.md)
 - [Advanced Use Cases](docs/ADVANCED-USE-CASES.md)
 
-## User Authentication
+## User Accounts
 
-To support all aspects of user authentication, you typically need infrastructure such as Email providers and SMTP providers.  
-The example deployment allows convenient passkeys logins that need further hardening for a real deployment.  
-See the [Passkeys overview](docs/PASSKEYS.md) to understand passkeys logins and how to harden them.
+The example deployment uses passkeys as its default authentication method and creates active user accounts after entry of an email.  
+This is a testing convenience and you can change the [OAuth Configuration](docs/OAUTH-CONFIGURATION.md) to manage users in alternative ways.
+
+A real deployment that stores user accounts in the Curity Identity Server would typically use a registration authenticator.  
+Accounts would then be created in an inactive state, and the user could perform an action like email verification to activate the account.  
+Signup flows also typically present forms to collect user attributes.
+
+## Email Verification
+
+The example deployment uses the [maildev SMTP test server](https://github.com/maildev/maildev) to simulate email verification when the user creates a passkey.  
+Maildev allows you to access email inboxes as any test user, whereas a real SMTP server only allows users to access their own emails.  
+A production deployment must replace the mock SMTP server with a real SMTP server.
 
 ## Managed Identities
 
