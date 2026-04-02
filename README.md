@@ -102,7 +102,7 @@ Next, run a console application that connects to the local backend:
 By default, the console application is configured to use passkeys to authenticate users.  
 On the first login, you will be prompted to create a passkey.
 
-![create a passkey](docs/images/create-passkey.png)
+<img src="docs/images/create-passkey.png" alt="Create a passkey" style="width:50%;" />
 
 You must prove your email address to create a passkey and will be prompted to paste in a one-time code.  
 The deployment includes the [maildev utility](https://github.com/maildev/maildev) as a convenient email inbox for testing.  
@@ -111,12 +111,12 @@ You can get the one-time code from the test email inbox at `http://localhost:108
 The operating system then prompts you to create a passkey and you must provide a user gesture to use secure storage.  
 For example, on the Microsoft platform you must use Windows Hello. 
 
-![windows hello](docs/images/windows-hello.png)
+<img src="docs/images/windows-hello.png" alt="Windows Hello dialog" style="width:50%;" />
 
 On all subsequent logins, select the `Sign in with a Passkey` option to authenticate with your passkey.  
 On every login you must provide the user gesture to use secure storage. 
 
-![sign in with a passkey](docs/images/signin-passkey.png)
+<img src="docs/images/signin-passkey.png" alt="Sign in with a passkey" style="width:50%;" />
 
 ### Authorizate AI Agent Access
 
