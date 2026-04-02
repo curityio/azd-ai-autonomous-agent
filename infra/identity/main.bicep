@@ -265,18 +265,6 @@ module containerAppAdmin 'idsvr/idsvr-container-app.bicep' = {
         value: sqlAdminUsername
       }
       {
-        name: 'ENTRA_CLIENT_ID'
-        value: entraClientId
-      }
-      {
-        name: 'ENTRA_CLIENT_SECRET'
-        value: entraClientSecret
-      }
-      {
-        name: 'ENTRA_OIDC_METADATA_URL'
-        value: entraOidcMetadataUrl
-      }
-      {
         name: 'GATEWAY_TOKEN_EXCHANGE_SECRET'
         value: gatewayTokenExchangeClientSecret
       }
@@ -370,18 +358,6 @@ module containerAppRuntime 'idsvr/idsvr-container-app.bicep' = {
       {
         name: 'SQL_ADMIN_USERNAME'
         value: sqlAdminUsername
-      }
-      {
-        name: 'ENTRA_CLIENT_ID'
-        value: entraClientId
-      }
-      {
-        name: 'ENTRA_CLIENT_SECRET'
-        value: entraClientSecret
-      }
-      {
-        name: 'ENTRA_OIDC_METADATA_URL'
-        value: entraOidcMetadataUrl
       }
       {
         name: 'GATEWAY_TOKEN_EXCHANGE_SECRET'

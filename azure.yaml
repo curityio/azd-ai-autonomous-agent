@@ -23,10 +23,6 @@ hooks:
     shell: sh
     run: ./infra/hooks/preprovision.sh
     interactive: true
-  predown:
-    shell: sh
-    run: ./infra/hooks/predown.sh
-    interactive: true
 
 #
 # When 'azd pipeline config' runs, avoid prompts by copying these variables and secrets to GitHub
@@ -42,8 +38,6 @@ pipeline:
     - AZURE_CONTAINER_REGISTRY_ENDPOINT
     - DBINIT_IMAGE_NAME
     - DEPLOYMENT_IDENTITY_ID
-    - ENTRA_CLIENT_ID
-    - ENTRA_OIDC_METADATA_URL
     - EXTERNAL_DOMAIN_NAME
     - GATEWAY_EXTERNAL_IMAGE_NAME
     - GATEWAY_INTERNAL_IMAGE_NAME
@@ -57,7 +51,6 @@ pipeline:
     - LICENSE_KEY
     - GATEWAY_TOKEN_EXCHANGE_SECRET
     - AGENT_TOKEN_EXCHANGE_SECRET
-    - ENTRA_CLIENT_SECRET
 
 #
 # When 'azd deploy' runs, it builds a Docker image with a timestamp-based tag and pushes it the Azure container registry

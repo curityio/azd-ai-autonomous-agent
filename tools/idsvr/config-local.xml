@@ -1,24 +1,4 @@
 <config xmlns="http://tail-f.com/ns/config/1.0">
-  <profiles xmlns="https://curity.se/ns/conf/base">
-    <profile>
-      <id>authentication-service</id>
-      <type xmlns:auth="https://curity.se/ns/conf/profile/authentication">auth:authentication-service</type>
-      <settings>
-        <authentication-service xmlns="https://curity.se/ns/conf/profile/authentication">
-          <authenticators>
-            <authenticator>
-              <id>username</id>
-              <authentication-actions>
-                <login>post-login</login>
-              </authentication-actions>
-              <username xmlns="https://curity.se/ns/ext-conf/username">
-              </username>
-            </authenticator>
-          </authenticators>
-        </authentication-service>
-      </settings>
-    </profile>
-  </profiles>
   <facilities xmlns="https://curity.se/ns/conf/base">
     <data-sources>
       <data-source>

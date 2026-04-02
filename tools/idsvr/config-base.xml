@@ -43,7 +43,49 @@
       <expose-detailed-error-messages/>
       <settings>
         <authentication-service xmlns="https://curity.se/ns/conf/profile/authentication">
+          <authenticators>
+            <authenticator>
+              <id>passkeys</id>
+              <required-authenticator-for-registration>username</required-authenticator-for-registration>
+              <passkeys xmlns="https://curity.se/ns/conf/authenticators/passkeys">
+                <enable-discoverable-credentials>true</enable-discoverable-credentials>
+                <account-manager>
+                  <id>default-account-manager</id>
+                </account-manager>
+              </passkeys>
+            </authenticator>
+            <authenticator>
+              <id>username</id>
+              <authentication-actions>
+                <login>auto-create-account</login>
+                <login>trigger-passkeys</login>
+                <login>post-login</login>
+              </authentication-actions>
+              <username xmlns="https://curity.se/ns/ext-conf/username">
+              </username>
+            </authenticator>
+          </authenticators>
           <authentication-actions>
+            <authentication-action>
+              <id>auto-create-account</id>
+              <auto-create-account xmlns="https://curity.se/ns/ext-conf/auto-create-account">
+                <account-manager>
+                  <id>default-account-manager</id>
+                </account-manager>
+                <create-active>true</create-active>
+              </auto-create-account>
+            </authentication-action>
+            <authentication-action>
+              <id>trigger-passkeys</id>
+              <multi-factor-condition xmlns="https://curity.se/ns/ext-conf/multi-factor-condition">
+                <disable-second-factor-subject-check>false</disable-second-factor-subject-check>
+                <always>
+                  <second-factor>
+                    <id>passkeys</id>
+                  </second-factor>
+                </always>
+              </multi-factor-condition>
+            </authentication-action>
             <authentication-action>
               <id>post-login</id>
               <script-transformer xmlns="https://curity.se/ns/ext-conf/script-transformer">
@@ -108,6 +150,7 @@
                 <audience>console-client</audience>
                 <audience>https://agent.demo.example</audience>
                 <user-authentication>
+                  <allowed-authenticators>username</allowed-authenticators>
                 </user-authentication>
                 <capabilities>
                   <code>
@@ -279,6 +322,15 @@
   </facilities>
   <processing xmlns="https://curity.se/ns/conf/base">
     <license-key>#{LICENSE_KEY}</license-key>
+    <account-managers>
+      <account-manager>
+        <id>default-account-manager</id>
+        <enable-registration>
+          <account-verification-method>no-verification</account-verification-method>
+        </enable-registration>
+        <account-data-source>default-datasource</account-data-source>
+      </account-manager>
+    </account-managers>
   </processing>
   <nacm xmlns="urn:ietf:params:xml:ns:yang:ietf-netconf-acm">
     <write-default>permit</write-default>

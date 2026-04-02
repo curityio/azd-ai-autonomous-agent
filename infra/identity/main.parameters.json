@@ -41,12 +41,6 @@
     "dbinitImageName": {
       "value": "${DBINIT_IMAGE_NAME}"
     },
-    "entraClientId": {
-      "value": "${ENTRA_CLIENT_ID}"
-    },
-    "entraOidcMetadataUrl": {
-      "value": "${ENTRA_OIDC_METADATA_URL}"
-    },
     "sqlAdminPassword": {
       "reference": {
         "keyVault": {
@@ -85,14 +79,6 @@
           "id": "/subscriptions/${AZURE_SUBSCRIPTION_ID}/resourceGroups/${AZURE_RESOURCE_GROUP}/providers/Microsoft.KeyVault/vaults/${KEY_VAULT_NAME}"
         },
         "secretName": "AGENT-TOKEN-EXCHANGE-SECRET"
-      }
-    },
-    "entraClientSecret": {
-      "reference": {
-        "keyVault": {
-          "id": "/subscriptions/${AZURE_SUBSCRIPTION_ID}/resourceGroups/${AZURE_RESOURCE_GROUP}/providers/Microsoft.KeyVault/vaults/${KEY_VAULT_NAME}"
-        },
-        "secretName": "ENTRA-CLIENT-SECRET"
       }
     }
   }

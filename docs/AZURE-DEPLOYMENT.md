@@ -124,12 +124,6 @@ Typically though, you need to understand endpoints, configuration and know how t
   - internal ports exposed: **6790**, **4465**, **4466**
   - scales **1..5** replicas
 
-- **Entra ID Client Registration** which sets the following properties in the Curity configuration:
-
-  - `ENTRA_CLIENT_ID`
-  - `ENTRA_CLIENT_SECRET`
-  - `ENTRA_OIDC_METADATA_URL`
-
 ## Applications
 
 - **Container App: Autonomous Agent**

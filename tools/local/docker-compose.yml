@@ -10,6 +10,7 @@ services:
       - 8443:8443
     volumes:
       - ../idsvr/cdb:/opt/idsvr/var/cdb
+      - ../idsvr/authenticators.anonymous-1.1.0.jar:/opt/idsvr/usr/share/plugins/authenticators.anonymous-1.1.0.jar
     environment:
       ADMIN: 'true'
       ADMIN_PASSWORD: '${ADMIN_PASSWORD}'

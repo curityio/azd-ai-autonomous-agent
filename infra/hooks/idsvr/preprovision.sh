@@ -81,9 +81,9 @@ if [ -z "${IDSVR_IMAGE_NAME:-}" ]; then
   cd ..
 fi
 
-# ---------------------------
-# Generate a cluster.xml file
-# ---------------------------
+# --------------------------------------------------------------------------------
+# Generate a cluster.xml file with a key that secures inter-workload communication
+# --------------------------------------------------------------------------------
 echo 'Generating cluster.xml with keystore using Docker...'
 
 ADMIN_WORKLOAD_NAME="idsvr-admin-${AZURE_ENV_NAME}"
@@ -96,90 +96,3 @@ if [ $? -ne 0 ] || [ -z "$CLUSTER_XML" ]; then
 fi
 
 echo "$CLUSTER_XML" > cluster.xml
-
-#
-# By default, the GitHub workflow's managed identity does not have permissions to edit Entra ID.
-# To activate the below code for a GitHub workflow, you would need to run the below script first.
-# - ./tools/utils/grant-workflow-entra-permissions.sh
-#
-if [ ! -z "${GITHUB_ACTION:-}" ]; then
-  exit 0
-fi
-
-# --------------------------------------------------------------------------
-# Create an Entra ID App Registration for OpenID Connect user authentication
-# --------------------------------------------------------------------------
-
-# Get the tenant ID for the OIDC metadata URL configured in the Curity Identity Server
-TENANT_ID="${AZURE_TENANT_ID:-}"
-if [ -z "$TENANT_ID" ]; then
-  TENANT_ID="$(az account show --query tenantId -o tsv 2>/dev/null || true)"
-fi
-if [ -z "$TENANT_ID" ]; then
-  echo 'Could not find the Entra ID tenant ID'
-  exit 1
-fi
-
-# Lookup or create the app
-ENTRA_APP_DISPLAY_NAME="curity-idsvr-${AZURE_ENV_NAME}"
-IDSVR_RUNTIME_URL="https://idsvr-runtime-${AZURE_ENV_NAME}.${EXTERNAL_DOMAIN_NAME}"
-ENTRA_CLIENT_ID="$(az ad app list --display-name "$ENTRA_APP_DISPLAY_NAME" --query "[0].appId" -o tsv 2>/dev/null || true)"
-if [ -z "$ENTRA_CLIENT_ID" ]; then
-
-  # Create the registration
-  echo "Creating Entra app registration: $ENTRA_APP_DISPLAY_NAME"
-  ENTRA_CLIENT_ID="$(az ad app create \
-    --display-name "$ENTRA_APP_DISPLAY_NAME" \
-    --sign-in-audience AzureADMyOrg \
-    --web-redirect-uris "${IDSVR_RUNTIME_URL}/authn/authentication/entra/callback" \
-    --query appId -o tsv)"
-  if [ $? -ne 0 ]; then
-    echo 'Unable to create Entra ID app registration'
-    exit 1
-  fi
-
-  # Ensure that the service principal exists, which can take a few seconds to propagate
-  if ! az ad sp show --id "$ENTRA_CLIENT_ID" -o none 2>/dev/null; then
-    echo "Creating Entra ID service principal ..."
-    az ad sp create --id "$ENTRA_CLIENT_ID" -o none 2>/dev/null || true
-    for i in 1 2 3 4 5; do
-      if az ad sp show --id "$ENTRA_CLIENT_ID" -o none 2>/dev/null; then
-        break
-      fi
-      sleep 2
-    done
-  fi
-
-  # Generate the Entra ID client secret
-  SECRET_KEY='ENTRA-CLIENT-SECRET'
-  echo "Creating Entra ID client secret: $SECRET_KEY ..."
-  ENTRA_CLIENT_SECRET="$(az ad app credential reset \
-    --id "$ENTRA_CLIENT_ID" \
-    --append \
-    --display-name "azd-${AZURE_ENV_NAME}" \
-    --years 1 \
-    --query password -o tsv)"
-  if [ $? -ne 0 ]; then
-    echo 'Unable to reset the client credential for the Entra ID app registration'
-    exit 1
-  fi
-  
-  # Store the secret in the key vault and add a reference to the local .env file
-  echo "Creating Azure key vault secret: $SECRET_KEY ..."
-  az keyvault secret set --vault-name "$KEY_VAULT_NAME" --name "$SECRET_KEY" --value "$ENTRA_CLIENT_SECRET" 1>/dev/null
-  if [ $? -ne 0 ]; then
-    exit 1
-  fi
-  SECRET_REF="akvs://${AZURE_SUBSCRIPTION_ID}/${KEY_VAULT_NAME}/${SECRET_KEY}"
-  echo "ENTRA_CLIENT_SECRET=\"$SECRET_REF\"" >> ../../.azure/${AZURE_ENV_NAME}/.env
-fi
-
-# Persist variables to azd env so that the provisioning can use them
-ENTRA_OIDC_METADATA_URL="https://login.microsoftonline.com/${TENANT_ID}/v2.0/.well-known/openid-configuration"
-azd env set ENTRA_CLIENT_ID "$ENTRA_CLIENT_ID" >/dev/null
-azd env set ENTRA_OIDC_METADATA_URL "$ENTRA_OIDC_METADATA_URL" >/dev/null
-
-# Indicate success
-echo "✓ Entra ID app registration is ready"
-echo "  ENTRA_CLIENT_ID: $ENTRA_CLIENT_ID"
-echo "  ENTRA_OIDC_METADATA_URL: $ENTRA_OIDC_METADATA_URL"
