@@ -332,6 +332,7 @@
         <enable-registration>
           <account-verification-method>no-verification</account-verification-method>
         </enable-registration>
+        <username-is-email>true</username-is-email>
         <account-data-source>default-datasource</account-data-source>
       </account-manager>
     </account-managers>

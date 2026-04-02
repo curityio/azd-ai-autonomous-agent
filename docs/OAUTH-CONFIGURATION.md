@@ -35,41 +35,16 @@ The following components use the OAuth client settings to get access tokens:
 
 The example deployment uses [Passkeys](PASSKEYS.md) as the default authentication method.  
 You can change that as required, for example to use Entra ID for user account storage and user logins.  
-
-```xml
-<authenticator>
-  <id>entra</id>
-  <authentication-actions>
-    <login>post-login</login>
-  </authentication-actions>
-  <oidc xmlns="https://curity.se/ns/conf/authenticators/oidc">
-    <configuration-url>#{ENTRA_OIDC_METADATA_URL}</configuration-url>
-    <client-id>#{ENTRA_CLIENT_ID}</client-id>
-    <client-secret>#{ENTRA_CLIENT_SECRET}</client-secret>
-    <fetch-userinfo>
-    </fetch-userinfo>
-    <prompt-login>if-requested-by-client</prompt-login>
-  </oidc>
-</authenticator>
-```
-
-In Entra ID you would need to create an app registration for the Curity Identity Server.  
-The Entra ID client should use a redirect URI of `https://<domain-name>/authn/authentication/<authenticator name>/callback`.
-
-![Entra client](images/entra-client.png)
+To do so, follow the steps in the [Authenticate Using Microsoft Entra ID](https://curity.io/resources/learn/oicd-authenticator-azure/) tutorial.
 
 ## User Attributes
 
 In the example deployment, the Curity Identity Server uses user attributes for `region` and `customer_id`.  
-You might configure those values in Entra ID in the following attributes:
-
-![Entra user attributes](images/entra-user-attributes.png)
-
-Once authentication completes, the Curity Identity Server can use a Script Authentication Action to receive attributes:
+If those values originate from an external identity system, the Curity Identity Server uses an authentication action to receive them:
 
 ![Authentication action](images/authentication-action.png)
 
-The following JavaScript logic runs, to transform Entra ID attributes and save them to the authentication context:
+The deployment includes the following example JavaScript logic, transform external attributes and save them to the authentication context:
 
 ```javascript
 function result(context) {
@@ -87,17 +62,12 @@ function result(context) {
 ## Scopes and Claims
 
 Business scopes are defined in the Admin UI's token designer, with claim values evaluated at runtime.  
-For each claim, the `Authentication Context Claims Provider` provides the value.
+For each claim, you can resolve claim values in various ways, e.g.:
+
+- An `Script Claims Provider` to apply JavaScript logic to read the value from the user's account.
+- An `Authentication Context Claims Provider` to read the value from the authentication context.
 
 ![Scopes and claims](images/scopes-and-claims.png)
-
-You could use the token designer to resolve other claim values from Entra ID user attributes.  
-For example, the console client could receive name details in its ID tokens:
-
-- Create a `profile` scope that contains the `given_name` and `family_name` claims.
-- Add the `profile` scope to the console client.
-- Drag the `given_name` and `family_name` claims into the ID token pane.
-- Use the the claims provider to set name claim values from Entra ID user attributes.
 
 ## Token Exchange
 

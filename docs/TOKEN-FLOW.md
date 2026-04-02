@@ -84,9 +84,9 @@ The Azure LLM is able to operate on raw data in highly flexible ways, to provide
 
 ## Embedded Access Tokens
 
-After Entra ID user authentication, the Curity Identity Server receives a set of Entra ID tokens.  
-The Curity Identity Server's access token can include the Entra ID access token as a custom claim.  
-The autonomous agent could use the Entra ID access token to interact with Azure MCP servers.  
+If you use an external identity system like Entra ID, the Curity Identity Server receives a set of external tokens.  
+The Curity Identity Server's access token can include an external token as a custom claim.  
+For example, the autonomous agent could use the Entra ID access token to interact with Azure MCP servers.  
 
 ```json
 {

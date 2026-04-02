@@ -47,11 +47,7 @@ Run the console client to sign in and get an access token with which to call the
 ./src/ConsoleClient/run.sh
 ```
 
-The local computer deployment uses the simplest form of authenticator, where you only enter a username.  
-You can enter any value to quickly get an access token for the local computer environment.
-
-<img src="images/username-authenticator.png" alt="Username Authenticator" style="width:50%;" />
-
+The default deployment uses [passkeys authentication](docs/PASSKEYS.md), e.g. you can sign in with Windows Hello on that platform.  
 The minimal client then calls the autonomous agent with a natural language command and the access token.  
 Wait a few seconds and you will get a report that the Azure LLM produces.
 

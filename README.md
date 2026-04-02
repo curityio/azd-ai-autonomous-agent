@@ -91,7 +91,7 @@ The first time you run a deployment, a CLI uses the browser to sign you in at Cu
 The CLI then uses an access token to download a trial license for the Curity Identity Server.
 
 Then, run a console application that connects to the local backend.  
-The default deployment uses [passkeys authentication](docs/PASSKEYS.md), so you can sign in with Windows Hello on that platform.
+The default deployment uses [passkeys authentication](docs/PASSKEYS.md), e.g. you can sign in with Windows Hello on that platform.
 
 ```bash
 ./src/ConsoleClient/run.sh
@@ -203,8 +203,7 @@ Then re-run `azd pipeline config` and commit changes to trigger the teardown.
 ## Important Security Notice
 
 This template, the application code, and configuration, showcase an architecture to protect business data.  
-However, further security work should be done to harden security for production systems.  
-The [Security Document](SECURITY.md) summarizes the use of both managed identities and password credentials.
+However, the [Security Document](SECURITY.md) explains further steps to harden security for production systems.  
 
 ## Guidance
 
@@ -239,11 +238,6 @@ The deeper behaviors are a future-proof backend AI deployment with security cont
 - Delivers least-privilege access tokens to agents and other clients, to restrict levels of access.
 - Enables resource servers and gateways to use any dynamic token claims, for flexible access control.
 - Exchanges tokens so that agents can federate to complete complex tasks.
-
-### Entra ID
-
-A specialist token issuer can integrate with existing identity systems.  
-In the example deployment, Entra ID is used for all user account storage and user authentication.
 
 ### Learn More
 

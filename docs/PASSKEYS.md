@@ -23,7 +23,7 @@ You must repeat the user gesture on every login, e.g with Windows Hello, to send
 The example flow does the main password work but allows anyone to create an account and sign in, as a developer convenience.  
 To make the flow production-ready you would need to perform at least the following additional steps:
 
-- Require user authentication before creating a user account
+- Require user authentication before activating the user account
 - Require user authentication before creating a passkey
 
 Those steps would require you to make minor changes to the deployment to reference additional infrastructure.  
@@ -32,8 +32,9 @@ To use email authentication for the above actions you would perform the followin
 - [Integrate an SMTP Server](https://curity.io/docs/identity-server/facilities/email-providers/email-providers-smtp/)
 - [Create an Email Authenticator](https://curity.io/docs/identity-server/facilities/email-providers/email-providers-smtp/)
 
-You would then replace the `anonymous` registration authenticator in the passkeys configuration with an email authenticator:
+You would then implement the following steps in the Admin UI:
 
-![Passkeys with anonymous registration](images/passkeys-configuration.png)
+- Use the `Facilities` menu to configure the account manager to use email authentication to activate accounts.
+- Use the `Authentication Profile` to configure the passkeys authenticator to use an email registration authenticator.
 
 You can learn more about passkeys in [Curity articles](https://curity.io/resources/learn/what-are-passkeys/).
