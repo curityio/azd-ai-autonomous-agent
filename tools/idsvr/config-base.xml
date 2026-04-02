@@ -45,8 +45,12 @@
         <authentication-service xmlns="https://curity.se/ns/conf/profile/authentication">
           <authenticators>
             <authenticator>
+              <id>anonymous</id>
+              <anonymous xmlns="https://curity.se/ns/ext-conf/anonymous"/>
+            </authenticator>
+            <authenticator>
               <id>passkeys</id>
-              <required-authenticator-for-registration>username</required-authenticator-for-registration>
+              <required-authenticator-for-registration>anonymous</required-authenticator-for-registration>
               <passkeys xmlns="https://curity.se/ns/conf/authenticators/passkeys">
                 <enable-discoverable-credentials>true</enable-discoverable-credentials>
                 <account-manager>
