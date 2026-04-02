@@ -27,7 +27,7 @@ To make the flow production-ready you would need to perform at least the followi
 - Require user authentication before creating a passkey
 
 Those steps would require you to make minor changes to the deployment to reference additional infrastructure.  
-For example, to use email authentication you could perform the following steps in the [Admin UI](OAUTH-CONFIGURATION.md):
+To use email authentication for the above actions you would perform the following steps in the [Admin UI](OAUTH-CONFIGURATION.md):
 
 - [Integrate an SMTP Server](https://curity.io/docs/identity-server/facilities/email-providers/email-providers-smtp/)
 - [Create an Email Authenticator](https://curity.io/docs/identity-server/facilities/email-providers/email-providers-smtp/)
