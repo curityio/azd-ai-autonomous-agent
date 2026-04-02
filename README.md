@@ -108,7 +108,7 @@ You must prove your email address to create a passkey and will be prompted to pa
 The deployment includes the [maildev utility](https://github.com/maildev/maildev) as a convenient email inbox for testing.  
 You can get the one-time code from the test email inbox at `http://localhost:1080`.
 
-The operating system then prompts you to create a passkey and you must provide a user gesture to use secure storage.  
+The operating system prompts to create a passkey and you provide a user gesture to unlock secure storage.  
 For example, on the Microsoft platform you must use Windows Hello. 
 
 <img src="docs/images/windows-hello.png" alt="Windows Hello dialog" style="width:50%;" />
