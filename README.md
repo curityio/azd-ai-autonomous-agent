@@ -1,5 +1,8 @@
 # Secured Autonomous Agent
 
+[![Quality](https://img.shields.io/badge/quality-experiment-red)](https://curity.io/resources/code-examples/status/)
+[![Availability](https://img.shields.io/badge/availability-source-blue)](https://curity.io/resources/code-examples/status/)
+
 An azd template to showcase an enterprise AI security architecture with OAuth 2.0 token intelligence.  
 Agents can act autonomously, and resource servers enforce administrator controls and human approvals.
 
