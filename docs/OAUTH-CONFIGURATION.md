@@ -1,36 +1,7 @@
 # OAuth Configuration
 
-In this deployment, the Curity Identity Server does not store user accounts or authenticate users directly.   
-Instead, it acts only as a specialist token issuer and does not use account management features.
-
-## Entra ID User Accounts
-
-In the example deployment, Entra ID stores user accounts and authenticates users.  
-The Curity Identity Server receives claims containing user attributes, for `region` and `customer_id`.  
-You can configure these values in your preferred Entra ID attributes:
-
-![Entra user attributes](images/entra-user-attributes.png)
-
-## Entra ID Client
-
-The deployment creates an app registration (OAuth client).  
-Verify that the client has a client secret and a redirect URI that points to the Curity Identity Server.
-
-![Entra client](images/entra-client.png)
-
-You can define claims for the client that contain user attributes according to [Microsoft guides](https://learn.microsoft.com/en-us/entra/external-id/customers/how-to-add-attributes-to-token):
-
-![Entra claims](images/entra-claims.png)
-
-Update the manifest of the Entra ID client to include the following settings.   
-Entra ID then issues claims to ID tokens with the current user's attribute values.
-
-```json
-{
-  "acceptMappedClaims": true,
-  "requestedAccessTokenVersion": 2
-}
-```
+In this deployment, the Curity Identity Server's main role is a specialist token issuer.  
+The Curity Identity Server does not need to store user accounts or authenticate users directly.   
 
 ## Admin UI
 
@@ -45,6 +16,9 @@ Sign in with the following details:
 - User: `admin`
 - Password: The `ADMIN_PASSWORD` environment variable value
 
+If you run the local deployment, navigate to `http://localhost:6749/admin` instead.  
+You can find the generated `ADMIN_PASSWORD` in the `tools/local/load-secrets.sh` file.
+
 ## OAuth Clients
 
 In the Admin UI, view the OAuth clients:
@@ -57,20 +31,41 @@ The following components use the OAuth client settings to get access tokens:
 - The external gateway is a token exchange client
 - The autonomous agent is also a token exchange client
 
-## Authenticator
+## User Authentication
 
-In the Admin UI, Entra ID is registered as an OpenID Connect authenticator:
+The example deployment uses [Passkeys](PASSKEYS.md) as the default authentication method.  
+You can change that as required, for example to use Entra ID for user account storage and user logins.  
 
-![Entra authenticator](images/entra-authenticator.png)
+```xml
+<authenticator>
+  <id>entra</id>
+  <authentication-actions>
+    <login>post-login</login>
+  </authentication-actions>
+  <oidc xmlns="https://curity.se/ns/conf/authenticators/oidc">
+    <configuration-url>#{ENTRA_OIDC_METADATA_URL}</configuration-url>
+    <client-id>#{ENTRA_CLIENT_ID}</client-id>
+    <client-secret>#{ENTRA_CLIENT_SECRET}</client-secret>
+    <fetch-userinfo>
+    </fetch-userinfo>
+    <prompt-login>if-requested-by-client</prompt-login>
+  </oidc>
+</authenticator>
+```
 
-View the properties of the authenticator:
+In Entra ID you would need to create an app registration for the Curity Identity Server.  
+The Entra ID client should use a redirect URI of `https://<domain-name>/authn/authentication/<authenticator name>/callback`.
 
-- The `scope` setting may affect attributes that Entra ID returns to the Curity Identity Server.
-- If the console client sends the `prompt=login` OpenID Connect parameter, that triggers a new Entra ID login.
+![Entra client](images/entra-client.png)
 
-## Authentication Action
+## User Attributes
 
-After authentication completes, the Curity Identity Server runs custom logic to manipulate Entra ID attributes:
+In the example deployment, the Curity Identity Server uses user attributes for `region` and `customer_id`.  
+You might configure those values in Entra ID in the following attributes:
+
+![Entra user attributes](images/entra-user-attributes.png)
+
+Once authentication completes, the Curity Identity Server can use a Script Authentication Action to receive attributes:
 
 ![Authentication action](images/authentication-action.png)
 

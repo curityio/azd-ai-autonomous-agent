@@ -38,6 +38,9 @@ The resources support multiple deployment scenarios:
 Enterprises use productive programming languages to build applications that use Microsoft AI technology.  
 Resource servers authorize using access token attributes and can apply dynamic runtime access controls.
 
+You can use an existing identity system, like Entra ID, for user account storage and user authentication.  
+After user logins, the Curity Identity Server issues tokens with which you can secure AI agent access.
+
 ![Initial Technical Flow](docs/images/initial-technical-flow.png)
 
 ## Getting Started
@@ -88,7 +91,7 @@ The first time you run a deployment, a CLI uses the browser to sign you in at Cu
 The CLI then uses an access token to download a trial license for the Curity Identity Server.
 
 Then, run a console application that connects to the local backend.  
-When prompted with a login form, enter any username to simulate real user authentication:
+The default deployment uses [passkeys authentication](docs/PASSKEYS.md), so you can sign in with Windows Hello on that platform.
 
 ```bash
 ./src/ConsoleClient/run.sh

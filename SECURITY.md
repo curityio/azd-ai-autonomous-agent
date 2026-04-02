@@ -18,6 +18,12 @@ OAuth 2.0 provides future-proof strong security for enterprise data, APIs, appli
 - [Token Flow](docs/TOKEN-FLOW.md)
 - [Advanced Use Cases](docs/ADVANCED-USE-CASES.md)
 
+## User Authentication
+
+To support all aspects of user authentication, you typically need infrastructure such as Email providers and SMTP providers.  
+The example deployment allows convenient passkeys logins that need further hardening for a real deployment.  
+See the [Passkeys overview](docs/PASSKEYS.md) to understand passkeys logins and how to harden them.
+
 ## Managed Identities
 
 The deployment uses the following managed identities:
@@ -25,9 +31,9 @@ The deployment uses the following managed identities:
 - The GitHub workflow uses a managed identity to run Azure deployments
 - The Autonomous Agent uses a managed identity to connect to Azure AI Foundry
 
-## Further Security Hardening
+## Connection Hardening
 
-For developer convenience, and to reduce scope / complexity, some connections do not use the strongest security.  
+For developer convenience, and to reduce scope / complexity, some backend connections do not use the strongest security.  
 For production deployments, first tighten firewall rules:  
 
 - Azure SQL connections.
