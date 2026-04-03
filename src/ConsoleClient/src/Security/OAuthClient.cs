@@ -28,7 +28,7 @@ namespace IO.Curity.ConsoleClient.Security
 
             if (serverOAuthScheme != null)
             {
-                var serverCodeFlowSettings = (serverOAuthScheme as OAuth2SecurityScheme)?.Flows?.AuthorizationCode;
+                var serverCodeFlowSettings = serverOAuthScheme?.OAuth2SecurityScheme?.Flows?.AuthorizationCode;
                 if (serverCodeFlowSettings != null)
                 {
                     this.serverCodeFlowSettings = serverCodeFlowSettings;

@@ -1,13 +1,13 @@
 namespace IO.Curity.AutonomousAgent
 {
     using System.Net;
-    using A2A;
     using A2A.AspNetCore;
     using IO.Curity.AutonomousAgent.Security;
     using Microsoft.AspNetCore.Authentication.JwtBearer;
     using Microsoft.AspNetCore.Authorization;
     using Microsoft.AspNetCore.Builder;
     using Microsoft.AspNetCore.Hosting;
+    using Microsoft.AspNetCore.Mvc.Authorization;
     using Microsoft.IdentityModel.Logging;
     using Microsoft.IdentityModel.Tokens;
 
@@ -53,8 +53,11 @@ namespace IO.Curity.AutonomousAgent
             
             builder.Services.AddAuthorization(options =>
             {
-                // All endpoints require JWTs except the agent card endpoint which uses [AllowAnonymous]
-                options.FallbackPolicy = new AuthorizationPolicyBuilder().RequireAuthenticatedUser().Build();
+                // All endpoints require JWTs except the agent card endpoint
+                options.FallbackPolicy = new AuthorizationPolicyBuilder(JwtBearerDefaults.AuthenticationScheme)
+                    .RequireAuthenticatedUser()
+                    .AddRequirements(new AllowAnonymousAgentCardRequirement())
+                    .Build();
 
                 // Authorized endpoints check for the agent's required scope
                 options.AddPolicy("scope", policy =>
@@ -67,9 +70,11 @@ namespace IO.Curity.AutonomousAgent
             });
 
             // Expose endpoints as an A2A server over HTTP
-            builder.Services.AddControllers();
             builder.Services.AddHttpContextAccessor();
             builder.Services.AddDistributedMemoryCache();
+
+            // Add the agent
+            builder.Services.AddA2AAgent<AutonomousAgent>(AutonomousAgent.GetAgentCard(configuration));
 
             // Define injectable objects
             builder.Services.AddSingleton(configuration);
@@ -77,20 +82,18 @@ namespace IO.Curity.AutonomousAgent
             builder.Services.AddSingleton<OAuthHttpClientHandler>();
             builder.Services.AddSingleton<TokenExchangeClient>();
             builder.Services.AddSingleton<TokenCache>();
-            
+
             var app = builder.Build();
             app.UseAuthentication();
             app.UseAuthorization();
-            app.MapControllers();
 
             // Create and run the A2A server as a web API
             var loggerFactory = app.Services.GetRequiredService<ILoggerFactory>();
             var oauthHttpClientHandler = app.Services.GetRequiredService<OAuthHttpClientHandler>();
             var agent = new AutonomousAgent(configuration, oauthHttpClientHandler, loggerFactory);
-            var taskManager = new TaskManager();
-            agent.Initialize(taskManager);
             
-            app.MapA2A(taskManager, path: "/").RequireAuthorization("scope");
+            // Map A2A paths and apply a policy to check for the required scope
+            app.MapA2A(path: "/").RequireAuthorization("scope");
             app.Run();
         }
     }

@@ -36,19 +36,19 @@ namespace IO.Curity.ConsoleClient
          */
         public async Task<string> SendNaturalLanguageCommandAsync(string command)
         {
-            var request = new MessageSendParams
+            var request = new SendMessageRequest
             {
-                Message = new AgentMessage
+                Message = new Message
                 {
-                    Role = MessageRole.User,
-                    Parts = [new TextPart { Text = command }]
+                    Role = Role.User,
+                    Parts = [Part.FromText(command)]
                 }
             };
             
             try
             {
                 var response = await this.a2aClient.SendMessageAsync(request);
-                return ((response as AgentMessage)?.Parts?[0] as TextPart)?.Text ?? string.Empty;
+                return response?.Message?.Parts?[0]?.Text ?? string.Empty;
             }
             catch (A2AException e)
             {

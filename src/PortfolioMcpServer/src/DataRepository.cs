@@ -5,58 +5,66 @@ namespace IO.Curity.PortfolioMcpServer
     using IO.Curity.PortfolioMcpServer.Entities;
 
     /*
-     * The example MCP server uses hard coded data that contains identity attributes
+     * Simulate a real MCP server that operates on stock transactions
      */
     public sealed class DataRepository
     {
+        static string usa = "USA";
+        static string europe = "Europe";
+        static string asia = "Asia";
+        
         /*
-         * Return mock information about stocks, where different stocks are traded per region
-         * Each region has 2 stocks in the mock data
+         * Return some hard coded stocks, where stocks are traded in a particular region
          */
         public Stock[] GetAvailableStocks(string region)
         {
+            if (region != usa && region != europe && region != asia)
+            {
+                return [];
+            }
+
             Stock[] allStocks =
             [
                 new()
                 {
                     Id = "COM1",
                     Name = "Company 1",
-                    Region = "USA",
+                    Region = usa,
                     CurrentPriceUSD = 386.54,
                 },
                 new()
                 {
                     Id = "COM2",
                     Name = "Company 2",
-                    Region = "Asia",
+                    Region = asia,
                     CurrentPriceUSD = 250.62,
                 },
                 new()
                 {
                     Id = "COM3",
                     Name = "Company 3",
-                    Region = "Europe",
+                    Region = europe,
                     CurrentPriceUSD = 21.07,
                 },
                 new()
                 {
                     Id = "COM4",
                     Name = "Company 4",
-                    Region = "USA",
+                    Region = usa,
                     CurrentPriceUSD = 180.75,
                 },
                 new()
                 {
                     Id = "COM5",
                     Name = "Company 5",
-                    Region = "Europe",
+                    Region = europe,
                     CurrentPriceUSD = 87.50,
                 },
                 new()
                 {
                     Id = "COM6",
                     Name = "Company 6",
-                    Region = "Asia",
+                    Region = asia,
                     CurrentPriceUSD = 109.88,
                 },
             ];
@@ -65,16 +73,23 @@ namespace IO.Curity.PortfolioMcpServer
         }
 
         /*
-         * Return the current value of the portfolio for the customer ID in the access token
+         * A real system would retrieve transactions from a database that match the customer ID and region in the access token
+         * This method just generates some demo data to show the effect of an LLM operating on raw data
          */
         public Portfolio GetPortfolio(string customerId, string region)
         {
-            // Get stocks for the region
             var stocks = GetAvailableStocks(region);
+            if (stocks.Length < 2)
+            {
+                return new Portfolio()
+                {
+                    Transactions = [],
+                };
+            }
+                
             var stock1 = stocks.First(s => s.Region == region);
             var stock2 = stocks.Last(s => s.Region == region);
 
-            // Make up some transactions for the customer
             Transaction[] customerTransactions =
             [
                 new()

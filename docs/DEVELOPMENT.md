@@ -10,29 +10,9 @@ An organization would use .NET to develop high-level application components:
 - The [Portfolio MCP Server](../src/PortfolioMcpServer/README.md) is a resource server that the LLM instructs the agent to call.
 - The [Internet Application](../src/ConsoleClient/README.md) is any app that runs an A2A client and sends access tokens.
 
-## Development Prerequisites
+## Docker Components
 
-On Windows, use a Linux bash shell like Git bash.  
-Follow the [Azure AI Setup](AZURE-AI-SETUP.md) to get connected to an Azure LLM.  
-In Visual Studio Code, add the following C# extensions.  
-
-<img src="images/dotnet-extensions.png" alt=".NET extensions" style="width:50%;" />
-
-## Run a Local End-to-End Flow
-
-Log in to the Azure CLI so that the local agent can authenticate to Azure with a token credential:
-
-```bash
-az login
-```
-
-Run local backend components for the Curity Identity Server, API gateways, the autonomous agent and the MCP server:
-
-```bash
-./tools/local/backend.sh
-```
-
-After deployment, backend components run at the following URLs:
+After deployment, Docker provides the following backend components:
 
 - Autonomous Agent (A2A Server): `http://localhost:3000`
 - Portfolio MCP Server: `http://localhost:3001`
@@ -52,7 +32,7 @@ You can enter any value to quickly get an access token for the local computer en
 
 <img src="images/username-authenticator.png" alt="Username Authenticator" style="width:50%;" />
 
-The minimal client then calls the autonomous agent with a natural language command and the access token.  
+The minimal client then calls the autonomous agent with a naural language command and the access token.  
 Wait a few seconds and you will get a report that the Azure LLM produces.
 
 ## Use Test-Driven Development
