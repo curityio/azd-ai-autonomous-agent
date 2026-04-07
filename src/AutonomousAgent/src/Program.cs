@@ -54,7 +54,7 @@ namespace IO.Curity.AutonomousAgent
             builder.Services.AddAuthorization(options =>
             {
                 // All endpoints require JWTs except the agent card endpoint
-                options.FallbackPolicy = new AuthorizationPolicyBuilder(JwtBearerDefaults.AuthenticationScheme)
+                options.FallbackPolicy = new AuthorizationPolicyBuilder()
                     .RequireAuthenticatedUser()
                     .AddRequirements(new AllowAnonymousAgentCardRequirement())
                     .Build();

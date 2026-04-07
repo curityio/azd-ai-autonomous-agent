@@ -89,7 +89,7 @@ namespace IO.Curity.AutonomousAgent
             this.logger.LogDebug($">>> LLM request: {command}");
 
             var agent = await this.agentFactory.Value;
-            var response = await agent.RunAsync(context.UserText ?? string.Empty);
+            var response = await agent.RunAsync(command);
             this.logger.LogDebug($">>> LLM response: {response.Text}");
 
             var responder = new MessageResponder(eventQueue, context.ContextId);
