@@ -55,7 +55,7 @@ Check the new project into source control, so that you can configure a GitHub wo
 
 ```bash
 mkdir my-secure-ai-integration && cd my-secure-ai-integration
-azd init --template https://github.com/curityio/azd-ai-autonomous-agent
+azd init --template curityio/azd-ai-autonomous-agent
 azd env set AZURE_LOCATION='uksouth'
 ```
 
