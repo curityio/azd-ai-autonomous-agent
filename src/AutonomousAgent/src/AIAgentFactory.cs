@@ -29,16 +29,14 @@ namespace IO.Curity.AutonomousAgent
          */
         public async Task<AIAgent> CreateAgentAsync()
         {
-#pragma warning disable CA2252
             var aiProjectClient = new AIProjectClient(new Uri(this.configuration.AzureFoundryProjectUrl), this.GetManagedCredential());
-#pragma warning restore CA2252
-
-            var mcpTools = await this.GetMcpToolsAsync();
-            return await aiProjectClient.CreateAIAgentAsync(
-                name: "autonomous-agent",
+            var tools = await this.GetMcpToolsAsync();
+            
+            return aiProjectClient.AsAIAgent(
                 model: this.configuration.AzureAIModelName,
+                name: "autonomous-agent",
                 instructions: "You are a backend autonomous agent",
-                tools: mcpTools.ToArray()
+                tools: tools.ToArray()
             );
         }
 
@@ -53,7 +51,9 @@ namespace IO.Curity.AutonomousAgent
             }
             else
             {
-                return new ManagedIdentityCredential(configuration.ManagedIdentityClientId);
+                return new ManagedIdentityCredential(
+                    ManagedIdentityId.FromUserAssignedClientId(configuration.ManagedIdentityClientId)
+                );
             }
         }
 

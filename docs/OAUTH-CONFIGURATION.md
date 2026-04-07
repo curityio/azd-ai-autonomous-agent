@@ -45,6 +45,9 @@ Sign in with the following details:
 - User: `admin`
 - Password: The `ADMIN_PASSWORD` environment variable value
 
+For the local deployment, use a URL of `http://localhost:6749/admin`.  
+Then use the password from the `tools/local/load-secrets.sh` file.
+
 ## OAuth Clients
 
 In the Admin UI, view the OAuth clients:

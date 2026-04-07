@@ -8,7 +8,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="A2A" Version="0.3.3-preview" />
+    <PackageReference Include="A2A" Version="1.0.0-preview" />
   </ItemGroup>
 
 </Project>

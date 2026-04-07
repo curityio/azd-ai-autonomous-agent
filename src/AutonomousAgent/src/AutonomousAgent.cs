@@ -4,8 +4,6 @@ namespace IO.Curity.AutonomousAgent
     using A2A;
     using IO.Curity.AutonomousAgent.Security;
     using Microsoft.Agents.AI;
-    using Microsoft.AspNetCore.Authorization;
-    using Microsoft.AspNetCore.Mvc;
     using Microsoft.Extensions.Logging;
 
     /*
@@ -13,7 +11,7 @@ namespace IO.Curity.AutonomousAgent
      * The autonomous agent calls the LLM which can select outbound MCP or A2A requests that require security
      * - https://github.com/a2aproject/a2a-dotnet
      */
-    public class AutonomousAgent : Controller
+    public class AutonomousAgent : IAgentHandler
     {
         private readonly Configuration configuration;
         private readonly ILogger<AutonomousAgent> logger;
@@ -35,31 +33,12 @@ namespace IO.Curity.AutonomousAgent
         }
 
         /*
-         * Wire up A2A operations
+         * Return the agent card information to A2A clients
          */
-        public void Initialize(ITaskManager taskManager)
-        {
-            taskManager.OnAgentCardQuery = this.GetAgentCardAsync;
-            taskManager.OnMessageReceived = this.ReceiveNaturalLanguageCommandAsync;
-        }
+        public static AgentCard GetAgentCard(Configuration configuration) {
 
-        /*
-         * Expose public agent card metadata 
-         */
-        [AllowAnonymous]
-        [HttpGet(".well-known/agent-card.json")]
-        public async Task<AgentCard> GetAgentCardWellKnownAsync()
-        {
-            var externalUrl = configuration.ExternalBaseUrl;
-            return await this.GetAgentCardAsync(externalUrl, CancellationToken.None);
-        }
-
-        /*
-         * Return an agent card to describe the A2A service
-         */
-        private async Task<AgentCard> GetAgentCardAsync(string agentUrl, CancellationToken cancellationToken)
-        {
-            var skill = new AgentSkill()
+            //".well-known/agent-card.json", 
+            var skill = new A2A.AgentSkill
             {
                 Id = "stocks",
                 Name = "Stock portfolio operations",
@@ -67,33 +46,36 @@ namespace IO.Curity.AutonomousAgent
                 Tags = ["stocks", "portfolio"],
             };
 
-            var scopes = new Dictionary<string, string>
+            var oauth2Scheme = new SecurityScheme
             {
-                [configuration.Scope] = "Read only access to a user portfolio",
-            };
-
-            var flows = new OAuthFlows()
-            {
-                AuthorizationCode = new AuthorizationCodeOAuthFlow
-                (
-                    new Uri(this.configuration.AuthorizationUrl),
-                    new Uri(this.configuration.TokenUrl),
-                    scopes
-                ),
+                OAuth2SecurityScheme = new OAuth2SecurityScheme
+                {
+                    Flows = new OAuthFlows
+                    {
+                        AuthorizationCode = new AuthorizationCodeOAuthFlow
+                        {
+                            AuthorizationUrl = configuration.AuthorizationUrl,
+                            TokenUrl = configuration.TokenUrl,
+                            Scopes = new Dictionary<string, string>
+                            {
+                                [configuration.Scope] = "Read only access to a user portfolio",
+                            },
+                        }
+                    }
+                }
             };
 
             return new AgentCard
             {
                 Name = "Autonomous Agent",
                 Description = "Uses backend security to process natural language commands from an external agent",
-                Url = agentUrl,
                 Version = "1.0.0",
                 DefaultInputModes = ["text"],
                 DefaultOutputModes = ["text"],
                 Skills = [skill],
                 SecuritySchemes = new Dictionary<string, SecurityScheme>
                 {
-                    ["oauth2"] = new OAuth2SecurityScheme(flows),
+                    ["oauth2"] = oauth2Scheme,
                 },
             };
         }
@@ -101,24 +83,17 @@ namespace IO.Curity.AutonomousAgent
         /*
          * Process an A2A request and return an A2A response 
          */
-        private async Task<A2AResponse> ReceiveNaturalLanguageCommandAsync(MessageSendParams messageSendParams, CancellationToken cancellationToken)
+        public async Task ExecuteAsync(RequestContext context, AgentEventQueue eventQueue, CancellationToken cancellationToken)
         {
-            var command = messageSendParams.Message.Parts.OfType<TextPart>().First().Text;
-
+            var command = context.UserText ?? string.Empty;
             this.logger.LogDebug($">>> LLM request: {command}");
+
             var agent = await this.agentFactory.Value;
-            var response = await agent.RunAsync(command);
+            var response = await agent.RunAsync(context.UserText ?? string.Empty);
             this.logger.LogDebug($">>> LLM response: {response.Text}");
 
-            var message = new AgentMessage()
-            {
-                Role = MessageRole.Agent,
-                MessageId = Guid.NewGuid().ToString(),
-                ContextId = messageSendParams.Message.ContextId,
-                Parts = [new TextPart { Text = response.Text }]
-            };
-
-            return message;
+            var responder = new MessageResponder(eventQueue, context.ContextId);
+            await responder.ReplyAsync($"Echo: {response.Text}", cancellationToken);
         }
     }
 }
