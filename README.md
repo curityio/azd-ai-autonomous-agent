@@ -198,7 +198,6 @@ Then re-run `azd pipeline config` and commit changes to trigger the teardown.
 
 - The [Azure Deployment](docs/AZURE-DEPLOYMENT.md) document explains more about the deployed resources.
 - The [Azure Endpoints](docs/AZURE-ENDPOINTS.md) document explains more about how to locate and test connections.
-- The [azd Open Issues](OPEN-ISSUES.md) document explains more about troubleshooting azd technical issues.
 
 ## Important Security Notice
 
