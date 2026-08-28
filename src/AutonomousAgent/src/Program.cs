@@ -7,7 +7,6 @@ namespace IO.Curity.AutonomousAgent
     using Microsoft.AspNetCore.Authorization;
     using Microsoft.AspNetCore.Builder;
     using Microsoft.AspNetCore.Hosting;
-    using Microsoft.AspNetCore.Mvc.Authorization;
     using Microsoft.IdentityModel.Logging;
     using Microsoft.IdentityModel.Tokens;
 
@@ -86,14 +85,10 @@ namespace IO.Curity.AutonomousAgent
             var app = builder.Build();
             app.UseAuthentication();
             app.UseAuthorization();
-
-            // Create and run the A2A server as a web API
-            var loggerFactory = app.Services.GetRequiredService<ILoggerFactory>();
-            var oauthHttpClientHandler = app.Services.GetRequiredService<OAuthHttpClientHandler>();
-            var agent = new AutonomousAgent(configuration, oauthHttpClientHandler, loggerFactory);
             
             // Map A2A paths and apply a policy to check for the required scope
             app.MapA2A(path: "/").RequireAuthorization("scope");
+            app.MapWellKnownAgentCard(AutonomousAgent.GetAgentCard(configuration));
             app.Run();
         }
     }
