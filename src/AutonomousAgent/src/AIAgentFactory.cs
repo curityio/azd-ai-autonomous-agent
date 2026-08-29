@@ -31,7 +31,7 @@ namespace IO.Curity.AutonomousAgent
         {
             var aiProjectClient = new AIProjectClient(new Uri(this.configuration.AzureFoundryProjectUrl), this.GetManagedCredential());
             var tools = await this.GetMcpToolsAsync();
-            
+
             return aiProjectClient.AsAIAgent(
                 model: this.configuration.AzureAIModelName,
                 name: "autonomous-agent",
