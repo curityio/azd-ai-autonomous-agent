@@ -2,12 +2,12 @@ namespace IO.Curity.AutonomousAgent
 {
     using System.Threading.Tasks;
     using A2A;
-    using IO.Curity.AutonomousAgent.Security;
     using Microsoft.Agents.AI;
     using Microsoft.Extensions.Logging;
+    using IO.Curity.AutonomousAgent.Utilities;
 
     /*
-     * The autonomous agent receives a natural language request from an external agent like Claude
+     * The autonomous agent receives a natural language request from an external app or agent
      * The autonomous agent calls the LLM which can select outbound MCP or A2A requests that require security
      * - https://github.com/a2aproject/a2a-dotnet
      */
@@ -21,14 +21,18 @@ namespace IO.Curity.AutonomousAgent
          * Create the agent in a thread safe manner on a background thread, during the first user request
          * The agent can then get tools from the MCP server with the user's access token
          */
-        public AutonomousAgent(Configuration configuration, OAuthHttpClientHandler oauthHttpClientHandler, ILoggerFactory loggerFactory)
+        public AutonomousAgent(
+            Configuration configuration,
+            LlmHttpClientPolicy llmHttpClientPolicy,
+            McpHttpClientHandler mcpHttpClientHandler,
+            ILoggerFactory loggerFactory)
         {
             this.configuration = configuration;
             this.logger = new Logger<AutonomousAgent>(loggerFactory);
 
             this.agentFactory = new Lazy<Task<AIAgent>>(() => Task.Run(() =>
             {
-                return new AIAgentFactory(this.configuration, oauthHttpClientHandler).CreateAgentAsync();
+                return new AIAgentFactory(this.configuration, llmHttpClientPolicy, mcpHttpClientHandler).CreateAgentAsync();
             }));
         }
 
@@ -37,7 +41,6 @@ namespace IO.Curity.AutonomousAgent
          */
         public static AgentCard GetAgentCard(Configuration configuration) {
 
-            //".well-known/agent-card.json", 
             var skill = new A2A.AgentSkill
             {
                 Id = "stocks",

@@ -73,7 +73,7 @@ Typically though, you need to understand endpoints, configuration and know how t
 
 - **Container Registry** + **Deployment Identity** with permissions to pull custom Docker containers
 
-- **Azure AI Foundry Resource**, including a foundry project and a low cost `gpt-4.1-mini` model
+- **Azure AI Foundry Resource**, including a foundry project and a low cost `gpt-5.4-nano` model
 
 - **Key Vault**, to store secrets during local deployments to Azure and to enable secrets to be copied to a GitHub workflow
 

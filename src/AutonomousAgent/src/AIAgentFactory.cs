@@ -1,14 +1,14 @@
 namespace IO.Curity.AutonomousAgent
 {
     using System;
+    using System.ClientModel.Primitives;
     using System.Net.Http;
     using Azure.AI.Projects;
-    using Azure.Core;
     using Azure.Identity;
-    using IO.Curity.AutonomousAgent.Security;
     using Microsoft.Agents.AI;
     using Microsoft.Extensions.AI;
     using ModelContextProtocol.Client;
+    using IO.Curity.AutonomousAgent.Utilities;
     
     /*
      * The agent factory creates an autonomous agent as a thread safe singleton
@@ -16,20 +16,30 @@ namespace IO.Curity.AutonomousAgent
     public class AIAgentFactory
     {
         private readonly Configuration configuration;
-        private readonly OAuthHttpClientHandler oauthHttpClientHandler;
+        private readonly LlmHttpClientPolicy llmHttpClientPolicy;
+        private readonly McpHttpClientHandler mcpHttpClientHandler;
 
-        public AIAgentFactory(Configuration configuration, OAuthHttpClientHandler oauthHttpClientHandler)
+        public AIAgentFactory(Configuration configuration, LlmHttpClientPolicy llmHttpClientPolicy, McpHttpClientHandler mcpHttpClientHandler)
         {
             this.configuration = configuration;
-            this.oauthHttpClientHandler = oauthHttpClientHandler;
+            this.llmHttpClientPolicy = llmHttpClientPolicy;
+            this.mcpHttpClientHandler = mcpHttpClientHandler;
         }
 
         /*
          * Connect to the Azure model and create an agent, then register tools
+         * Getting the Azure credential requires an AZURE_CLIENT_ID environment variable in deployed systems
          */
         public async Task<AIAgent> CreateAgentAsync()
         {
-            var aiProjectClient = new AIProjectClient(new Uri(this.configuration.AzureFoundryProjectUrl), this.GetManagedCredential());
+            var options = new AIProjectClientOptions();
+            options.AddPolicy(this.llmHttpClientPolicy, PipelinePosition.PerCall);
+
+            var aiProjectClient = new AIProjectClient(
+                new Uri(this.configuration.AzureFoundryProjectUrl),
+                new DefaultAzureCredential(),
+                options);
+
             var tools = await this.GetMcpToolsAsync();
 
             return aiProjectClient.AsAIAgent(
@@ -38,23 +48,6 @@ namespace IO.Curity.AutonomousAgent
                 instructions: "You are a backend autonomous agent",
                 tools: tools.ToArray()
             );
-        }
-
-        /*
-         * Get an Azure managed credential with which to connect to the model
-         */
-        private TokenCredential GetManagedCredential()
-        {
-            if (this.configuration.IsLocalDevelopment)
-            {
-                return new AzureCliCredential();
-            }
-            else
-            {
-                return new ManagedIdentityCredential(
-                    ManagedIdentityId.FromUserAssignedClientId(configuration.ManagedIdentityClientId)
-                );
-            }
         }
 
         /*
@@ -68,7 +61,7 @@ namespace IO.Curity.AutonomousAgent
                 Endpoint = new Uri(this.configuration.PortfolioMcpServerUrl),
             };
 
-            var httpClient = new HttpClient(this.oauthHttpClientHandler);
+            var httpClient = new HttpClient(this.mcpHttpClientHandler);
             var mcpClient = await McpClient.CreateAsync
             (
                 new HttpClientTransport(transportOptions, httpClient)

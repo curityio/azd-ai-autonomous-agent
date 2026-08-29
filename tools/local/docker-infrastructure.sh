@@ -84,18 +84,10 @@ if [ $? -ne 0 ]; then
 fi
 
 #
-# Ensure no leftover configuration database in the Curity Identity Server Docker image
-#
-cd ..
-rm -rf cdb 2>/dev/null
-mkdir cdb
-chmod 777 cdb
-
-#
 # Deploy the Curity Identity Server, the external gateway and the internal gateway
 #
 cd ../local
-docker compose up
+docker compose up --force-recreate
 if [ $? -ne 0 ]; then
   exit 1
 fi

@@ -1,4 +1,4 @@
-namespace IO.Curity.AutonomousAgent
+namespace IO.Curity.AutonomousAgent.Utilities
 {
     using Microsoft.AspNetCore.Http;
     using Microsoft.Extensions.Primitives;

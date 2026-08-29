@@ -211,7 +211,7 @@ Use the following guidance to choose an Azure region and to plan costs.
 
 ### Region Availability
 
-This template uses **gpt-4.1-mini** which may not be available in all Azure regions.  
+This template uses **gpt-5.4-nano** which may not be available in all Azure regions.  
 Check for [up-to-date region availability](https://learn.microsoft.com/azure/ai-services/openai/concepts/models#standard-deployment-model-availability) and select a region during deployment accordingly.  
 Consider using **East US 2**, **Sweden Central** or **UK South**.
 

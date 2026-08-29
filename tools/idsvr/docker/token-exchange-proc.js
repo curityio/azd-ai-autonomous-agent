@@ -41,7 +41,7 @@ function result(context) {
   );
 
   var issuedAccessToken = fullContext
-    .getDefaultAccessTokenJwtIssuer()
+    .accessTokenIssuer
     .issue(tokenData, presentedDelegation);
 
   return {
