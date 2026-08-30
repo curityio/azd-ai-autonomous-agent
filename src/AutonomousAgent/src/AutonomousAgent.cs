@@ -32,7 +32,15 @@ namespace IO.Curity.AutonomousAgent
 
             this.agentFactory = new Lazy<Task<AIAgent>>(() => Task.Run(() =>
             {
-                return new AIAgentFactory(this.configuration, llmHttpClientPolicy, mcpHttpClientHandler).CreateAgentAsync();
+                try
+                {
+                    return new AIAgentFactory(this.configuration, llmHttpClientPolicy, mcpHttpClientHandler).CreateAgentAsync();
+                }
+                catch (Exception e)
+                {
+                    this.logger.LogDebug($">>> Create agent error: {e.Message}");
+                    throw;
+                }
             }));
         }
 
@@ -91,12 +99,20 @@ namespace IO.Curity.AutonomousAgent
             var command = context.UserText ?? string.Empty;
             this.logger.LogDebug($">>> LLM request: {command}");
 
-            var agent = await this.agentFactory.Value;
-            var response = await agent.RunAsync(command);
-            this.logger.LogDebug($">>> LLM response: {response.Text}");
+            try
+            {
+                var agent = await this.agentFactory.Value;
+                var response = await agent.RunAsync(command);
+                this.logger.LogDebug($">>> LLM response: {response.Text}");
 
-            var responder = new MessageResponder(eventQueue, context.ContextId);
-            await responder.ReplyAsync($"Echo: {response.Text}", cancellationToken);
+                var responder = new MessageResponder(eventQueue, context.ContextId);
+                await responder.ReplyAsync($"Echo: {response.Text}", cancellationToken);
+            }
+            catch (Exception e)
+            {
+                this.logger.LogDebug($">>> LLM error response: {e.Message}");
+                throw;
+            }
         }
     }
 }

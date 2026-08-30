@@ -45,7 +45,9 @@ namespace IO.Curity.AutonomousAgent
             return aiProjectClient.AsAIAgent(
                 model: this.configuration.AzureAIModelName,
                 name: "autonomous-agent",
-                instructions: "You are a backend autonomous agent",
+                instructions: """
+                    You are a backend autonomous agent that operates on the user's stock portfolio history.
+                    """,
                 tools: tools.ToArray()
             );
         }

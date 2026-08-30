@@ -12,65 +12,6 @@ namespace IO.Curity.PortfolioMcpServer
         static string usa = "USA";
         static string europe = "Europe";
         static string asia = "Asia";
-        
-        /*
-         * Return some hard coded stocks, where stocks are traded in a particular region
-         */
-        public Stock[] GetAvailableStocks(string region)
-        {
-            if (region != usa && region != europe && region != asia)
-            {
-                return [];
-            }
-
-            Stock[] allStocks =
-            [
-                new()
-                {
-                    Id = "COM1",
-                    Name = "Company 1",
-                    Region = usa,
-                    CurrentPriceUSD = 386.54,
-                },
-                new()
-                {
-                    Id = "COM2",
-                    Name = "Company 2",
-                    Region = asia,
-                    CurrentPriceUSD = 250.62,
-                },
-                new()
-                {
-                    Id = "COM3",
-                    Name = "Company 3",
-                    Region = europe,
-                    CurrentPriceUSD = 21.07,
-                },
-                new()
-                {
-                    Id = "COM4",
-                    Name = "Company 4",
-                    Region = usa,
-                    CurrentPriceUSD = 180.75,
-                },
-                new()
-                {
-                    Id = "COM5",
-                    Name = "Company 5",
-                    Region = europe,
-                    CurrentPriceUSD = 87.50,
-                },
-                new()
-                {
-                    Id = "COM6",
-                    Name = "Company 6",
-                    Region = asia,
-                    CurrentPriceUSD = 109.88,
-                },
-            ];
-
-            return allStocks.Where(s => s.Region == region).ToArray();
-        }
 
         /*
          * A real system would retrieve transactions from a database that match the customer ID and region in the access token
@@ -146,6 +87,65 @@ namespace IO.Curity.PortfolioMcpServer
             {
                 Transactions = customerTransactions,
             };
+        }
+
+        /*
+         * Return some hard coded stocks, where stocks are traded in a particular region
+         */
+        private Stock[] GetAvailableStocks(string region)
+        {
+            if (region != usa && region != europe && region != asia)
+            {
+                return [];
+            }
+
+            Stock[] allStocks =
+            [
+                new()
+                {
+                    Id = "COM1",
+                    Name = "Company 1",
+                    Region = usa,
+                    CurrentPriceUSD = 386.54,
+                },
+                new()
+                {
+                    Id = "COM2",
+                    Name = "Company 2",
+                    Region = asia,
+                    CurrentPriceUSD = 250.62,
+                },
+                new()
+                {
+                    Id = "COM3",
+                    Name = "Company 3",
+                    Region = europe,
+                    CurrentPriceUSD = 21.07,
+                },
+                new()
+                {
+                    Id = "COM4",
+                    Name = "Company 4",
+                    Region = usa,
+                    CurrentPriceUSD = 180.75,
+                },
+                new()
+                {
+                    Id = "COM5",
+                    Name = "Company 5",
+                    Region = europe,
+                    CurrentPriceUSD = 87.50,
+                },
+                new()
+                {
+                    Id = "COM6",
+                    Name = "Company 6",
+                    Region = asia,
+                    CurrentPriceUSD = 109.88,
+                },
+            ];
+
+            return allStocks.Where(s => s.Region == region).ToArray();
         }
     }
 }

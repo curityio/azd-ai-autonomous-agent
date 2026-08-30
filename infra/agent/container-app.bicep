@@ -64,18 +64,6 @@ resource autonomousagent 'Microsoft.App/containerApps@2025-07-01' = {
               value: 'https://gateway-external-${environmentName}.${externalDomainName}/a2a'
             }
             {
-              name: 'ISSUER'
-              value: 'https://idsvr-runtime-${environmentName}.${externalDomainName}/oauth/v2/oauth-anonymous'
-            }
-            {
-              name: 'AUDIENCE'
-              value: 'https://agent.demo.example'
-            }
-            {
-              name: 'ALGORITHM'
-              value: 'ES256'
-            }
-            {
               name: 'AUTHORIZATION_URL'
               value: 'https://idsvr-runtime-${environmentName}.${externalDomainName}/oauth/v2/oauth-authorize'
             }
@@ -86,22 +74,6 @@ resource autonomousagent 'Microsoft.App/containerApps@2025-07-01' = {
             {
               name: 'SCOPE'
               value: 'stocks/read'
-            }
-            {
-              name: 'TOKEN_EXCHANGE_CLIENT_ID'
-              value: 'autonomous-agent'
-            }
-            {
-              name: 'TOKEN_EXCHANGE_CLIENT_SECRET'
-              value: tokenExchangeClientSecret
-            }
-            {
-              name: 'TOKEN_EXCHANGE_TARGET_AUDIENCE'
-              value: 'https://mcp.demo.example'
-            }
-            {
-              name: 'TOKEN_EXCHANGE_CACHE_SECONDS'
-              value: '300'
             }
             {
               name: 'PORTFOLIO_MCP_SERVER_URL'
@@ -116,7 +88,7 @@ resource autonomousagent 'Microsoft.App/containerApps@2025-07-01' = {
               value: 'gpt-5.4-nano'
             }
             {
-              name: 'MANAGED_IDENTITY_CLIENT_ID'
+              name: 'AZURE_CLIENT_ID'
               value: managedIdentityClientId
             }
           ]

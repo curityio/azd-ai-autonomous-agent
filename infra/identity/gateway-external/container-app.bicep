@@ -6,7 +6,6 @@ param tags object = {}
 param identityId string
 param containerAppsEnvironmentId string
 param containerRegistryName string
-param imageName string
 
 resource containerApp 'Microsoft.App/containerApps@2025-07-01' = {
   name: name
@@ -38,7 +37,7 @@ resource containerApp 'Microsoft.App/containerApps@2025-07-01' = {
       containers: [
         {
           name: 'main'
-          image: imageName
+          image: 'kong/kong:3.9-ubuntu'
           resources: {
             cpu: 1
             memory: '2Gi'
@@ -59,14 +58,6 @@ resource containerApp 'Microsoft.App/containerApps@2025-07-01' = {
             {
               name: 'KONG_LOG_LEVEL'
               value: 'warn'
-            }
-            {
-              name: 'KONG_PLUGINS'
-              value: 'bundled,token-exchange'
-            }
-            {
-              name: 'KONG_NGINX_HTTP_LUA_SHARED_DICT'
-              value: 'token-exchange 10m'
             }
           ]
           volumeMounts: [

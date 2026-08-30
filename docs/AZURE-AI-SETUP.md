@@ -21,10 +21,10 @@ Select a low cost model, like `gpt-5.4-nano`, select `Use this model` and deploy
 
 ## Grant AI Permissions
 
-Next, ensure that your user account has [Access to Microsoft Foundry](https://learn.microsoft.com/en-us/azure/foundry/concepts/rbac-foundry#minimum-role-assignments-to-get-started), for example:
+Next, ensure that your user account has [Data Plane Access to Microsoft Foundry](https://learn.microsoft.com/en-us/azure/foundry/concepts/rbac-foundry#minimum-role-assignments-to-get-started), for example:
 
 - In the Foundry Portal, edit the resource, navigate to `Access control (IAM)` and select `Add role assignement`.  
-- Select the `Azure AI User` role, add your user account as a member, then assign the role:
+- Select the `Foundry User` role, add your user account as a member, then assign the role:
 
 <img src="images/azure-ai-role.png" alt="Azure AI Role" style="width:50%;" />
 

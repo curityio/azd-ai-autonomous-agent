@@ -30,26 +30,3 @@ if [ $? -ne 0 ]; then
   echo 'envsubst failed for external gateway'
   exit 1
 fi
-
-#
-# Build and push Docker containers
-#
-if [ -z "${GATEWAY_EXTERNAL_IMAGE_NAME:-}" ]; then
-  
-  az acr login --name "$CONTAINER_REGISTRY_NAME"
-
-  TAG="$(date +%Y%m%d%H%M%S)"
-  docker build --no-cache --platform linux/amd64 -t "gateway-external:$TAG" .
-  if [ $? -ne 0 ]; then
-    exit 1
-  fi 
-
-  IMAGE="$CONTAINER_REGISTRY_NAME.azurecr.io/gateway-external:$TAG"
-  docker tag "gateway-external:$TAG" "$IMAGE"
-  docker push "$IMAGE"
-  if [ $? -ne 0 ]; then
-    exit 1
-  fi 
-
-  azd env set GATEWAY_EXTERNAL_IMAGE_NAME "$IMAGE" >/dev/null
-fi

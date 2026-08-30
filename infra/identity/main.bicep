@@ -37,9 +37,6 @@ param containerRegistryName string
 @description('The deployment identity to pull images from the Docker registry')
 param identityId string
 
-@description('The Docker image for the external gateway')
-param gatewayExternalImageName string
-
 @description('The Docker image for the internal gateway')
 param gatewayInternalImageName string
 
@@ -75,12 +72,8 @@ param entraClientSecret string
 param entraOidcMetadataUrl string
 
 @secure()
-@description('The token exchange client ID secret that the external gateway uses.')
+@description('The token exchange client ID secret that the internal gateway uses.')
 param gatewayTokenExchangeClientSecret string
-
-@secure()
-@description('The token exchange client ID secret that the backend agent uses.')
-param agentTokenExchangeClientSecret string
 
 // Configuration upload for the external gateway
 module externalGatewayConfiguration 'gateway-external/upload-configuration.bicep' = {
@@ -104,7 +97,6 @@ module externalGatewayContainerApp 'gateway-external/container-app.bicep' = {
     identityId: identityId
     containerAppsEnvironmentId: containerAppsEnvironmentId
     containerRegistryName: containerRegistryName
-    imageName: gatewayExternalImageName
   }
 }
 
@@ -280,10 +272,6 @@ module containerAppAdmin 'idsvr/idsvr-container-app.bicep' = {
         name: 'GATEWAY_TOKEN_EXCHANGE_SECRET'
         value: gatewayTokenExchangeClientSecret
       }
-      {
-        name: 'AGENT_TOKEN_EXCHANGE_SECRET'
-        value: agentTokenExchangeClientSecret
-      }
     ]
   }
 }
@@ -386,10 +374,6 @@ module containerAppRuntime 'idsvr/idsvr-container-app.bicep' = {
       {
         name: 'GATEWAY_TOKEN_EXCHANGE_SECRET'
         value: gatewayTokenExchangeClientSecret
-      }
-      {
-        name: 'AGENT_TOKEN_EXCHANGE_SECRET'
-        value: agentTokenExchangeClientSecret
       }
     ]
   }

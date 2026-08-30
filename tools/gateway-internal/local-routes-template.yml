@@ -34,7 +34,7 @@ services:
     config:
       token_endpoint: http://idsvr:8443/oauth/v2/oauth-token
       client_id: internal-gateway-client
-      client_secret: oi8yjQe4VvjrkbwlFfm8-iA9kbiEQKlGqULsA5I3Jgo
+      client_secret: $GATEWAY_TOKEN_EXCHANGE_SECRET
       token_cache_seconds: 900
       target_audience: 'https://mcp.demo.example'
   - name: token-audit

@@ -30,10 +30,3 @@ services:
     config:
       replace:
         uri: "/$(uri_captures[1])"
-  - name: token-exchange
-    config:
-      token_endpoint: http://idsvr-runtime-$AZURE_ENV_NAME/oauth/v2/oauth-token
-      client_id: external-gateway-client
-      client_secret: $GATEWAY_TOKEN_EXCHANGE_SECRET
-      token_cache_seconds: 900
-      target_scope: 'stocks/read'

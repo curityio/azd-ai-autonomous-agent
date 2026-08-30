@@ -26,9 +26,6 @@
     "identityId": {
       "value": "${DEPLOYMENT_IDENTITY_ID}"
     },
-    "gatewayExternalImageName": {
-      "value": "${GATEWAY_EXTERNAL_IMAGE_NAME}"
-    },
     "gatewayInternalImageName": {
       "value": "${GATEWAY_INTERNAL_IMAGE_NAME}"
     },
@@ -77,14 +74,6 @@
           "id": "/subscriptions/${AZURE_SUBSCRIPTION_ID}/resourceGroups/${AZURE_RESOURCE_GROUP}/providers/Microsoft.KeyVault/vaults/${KEY_VAULT_NAME}"
         },
         "secretName": "GATEWAY-TOKEN-EXCHANGE-SECRET"
-      }
-    },
-    "agentTokenExchangeClientSecret": {
-      "reference": {
-        "keyVault": {
-          "id": "/subscriptions/${AZURE_SUBSCRIPTION_ID}/resourceGroups/${AZURE_RESOURCE_GROUP}/providers/Microsoft.KeyVault/vaults/${KEY_VAULT_NAME}"
-        },
-        "secretName": "AGENT-TOKEN-EXCHANGE-SECRET"
       }
     },
     "entraClientSecret": {

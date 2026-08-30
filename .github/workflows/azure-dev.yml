@@ -130,7 +130,6 @@ jobs:
           ENTRA_CLIENT_ID: ${{ vars.ENTRA_CLIENT_ID }}
           ENTRA_OIDC_METADATA_URL: ${{ vars.ENTRA_OIDC_METADATA_URL }}
           EXTERNAL_DOMAIN_NAME: ${{ vars.EXTERNAL_DOMAIN_NAME }}
-          GATEWAY_EXTERNAL_IMAGE_NAME: ${{ vars.GATEWAY_EXTERNAL_IMAGE_NAME }}
           GATEWAY_INTERNAL_IMAGE_NAME: ${{ vars.GATEWAY_INTERNAL_IMAGE_NAME }}
           IDSVR_IMAGE_NAME: ${{ vars.IDSVR_IMAGE_NAME }}
           KEY_VAULT_NAME: ${{ vars.KEY_VAULT_NAME }}
@@ -141,7 +140,6 @@ jobs:
           LICENSE_KEY: ${{ secrets.LICENSE_KEY }}
           ENTRA_CLIENT_SECRET: ${{ secrets.ENTRA_CLIENT_SECRET }}
           GATEWAY_TOKEN_EXCHANGE_SECRET: ${{ secrets.GATEWAY_TOKEN_EXCHANGE_SECRET }}
-          AGENT_TOKEN_EXCHANGE_SECRET: ${{ secrets.AGENT_TOKEN_EXCHANGE_SECRET }}
 
   #
   # The build job deploys applications when C# code is committed to main
@@ -184,7 +182,6 @@ jobs:
           EXTERNAL_DOMAIN_NAME: ${{ vars.EXTERNAL_DOMAIN_NAME }}
           KEY_VAULT_NAME: ${{ vars.KEY_VAULT_NAME }}
           AZURE_CONTAINER_REGISTRY_ENDPOINT: ${{ vars.AZURE_CONTAINER_REGISTRY_ENDPOINT }}
-          AGENT_TOKEN_EXCHANGE_SECRET: ${{ secrets.AGENT_TOKEN_EXCHANGE_SECRET }}
 
   #
   # Set the 'if' flag to true for this job and to false for other jobs to tear down the deployment

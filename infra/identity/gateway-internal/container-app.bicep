@@ -62,7 +62,11 @@ resource containerApp 'Microsoft.App/containerApps@2025-07-01' = {
             }
             {
               name: 'KONG_PLUGINS'
-              value: 'bundled,token-audit'
+              value: 'bundled,token-exchange,token-audit'
+            }
+            {
+              name: 'KONG_NGINX_HTTP_LUA_SHARED_DICT'
+              value: 'token-exchange 10m'
             }
             {
               name: 'KONG_NGINX_HTTP_LOG_FORMAT'

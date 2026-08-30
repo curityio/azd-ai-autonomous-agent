@@ -38,7 +38,6 @@ When the `identity` stage completes, the `./azure/dev/.env` file gets populated 
 To force a redeployment to build a new Docker image, delete the corresponding variable from the `.env` file.
 
 ```text
-GATEWAY_EXTERNAL_IMAGE_NAME="<unique-prefix>.azurecr.io/gateway-external:<timestamp>"
 GATEWAY_INTERNAL_IMAGE_NAME="<unique-prefix>.azurecr.io/gateway-internal:<timestamp>"
 IDSVR_IMAGE_NAME="<unique-prefix>.azurecr.io/idsvr:<timestamp>"
 ```

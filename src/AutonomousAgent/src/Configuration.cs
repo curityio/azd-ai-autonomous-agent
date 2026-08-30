@@ -16,7 +16,6 @@ namespace IO.Curity.AutonomousAgent
         public string PortfolioMcpServerUrl {get; private set;}
         public string AzureFoundryProjectUrl {get; private set;}
         public string AzureAIModelName {get; private set;}
-        public string ManagedIdentityClientId {get; private set;}
 
         public Configuration()
         {
@@ -29,7 +28,6 @@ namespace IO.Curity.AutonomousAgent
             this.PortfolioMcpServerUrl = ReadEnvironmentVariable("PORTFOLIO_MCP_SERVER_URL");
             this.AzureFoundryProjectUrl = ReadEnvironmentVariable("AZURE_AI_FOUNDRY_PROJECT_URL");
             this.AzureAIModelName = ReadEnvironmentVariable("AZURE_AI_MODEL_NAME");
-            this.ManagedIdentityClientId = ReadEnvironmentVariable("MANAGED_IDENTITY_CLIENT_ID", false);
         }
 
         private static string ReadEnvironmentVariable(string name, bool required=false)

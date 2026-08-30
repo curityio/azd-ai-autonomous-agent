@@ -27,21 +27,12 @@ namespace IO.Curity.PortfolioMcpServer
 
         /*
          * Use custom attributes from the access token and audit identity attributes if required
-         * This method restricts data returned to LLMs to allowed stocks for user's region claim
-         */
-        [McpServerTool, Description("Return stocks available for the current user's region")]
-        public Stock[] GetAvailableStocks()
-        {
-            var region = this.GetClaim("region");
-            this.logger.LogDebug($"Returning stocks available for region: {region}");
-            return this.repository.GetAvailableStocks(region);
-        }
-
-        /*
-         * Use custom attributes from the access token and audit identity attributes if required
          * This method restricts data returned to LLMs to the user's portfolio, identified by the customer ID and region
          */
-        [McpServerTool, Description("Return the customer's portfolio with its history of transactions")]
+        [McpServerTool, Description("""
+            Returns the customer's portfolio with its entire history of transactions.
+            The MCP client can add all transactions to get the current value of the portfolio.
+        """)]
         public Portfolio GetPortfolio()
         {
             var customerId = this.GetClaim("customer_id");

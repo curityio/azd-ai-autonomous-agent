@@ -22,17 +22,6 @@ function result(context) {
     scopes = newScope.split(' ');
   }
 
-  var clientType = context.client.properties['client_type'];
-  if (clientType) {
-    tokenData.client_type = clientType;
-    if (clientType == 'ai-agent') {
-      var agentClientId = context.request.getFormParameter('client_id');
-      if (agentClientId) {
-        tokenData.agent_id = agentClientId;
-      }
-    }
-  }
-  
   var fullContext = context.getInitializedContext(
     context.subjectAttributes(),
     context.contextAttributes(),
@@ -41,7 +30,7 @@ function result(context) {
   );
 
   var issuedAccessToken = fullContext
-    .accessTokenIssuer
+    .getDefaultAccessTokenJwtIssuer()
     .issue(tokenData, presentedDelegation);
 
   return {

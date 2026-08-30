@@ -10,4 +10,4 @@ cd "$(dirname "${BASH_SOURCE[0]}")"
 
 git update-index --assume-unchanged ../idsvr/cluster.xml
 git update-index --assume-unchanged ../gateway-internal/azure-internal-routes.yml
-git update-index --assume-unchanged ../gateway-external/azure-external-routes.yml
+git update-index --assume-unchanged ../gateway-internal/azure-external-routes.yml

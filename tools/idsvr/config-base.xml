@@ -118,27 +118,12 @@
                 <validate-port-on-loopback-interfaces>false</validate-port-on-loopback-interfaces>
               </client>
               <client>
-                <id>external-gateway-client</id>
+                <id>internal-gateway-client</id>
                 <secret>#{GATEWAY_TOKEN_EXCHANGE_SECRET}</secret>
                 <scope>stocks/read</scope>
                 <capabilities>
                   <oauth-token-exchange/>
                 </capabilities>
-              </client>
-              <client>
-                <id>autonomous-agent</id>
-                <secret>#{AGENT_TOKEN_EXCHANGE_SECRET}</secret>
-                <scope>stocks/read</scope>
-                <capabilities>
-                  <oauth-token-exchange/>
-                </capabilities>
-                <access-token-ttl>900</access-token-ttl>
-                <properties>
-                  <property>
-                    <key>client_type</key>
-                    <value>ai-agent</value>
-                  </property>
-                </properties>
               </client>
             </config-backed>
           </client-store>

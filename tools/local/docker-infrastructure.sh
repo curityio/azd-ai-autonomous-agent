@@ -11,6 +11,7 @@ cd "$(dirname "${BASH_SOURCE[0]}")"
 #
 if [ ! -f ./load-secrets.sh ]; then
   echo 'Generate some secrets before deploying local infrastructure'
+  read -n 1
   exit 1
 fi
 . ./load-secrets.sh
@@ -21,17 +22,20 @@ fi
 cd ../idsvr
 ./download-license.sh
 if [ $? -ne 0 ]; then
+  read -n 1
   exit 1
 fi
 
 if [ ! -f license.json ]; then
   echo 'Unable to find a license file for the Curity Identity Server'
+  read -n 1
   exit 1
 fi
 
 LICENSE_KEY="$(cat license.json | jq -r .License)"
 if [ "$LICENSE_KEY" == '' ]; then
   echo 'Unable to find a license key for the Curity Identity Server'
+  read -n 1
   exit 1
 fi
 
@@ -49,16 +53,12 @@ docker pull kong/kong:3.9-ubuntu
 docker pull curity.azurecr.io/curity/idsvr:latest
 
 #
-# Build the external API gateway Docker image, with an introspection plugin
+# Update environment variables for the internal API gateway
 #
-cd ../gateway-external
+cd ../gateway-internal
 envsubst < local-routes-template.yml > local-routes.yml
 if [ $? -ne 0 ]; then
-  exit 1
-fi
-
-docker build --no-cache -t gateway-external:1.0.0 .
-if [ $? -ne 0 ]; then
+  read -n 1
   exit 1
 fi
 
@@ -68,6 +68,7 @@ fi
 cd ../gateway-internal
 docker build --no-cache -t gateway-internal:1.0.0 .
 if [ $? -ne 0 ]; then
+  read -n 1  
   exit 1
 fi
 
@@ -80,14 +81,16 @@ cp ../config-base.xml .
 cp ../config-local.xml .
 docker build --no-cache -t idsvr:1.0.0 .
 if [ $? -ne 0 ]; then
+  read -n 1
   exit 1
 fi
 
 #
 # Deploy the Curity Identity Server, the external gateway and the internal gateway
 #
-cd ../local
+cd ../../local
 docker compose up --force-recreate
 if [ $? -ne 0 ]; then
+  read -n 1  
   exit 1
 fi

@@ -19,7 +19,6 @@ if [ ! -f ./load-secrets.sh ]; then
   echo "export SQL_ADMIN_PASSWORD='$(generatePassword)'" > load-secrets.sh
   echo "export ADMIN_PASSWORD='$(generatePassword)'" >> load-secrets.sh
   echo "export GATEWAY_TOKEN_EXCHANGE_SECRET='$(generatePassword)'" >>  load-secrets.sh
-  echo "export AGENT_TOKEN_EXCHANGE_SECRET='$(generatePassword)'" >> load-secrets.sh
   chmod +x load-secrets.sh
 fi
 
