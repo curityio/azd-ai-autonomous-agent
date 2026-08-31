@@ -1,9 +1,16 @@
+#pragma warning disable OPENAI001
 namespace IO.Curity.AutonomousAgent
 {
+    using System;
+    using System.ClientModel.Primitives;
+    using System.Text;
     using System.Threading.Tasks;
     using A2A;
-    using Microsoft.Agents.AI;
+    using Azure.AI.Extensions.OpenAI;
+    using Azure.AI.Projects;
+    using Azure.Identity;
     using Microsoft.Extensions.Logging;
+    using OpenAI.Responses;
     using IO.Curity.AutonomousAgent.Utilities;
 
     /*
@@ -14,8 +21,10 @@ namespace IO.Curity.AutonomousAgent
     public class AutonomousAgent : IAgentHandler
     {
         private readonly Configuration configuration;
+        private readonly McpHttpClientHandler mcpHttpClientHandler;
         private readonly ILogger<AutonomousAgent> logger;
-        private Lazy<Task<AIAgent>> agentFactory;
+
+        private readonly ProjectResponsesClient responsesClient;
 
         /*
          * Create the agent in a thread safe manner on a background thread, during the first user request
@@ -28,20 +37,19 @@ namespace IO.Curity.AutonomousAgent
             ILoggerFactory loggerFactory)
         {
             this.configuration = configuration;
+            this.mcpHttpClientHandler = mcpHttpClientHandler;
             this.logger = new Logger<AutonomousAgent>(loggerFactory);
+            
+            var options = new AIProjectClientOptions();
+            options.AddPolicy(llmHttpClientPolicy, PipelinePosition.PerCall);
 
-            this.agentFactory = new Lazy<Task<AIAgent>>(() => Task.Run(() =>
-            {
-                try
-                {
-                    return new AIAgentFactory(this.configuration, llmHttpClientPolicy, mcpHttpClientHandler).CreateAgentAsync();
-                }
-                catch (Exception e)
-                {
-                    this.logger.LogDebug($">>> Create agent error: {e.Message}");
-                    throw;
-                }
-            }));
+            var projectClient = new AIProjectClient(
+                new Uri(this.configuration.AzureFoundryProjectUrl),
+                new DefaultAzureCredential());
+
+            this.responsesClient = projectClient
+                .GetProjectOpenAIClient()
+                .GetProjectResponsesClientForModel(this.configuration.AzureAIModelName);
         }
 
         /*
@@ -49,7 +57,7 @@ namespace IO.Curity.AutonomousAgent
          */
         public static AgentCard GetAgentCard(Configuration configuration) {
 
-            var skill = new A2A.AgentSkill
+            var skill = new AgentSkill
             {
                 Id = "stocks",
                 Name = "Stock portfolio operations",
@@ -92,26 +100,92 @@ namespace IO.Curity.AutonomousAgent
         }
 
         /*
-         * Process an A2A request and return an A2A response 
+         * Receive an A2A request, call Foundry, then return an A2A response
          */
         public async Task ExecuteAsync(RequestContext context, AgentEventQueue eventQueue, CancellationToken cancellationToken)
         {
-            var command = context.UserText ?? string.Empty;
-            this.logger.LogDebug($">>> LLM request: {command}");
+            var userCommand = context.UserText ?? string.Empty;
+            this.logger.LogDebug($">>> LLM request: {userCommand}");
 
             try
             {
-                var agent = await this.agentFactory.Value;
-                var response = await agent.RunAsync(command);
-                this.logger.LogDebug($">>> LLM response: {response.Text}");
+                var responseText = await this.CallFoundryModel(userCommand);
+                this.logger.LogDebug($">>> LLM response: {responseText}");
 
                 var responder = new MessageResponder(eventQueue, context.ContextId);
-                await responder.ReplyAsync($"Echo: {response.Text}", cancellationToken);
+                await responder.ReplyAsync(responseText, cancellationToken);
             }
             catch (Exception e)
             {
                 this.logger.LogDebug($">>> LLM error response: {e.Message}");
-                throw;
+
+                var responder = new MessageResponder(eventQueue, context.ContextId);
+                await responder.ReplyAsync("Server problem encountered", cancellationToken);
+            }
+        }
+
+        /*
+         * Call Foundry using the OpenAI responses API and handle any LLM responses that trigger MCP tools
+         */
+        private async Task<string> CallFoundryModel(string userCommand)
+        {
+            var options = new CreateResponseOptions
+            {
+                InputItems =
+                {
+                    ResponseItem.CreateUserMessageItem(userCommand)
+                },
+                ReasoningOptions = new ResponseReasoningOptions
+                {
+                    ReasoningEffortLevel = ResponseReasoningEffortLevel.None
+                }
+            };
+
+            var mcpToolsClient = new McpToolsClient(this.configuration, this.mcpHttpClientHandler);
+            await mcpToolsClient.AddFunctionTools(options.Tools);
+
+            while (true)
+            {
+                var finalText = new StringBuilder();
+                var functionCalls = new List<FunctionCallResponseItem>();
+            
+                var response = await this.responsesClient.CreateResponseAsync(options);
+                foreach (var output in response.Value.OutputItems)
+                {
+                    switch (output)
+                    {
+                        case FunctionCallResponseItem call:
+                            this.logger.LogDebug($">>> LLM triggered MCP request: {call.CallId}, {call.FunctionName}");
+                            functionCalls.Add(call);
+                            break;
+
+                        case MessageResponseItem message:
+                            this.logger.LogDebug($">>> LLM final response: {message.Content}");
+                            foreach (var content in message.Content)
+                            {
+                                finalText.Append(content.Text);
+                            }
+                            break;
+
+                        default:
+                            this.logger.LogDebug($">>> LLM unhandled response: {output.GetType().Name}");
+                            break;
+                    }
+
+                    options.InputItems.Add(output);
+                }
+
+                foreach (var call in functionCalls)
+                {
+                    var jsonData = await mcpToolsClient.CallToolAsync(call);
+                    var jsonResponseItem = new FunctionCallOutputResponseItem(call.CallId, jsonData);
+                    options.InputItems.Add(jsonResponseItem);
+                }
+
+                if (functionCalls.Count == 0)
+                {
+                    return finalText.ToString();
+                }
             }
         }
     }

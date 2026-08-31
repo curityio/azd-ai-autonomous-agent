@@ -1,11 +1,9 @@
 # Tasks
 
-## AI Logic Updates
+## Deployment Simplification
 
-- Use the OpenAI responses API
-- Simplify agent creation code if possible
-- Use low reasoning for faster responses
-- Return current stock prices in another MCP tool
+- Remove complex routing
+- Revamp MCP server tests
 
 ## LLM Token Validation
 

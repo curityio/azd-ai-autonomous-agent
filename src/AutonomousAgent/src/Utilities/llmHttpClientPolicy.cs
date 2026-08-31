@@ -32,6 +32,9 @@ namespace IO.Curity.AutonomousAgent.Utilities
             IReadOnlyList<PipelinePolicy> pipeline,
             int currentIndex)
         {
+            System.Console.WriteLine("*** HTTP REQUEST ***");
+            System.Console.WriteLine(message.Request.Uri);
+            System.Console.WriteLine(this.httpContextAccessor.GetAccessToken());
             message.Request.Headers.Add(
                 "Authorization",
                 $"Bearer ${this.httpContextAccessor.GetAccessToken()}"

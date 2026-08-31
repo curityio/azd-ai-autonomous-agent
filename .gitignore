@@ -8,6 +8,6 @@ license.json
 *.sln
 bin
 obj
-local-routes.yml
+tools/gateway-internal/local-routes.yml
 tools/idsvr/docker/*.xml
 src/PortfolioMcpServer/.env

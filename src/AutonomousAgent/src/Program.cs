@@ -30,7 +30,6 @@ namespace IO.Curity.AutonomousAgent
             builder.Services.AddA2AAgent<AutonomousAgent>(AutonomousAgent.GetAgentCard(configuration));
             builder.Services.AddSingleton(configuration);
             builder.Services.AddHttpContextAccessor();
-            builder.Services.AddSingleton<AIAgentFactory>();
             builder.Services.AddSingleton<LlmHttpClientPolicy>();
             builder.Services.AddSingleton<McpHttpClientHandler>();
 

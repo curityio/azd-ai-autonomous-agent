@@ -88,7 +88,7 @@ namespace IO.Curity.PortfolioMcpServer
 
             // Add injectable objects
             builder.Services.AddSingleton(configuration);
-            builder.Services.AddSingleton(new DataRepository());
+            builder.Services.AddSingleton(new StocksRepository());
 
             // Expose endpoints as an MCP server over HTTP
             builder.Services.AddControllers();
