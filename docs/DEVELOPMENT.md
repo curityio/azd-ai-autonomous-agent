@@ -54,7 +54,7 @@ To demonstrate test-driven development, use the following commands in different 
 
 ```bash
 ./src/PortfolioMcpServer/run.sh
-./test.sh
+./src/PortfolioMcpServer/test.sh
 ```
 
 The [OAuth integration tests](../src/PortfolioMcpServer/security-tests/src/SecurityTests.cs) show how to send mock JWT access tokens to the Portfolio MCP Server.  
