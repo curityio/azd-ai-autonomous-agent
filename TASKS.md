@@ -1,10 +1,5 @@
 # Tasks
 
-## Deployment Simplification
-
-- Remove complex routing
-- Revamp MCP server tests
-
 ## LLM Token Validation
 
 - Route the LLM request via the internal gateway.

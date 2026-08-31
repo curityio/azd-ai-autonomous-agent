@@ -55,11 +55,11 @@ namespace IO.Curity.PortfolioMcpServer.SecurityTests
         }
 
         /*
-         * Get available stocks with a valid access token
+         * Get current stock prices with a valid access token
          */
         [Fact]
         [Trait("Category", "Security")]
-        public async Task SecureMcpRequest_GetAvailableStocks_SucceedsWithValidAccessToken()
+        public async Task SecureMcpRequest_GetCurrentStockPrices_SucceedsWithValidAccessToken()
         {
             var options = new MockTokenOptions(this.data.Configuration)
             {
@@ -70,7 +70,7 @@ namespace IO.Curity.PortfolioMcpServer.SecurityTests
             var accessToken = this.data.AuthorizationServer.IssueAccessToken(options);
             
             var mcpClient = await this.CreateMcpClient(accessToken);
-            var response = await mcpClient.CallToolAsync(toolName: "get_available_stocks", cancellationToken: CancellationToken.None);
+            var response = await mcpClient.CallToolAsync(toolName: "get_current_stock_prices", cancellationToken: CancellationToken.None);
             var responseText = response?.Content?.OfType<TextContentBlock>().First().Text ?? string.Empty;
 
             var stocks = JsonSerializer.Deserialize<Stock[]>(responseText, new JsonSerializerOptions

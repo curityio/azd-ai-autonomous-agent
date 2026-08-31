@@ -160,7 +160,7 @@ namespace IO.Curity.AutonomousAgent
                             break;
 
                         case MessageResponseItem message:
-                            this.logger.LogDebug($">>> LLM final response: {message.Content}");
+                            this.logger.LogDebug(">>> LLM received final response");
                             foreach (var content in message.Content)
                             {
                                 finalText.Append(content.Text);

@@ -38,7 +38,7 @@ namespace IO.Curity.PortfolioMcpServer.SecurityTests
             this.jwks = new JwkSet(tokenSigningPublicKey);
 
             this.httpServer = new HttpListener();
-            this.httpServer.Prefixes.Add($"http://localhost:{configuration.JwksUriPort}/");
+            this.httpServer.Prefixes.Add($"{configuration.JwksUri}/");
             this.httpServer.Start();
             this.httpServer.BeginGetContext(this.onJwksRequest, this.httpServer);
         }

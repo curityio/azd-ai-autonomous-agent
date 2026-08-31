@@ -17,13 +17,11 @@ services:
       LICENSE_KEY: '${LICENSE_KEY}'
 
   #
-  # The external gateway exposes the autonomous agent to the internet
+  # The external gateway exposes the Portfolio MCP server and security components
   #
   external-gateway:
     image: kong/kong:3.9-ubuntu
     hostname: gateway-external
-    extra_hosts:
-      - "host.docker.internal:host-gateway"
     ports:
       - 80:8000
     volumes:
@@ -35,17 +33,12 @@ services:
       KONG_LOG_LEVEL: 'info'
 
   #
-  # The internal gateway intercepts all requests from the autonomous agent to the LLM, MCP servers or A2A servers
-  # When calling secured endpoints the gateway exchanges opaque access tokens and delivers a JWT access token to the MCP server
-  # The JWT access token also contains agent attributes and the gateway can include all token attributes in its logging
+  # The internal gateway handles token exchange when the autonomous agent calls the MCP server
+  # The internal gateway also does audit logging using access token attributes
   #
   internal-gateway:
     image: gateway-internal:1.0.0
     hostname: gateway-internal
-    extra_hosts:
-      - "host.docker.internal:host-gateway"
-    ports:
-      - 81:8000
     volumes:
       - ../gateway-internal/local-routes.yml:/usr/local/kong/declarative/kong.yml
     environment:
@@ -57,3 +50,12 @@ services:
       KONG_NGINX_HTTP_LUA_SHARED_DICT: 'token-exchange 10m'
       KONG_NGINX_HTTP_LOG_FORMAT: "json_combined escape=json '{ \"time_iso8601\": \"$$time_iso8601\", \"remote_addr\": \"$$remote_addr\", \"method\": \"$$request_method\", \"uri\": \"$$request_uri\", \"status\": $$status, \"body_bytes_sent\": $$body_bytes_sent, \"request_time\": $$request_time, \"upstream_response_time\": \"$$upstream_response_time\", \"upstream_addr\": \"$$upstream_addr\", \"http_x_forwarded_for\": \"$$http_x_forwarded_for\", \"kong_request_id\": \"$$http_kong_request_id\" }'"
       KONG_PROXY_ACCESS_LOG: "/dev/stdout json_combined"
+
+  #
+  # The local agent calls a Portfolio MCP server that runs in Docker behind gateways
+  #
+  portfolio-mcp-server:
+    image: portfolio-mcp-server:1.0.0
+    hostname: portfolio-mcp-server
+    env_file:
+      - ../../src/PortfolioMcpServer/.env.dockercompose

@@ -3,30 +3,15 @@ _transform: true
 services:
 
 #
-# Handles local computer requests from the console client to the autonomous agent
+# The external entry point for local computer requests from the autonomous agent to the MCP server
+# Requests are routed via the internal gateway
 #
-- name: autonomous-agent-card
-  url: http://host.docker.internal:3000/.well-known/agent-card.json
+- name: portfolio-mcp-server
+  url: http://gateway-internal:8000/portfolio-mcp-server
   routes:
-  - name: autonomous-agent-card
+  - name: portfolio-mcp-server-resource-metadata
     hosts:
     - localhost
     paths:
-    - /a2a/.well-known/agent-card.json
-
-#
-# Handles local computer A2A requests from the console client
-#
-- name: autonomous-agent
-  url: http://host.docker.internal:3000
-  routes:
-  - name: autonomous-agent
-    hosts:
-    - localhost
-    paths:
-    - /a2a
-  plugins:
-  - name: request-transformer
-    config:
-      replace:
-        uri: "/$(uri_captures[1])"
+    - /portfolio-mcp-server
+  

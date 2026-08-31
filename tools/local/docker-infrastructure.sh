@@ -63,6 +63,16 @@ if [ $? -ne 0 ]; then
 fi
 
 #
+# Build the Docker image for the Portfolio MCP server
+#
+cd ../gateway-internal
+docker build --no-cache -t gateway-internal:1.0.0 .
+if [ $? -ne 0 ]; then
+  read -n 1  
+  exit 1
+fi
+
+#
 # Build the internal API gateway Docker image, with a token auditing plugin
 #
 cd ../gateway-internal
