@@ -56,7 +56,7 @@ resource modelDeployment 'Microsoft.CognitiveServices/accounts/deployments@2025-
     model: {
       name: 'gpt-5.4-nano'
       format: 'OpenAI'
-      version: '2025-04-14'
+      version: '2026-03-17'
     }
   }
 }
