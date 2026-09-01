@@ -98,16 +98,6 @@ local function exchange_access_token(received_access_token, config)
         }
     })
 
-    if response.status == 200 then
-        local data = cjson.decode(response.body)
-        if not data or not data.access_token then
-            ngx.log(ngx.WARN, 'No access token was received in a token exchange response')
-            return { status = 500 }
-        end
-
-        new_access_token = data.access_token
-    end
-    
     if error then
         local connection_message = 'A technical problem occurred during token exchange'
         ngx.log(ngx.WARN, connection_message .. error)
@@ -116,6 +106,16 @@ local function exchange_access_token(received_access_token, config)
 
     if not response then
         return { status = 500 }
+    end
+
+    if response.status == 200 then
+        local data = cjson.decode(response.body)
+        if not data or not data.access_token then
+            ngx.log(ngx.WARN, 'No access token was received in a token exchange response')
+            return { status = 500 }
+        end
+
+        new_access_token = data.access_token
     end
 
     if response.status ~= 200 then

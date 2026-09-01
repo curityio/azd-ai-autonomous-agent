@@ -20,7 +20,7 @@ namespace IO.Curity.PortfolioMcpServer
 
         public Configuration()
         {
-            this.IsLocalDevelopment = ReadEnvironmentVariable("ENV") == "local";
+            this.IsLocalDevelopment = ReadEnvironmentVariable("ENV", false) == "local";
             this.Port = int.Parse(ReadEnvironmentVariable("PORT"));
             this.ExternalBaseUrl = ReadEnvironmentVariable("EXTERNAL_BASE_URL");
             this.AuthorizationServerBaseUrl = ReadEnvironmentVariable("AUTHORIZATION_SERVER_BASE_URL");

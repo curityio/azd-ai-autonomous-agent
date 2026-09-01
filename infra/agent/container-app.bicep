@@ -113,11 +113,15 @@ resource autonomousagent 'Microsoft.App/containerApps@2025-07-01' = {
             }
             {
               name: 'AZURE_AI_MODEL_NAME'
-              value: 'gpt-4.1-mini'
+              value: 'gpt-5.4-nano'
             }
             {
-              name: 'MANAGED_IDENTITY_CLIENT_ID'
+              name: 'AZURE_CLIENT_ID'
               value: managedIdentityClientId
+            }
+            {
+              name: 'CONSOLE_CLIENT_ACCESS_TOKEN_TYPE'
+              value: 'opaque'
             }
           ]
         }

@@ -37,4 +37,4 @@ Also consider using stronger credentials for these secrets:
 
 - The JDBC connection from the Curity Identity Server to Azure SQL could use a managed identity.
 - The Admin UI for the Curity Identity Server could use an Entra ID federated login.
-- Token exchange could use JWT workload identities instead of client secrets.
+- In supporting environments, token exchange could use JWT workload identities instead of client secrets.

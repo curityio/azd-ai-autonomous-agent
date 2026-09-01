@@ -3,28 +3,28 @@ _transform: true
 services:
 
 #
-# Handles local computer requests from the autonomous agent to the secured MCP server
+# Internal requests to the MCP server's unsecured metadata endpoint
 #
 - name: portfolio-mcp-server-resource-metadata
-  url: http://host.docker.internal:3001/.well-known/oauth-protected-resource
+  url: http://portfolio-mcp-server:3001/.well-known/oauth-protected-resource
   routes:
   - name: portfolio-mcp-server-resource-metadata
     hosts:
-    - localhost:81
+    - gateway-internal
     paths:
-    - /mcp/.well-known/oauth-protected-resource
+    - /portfolio-mcp-server/.well-known/oauth-protected-resource
 
 #
-# The gateway uses a plugin to write an audit log with token details for secured agent requests
+# Agents use a JWT access token to call MCP tools and a plugin writes audit logs from access token attributes
 #
-- name: portfolio-mcp-server
-  url: http://host.docker.internal:3001
+- name: portfolio-mcp-server-tools
+  url: http://portfolio-mcp-server:3001
   routes:
   - name: portfolio-mcp-server
     hosts:
-    - localhost:81
+    - gateway-internal
     paths:
-    - /mcp
+    - /portfolio-mcp-server
   plugins:
   - name: request-transformer
     config:

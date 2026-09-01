@@ -16,17 +16,15 @@ namespace IO.Curity.AutonomousAgent
     public static class Program
     {
         /*
-         * The agent is an A2A service, where A2A endpoints are protected by JWT access tokens
+         * Create the autonomous agent as an A2A service
          */
         public static async Task Main()
         {
-            // Load configuration settings
             var configuration = new Configuration();
-            
-            // The agent can log OAuth error details but does not return them to the caller
-            IdentityModelEventSource.ShowPII = configuration.IsLocalDevelopment;
 
-            // The MCP server runs in an internal network
+            // View error details during development
+            IdentityModelEventSource.ShowPII = configuration.IsLocalDevelopment;
+            
             var builder = WebApplication.CreateBuilder();
             builder.Configuration.AddJsonFile("appSettings.json");
             builder.WebHost
@@ -67,17 +65,11 @@ namespace IO.Curity.AutonomousAgent
                     )
                 );
             });
-
-            // Expose endpoints as an A2A server over HTTP
+            
+            builder.Services.AddA2AAgent<AutonomousAgent>(AutonomousAgent.GetAgentCard(configuration));
             builder.Services.AddHttpContextAccessor();
             builder.Services.AddDistributedMemoryCache();
-
-            // Add the agent
-            builder.Services.AddA2AAgent<AutonomousAgent>(AutonomousAgent.GetAgentCard(configuration));
-
-            // Define injectable objects
             builder.Services.AddSingleton(configuration);
-            builder.Services.AddSingleton<AIAgentFactory>();
             builder.Services.AddSingleton<OAuthHttpClientHandler>();
             builder.Services.AddSingleton<TokenExchangeClient>();
             builder.Services.AddSingleton<TokenCache>();
@@ -85,8 +77,7 @@ namespace IO.Curity.AutonomousAgent
             var app = builder.Build();
             app.UseAuthentication();
             app.UseAuthorization();
-            
-            // Map A2A paths and apply a policy to check for the required scope
+
             app.MapA2A(path: "/").RequireAuthorization("scope");
             app.MapWellKnownAgentCard(AutonomousAgent.GetAgentCard(configuration));
             app.Run();

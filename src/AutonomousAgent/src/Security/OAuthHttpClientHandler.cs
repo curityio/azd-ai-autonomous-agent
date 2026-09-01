@@ -2,6 +2,7 @@ namespace IO.Curity.AutonomousAgent.Security
 {
     using System.Net.Http;
     using Microsoft.Extensions.Logging;
+    using IO.Curity.AutonomousAgent.Utilities;
 
     /*
      * An HTTP handler to add OAuth access tokens to outbound MCP client or A2A requests

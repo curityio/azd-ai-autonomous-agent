@@ -113,6 +113,12 @@
                   <code>
                   </code>
                 </capabilities>
+                <properties>
+                  <property>
+                    <key>access_token_type</key>
+                    <value>#{CONSOLE_CLIENT_ACCESS_TOKEN_TYPE}</value>
+                  </property>
+                </properties>
                 <use-pairwise-subject-identifiers>
                 </use-pairwise-subject-identifiers>
                 <validate-port-on-loopback-interfaces>false</validate-port-on-loopback-interfaces>
@@ -238,6 +244,10 @@
           <id>token-service-token</id>
           <uri>/oauth/v2/oauth-token</uri>
           <endpoint-kind>oauth-token</endpoint-kind>
+          <token-endpoint-procedures>
+            <flow>oauth-token-authorization-code</flow>
+            <procedure>authorization-code-proc</procedure>
+          </token-endpoint-procedures>
           <token-endpoint-procedures>
             <flow>oauth-token-oauth-token-exchange</flow>
             <procedure>token-exchange-proc</procedure>

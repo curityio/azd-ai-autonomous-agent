@@ -22,12 +22,11 @@ namespace IO.Curity.AutonomousAgent
         public int TokenExchangeCacheSeconds  {get; private set;}
         public string PortfolioMcpServerUrl {get; private set;}
         public string AzureFoundryProjectUrl {get; private set;}
-        public string AzureAIModelName {get; private set;}
-        public string ManagedIdentityClientId {get; private set;}
+        public string AzureAIModelDeploymentName {get; private set;}
 
         public Configuration()
         {
-            this.IsLocalDevelopment = ReadEnvironmentVariable("ENV") == "local";
+            this.IsLocalDevelopment = ReadEnvironmentVariable("ENV", false) == "local";
             this.Port = int.Parse(ReadEnvironmentVariable("PORT"));
             this.ExternalBaseUrl = ReadEnvironmentVariable("EXTERNAL_BASE_URL");
             this.Issuer = ReadEnvironmentVariable("ISSUER");
@@ -42,8 +41,7 @@ namespace IO.Curity.AutonomousAgent
             this.TokenExchangeCacheSeconds = int.Parse(ReadEnvironmentVariable("TOKEN_EXCHANGE_CACHE_SECONDS"));
             this.PortfolioMcpServerUrl = ReadEnvironmentVariable("PORTFOLIO_MCP_SERVER_URL");
             this.AzureFoundryProjectUrl = ReadEnvironmentVariable("AZURE_AI_FOUNDRY_PROJECT_URL");
-            this.AzureAIModelName = ReadEnvironmentVariable("AZURE_AI_MODEL_NAME");
-            this.ManagedIdentityClientId = ReadEnvironmentVariable("MANAGED_IDENTITY_CLIENT_ID", false);
+            this.AzureAIModelDeploymentName = ReadEnvironmentVariable("AZURE_AI_MODEL_DEPLOYMENT_NAME");
         }
 
         private static string ReadEnvironmentVariable(string name, bool required=false)

@@ -81,16 +81,21 @@ Log in to the Azure CLI so that the local agent can present a CLI identity to th
 az login
 ```
 
-Run a local deployment that runs the agent and MCP server, along with Docker identity infrastructure:
+Run a local deployment that runs a deployed MCP server, along with Docker identity infrastructure:
 
 ```bash
 ./tools/local/backend.sh
 ```
 
 The first time you run a deployment, a CLI uses the browser to sign you in at Curity.  
-The CLI then uses an access token to download a trial license for the Curity Identity Server.
+The CLI then uses an access token to download a trial license for the Curity Identity Server.  
+Next, run the agent for development:
 
-Then, run a console application that connects to the local backend.  
+```bash
+./src/AuthonomousAgent/run.sh
+```
+
+Then, run a console application that calls the agent.  
 When prompted with a login form, enter any username to simulate real user authentication:
 
 ```bash
@@ -211,7 +216,7 @@ Use the following guidance to choose an Azure region and to plan costs.
 
 ### Region Availability
 
-This template uses **gpt-4.1-mini** which may not be available in all Azure regions.  
+This template uses **gpt-5.4-nano** which may not be available in all Azure regions.  
 Check for [up-to-date region availability](https://learn.microsoft.com/azure/ai-services/openai/concepts/models#standard-deployment-model-availability) and select a region during deployment accordingly.  
 Consider using **East US 2**, **Sweden Central** or **UK South**.
 

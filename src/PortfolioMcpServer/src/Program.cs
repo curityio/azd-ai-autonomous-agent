@@ -23,8 +23,8 @@ namespace IO.Curity.PortfolioMcpServer
             // Load configuration settings
             var configuration = new Configuration();
             
-            // The MCP server can log OAuth error details but does not return them to the caller
-            IdentityModelEventSource.ShowPII = true;
+            // View error details during development
+            IdentityModelEventSource.ShowPII = configuration.IsLocalDevelopment;
 
             // The MCP server runs in an internal network
             var builder = WebApplication.CreateBuilder();
@@ -88,7 +88,7 @@ namespace IO.Curity.PortfolioMcpServer
 
             // Add injectable objects
             builder.Services.AddSingleton(configuration);
-            builder.Services.AddSingleton(new DataRepository());
+            builder.Services.AddSingleton(new StocksRepository());
 
             // Expose endpoints as an MCP server over HTTP
             builder.Services.AddControllers();

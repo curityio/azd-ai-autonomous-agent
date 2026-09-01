@@ -45,7 +45,7 @@ resource aiProject 'Microsoft.CognitiveServices/accounts/projects@2025-06-01' = 
 // Deploy the foundry resource
 resource modelDeployment 'Microsoft.CognitiveServices/accounts/deployments@2025-06-01'= {
   parent: aiFoundry
-  name: 'gpt-4.1-mini'
+  name: 'gpt-5.4-nano'
   dependsOn: [aiProject]
   tags: tags
   sku: {
@@ -54,7 +54,7 @@ resource modelDeployment 'Microsoft.CognitiveServices/accounts/deployments@2025-
   }
   properties: {
     model: {
-      name: 'gpt-4.1-mini'
+      name: 'gpt-5.4-nano'
       format: 'OpenAI'
       version: '2025-04-14'
     }

@@ -17,14 +17,14 @@ You may need to replace the name `curity-demo` with a globally unique value.
 
 Select `Go to resource` and select the resources's default project, named `proj-default`.  
 Then select `Go to Foundry Portal` and navigate to the `Model Catalog`.  
-Select a low cost model, like `gpt-4.1-mini`, select `Use this model` and deploy it.
+Select a low cost model, like `gpt-5.4-nano`, select `Use this model` and deploy it.
 
 ## Grant AI Permissions
 
-Next, ensure that your user account has [Access to Microsoft Foundry](https://learn.microsoft.com/en-us/azure/foundry/concepts/rbac-foundry#minimum-role-assignments-to-get-started), for example:
+Next, ensure that your user account has [Data Plane Access to Microsoft Foundry](https://learn.microsoft.com/en-us/azure/foundry/concepts/rbac-foundry#minimum-role-assignments-to-get-started), for example:
 
 - In the Foundry Portal, edit the resource, navigate to `Access control (IAM)` and select `Add role assignement`.  
-- Select the `Azure AI User` role, add your user account as a member, then assign the role:
+- Select the `Foundry User` role, add your user account as a member, then assign the role:
 
 <img src="images/azure-ai-role.png" alt="Azure AI Role" style="width:50%;" />
 
@@ -36,5 +36,30 @@ Edit the `src/AutonomousAgent/.env` file and update settings to match your Found
 
 ```bash
 export AZURE_AI_FOUNDRY_PROJECT_URL='https://curity-demo.cognitiveservices.azure.com/api/projects/proj-default'
-export AZURE_AI_MODEL_NAME='gpt-4.1-mini'
+export AZURE_AI_MODEL_NAME='gpt-5.4-nano'
+```
+
+## Test the Connection
+
+Use commands such as the following to ensure that the connection works:
+
+```bash
+FOUNDRY_RESOURCE_NAME='curity-demo'
+FOUNDRY_PROJECT_NAME='proj-default'
+FOUNDRY_MODEL_NAME='gpt-5.4-nano'
+
+az login
+
+ACCESS_TOKEN=$(az account get-access-token \
+  --scope https://ai.azure.com/.default \
+  --query accessToken \
+  --output tsv)
+
+curl -s -X POST "https://$FOUNDRY_RESOURCE_NAME.services.ai.azure.com/api/projects/$FOUNDRY_PROJECT_NAME/openai/v1/responses" \
+  -H "authorization: Bearer $ACCESS_TOKEN" \
+  -H "content-type: application/json" \
+  -d '{
+      "model": "$FOUNDRY_MODEL_NAME",
+ "input": "What is the capital of France?"
+    }'
 ```
