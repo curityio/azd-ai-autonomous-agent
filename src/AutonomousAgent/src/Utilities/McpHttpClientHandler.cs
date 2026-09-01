@@ -1,8 +1,6 @@
 namespace IO.Curity.AutonomousAgent.Utilities
 {
     using System.Net.Http;
-    using Azure.Core;
-    using Azure.Identity;
     using Microsoft.Extensions.Logging;
 
     /*
@@ -21,7 +19,7 @@ namespace IO.Curity.AutonomousAgent.Utilities
         }
 
         /*
-         * Outbound MCP, A2A or LLM calls can send the access token and a workload identity
+         * Outbound MCP, A2A or LLM calls can send the access token
          */
         protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
         {
@@ -32,32 +30,11 @@ namespace IO.Curity.AutonomousAgent.Utilities
                 throw new UnauthorizedAccessException();
             }
 
-            var workloadCredential = await this.GetWorkloadCredential();
-
             this.logger.LogDebug($">>> Agent remote request: {request.Method} {request.RequestUri} ");
             request.Headers.Add("Authorization", $"Bearer {receivedAccessToken}");
-            request.Headers.Add("Workload-Identity", workloadCredential);
             var response = await base.SendAsync(request, cancellationToken);
             this.logger.LogDebug($">>> Agent remote response status: {response.StatusCode}");
             return response;
-        }
-
-        /*
-         * A backend agent should use a workload credential to strongly authenticate with other internal components
-         * This example uses an Azure access token but that is not a true workload identity
-         * A more complete Azure deployment might send a Kubernetes service account token
-         * - https://curity.io/resources/learn/oauth-client-credentials-kubernetes/
-         */
-        private async Task<string> GetWorkloadCredential()
-        {
-            var workloadCredential = new DefaultAzureCredential();
-            var workloadIdentityToken = await workloadCredential.GetTokenAsync(new TokenRequestContext(new[]
-                {
-                    "https://management.azure.com/.default"
-                })
-            );
-
-            return workloadIdentityToken.Token;
         }
     }
 }

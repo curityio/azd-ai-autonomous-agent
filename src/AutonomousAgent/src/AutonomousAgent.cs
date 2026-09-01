@@ -49,7 +49,7 @@ namespace IO.Curity.AutonomousAgent
 
             this.responsesClient = projectClient
                 .GetProjectOpenAIClient()
-                .GetProjectResponsesClientForModel(this.configuration.AzureAIModelName);
+                .GetProjectResponsesClientForModel(this.configuration.AzureAIModelDeploymentName);
         }
 
         /*

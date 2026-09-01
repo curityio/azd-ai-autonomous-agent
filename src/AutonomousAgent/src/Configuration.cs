@@ -15,7 +15,7 @@ namespace IO.Curity.AutonomousAgent
         public string Scope {get; private set;}
         public string PortfolioMcpServerUrl {get; private set;}
         public string AzureFoundryProjectUrl {get; private set;}
-        public string AzureAIModelName {get; private set;}
+        public string AzureAIModelDeploymentName {get; private set;}
 
         public Configuration()
         {
@@ -27,7 +27,7 @@ namespace IO.Curity.AutonomousAgent
             this.Scope = ReadEnvironmentVariable("SCOPE");
             this.PortfolioMcpServerUrl = ReadEnvironmentVariable("PORTFOLIO_MCP_SERVER_URL");
             this.AzureFoundryProjectUrl = ReadEnvironmentVariable("AZURE_AI_FOUNDRY_PROJECT_URL");
-            this.AzureAIModelName = ReadEnvironmentVariable("AZURE_AI_MODEL_NAME");
+            this.AzureAIModelDeploymentName = ReadEnvironmentVariable("AZURE_AI_MODEL_DEPLOYMENT_NAME");
         }
 
         private static string ReadEnvironmentVariable(string name, bool required=false)
