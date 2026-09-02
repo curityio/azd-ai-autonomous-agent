@@ -36,9 +36,7 @@ namespace IO.Curity.AutonomousAgent
                 var functionTool = ResponseTool.CreateFunctionTool(
                     functionName: tool.Name,
                     functionDescription: tool.Description,
-                    functionParameters:
-                        BinaryData.FromString(
-                            tool.JsonSchema.GetRawText()),
+                    functionParameters: BinaryData.FromString(tool.JsonSchema.GetRawText()),
                     strictModeEnabled: false
                 );
                 toolList.Add(functionTool);
