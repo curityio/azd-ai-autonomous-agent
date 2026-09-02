@@ -20,7 +20,8 @@ namespace IO.Curity.AutonomousAgent.Security
         }
 
         /*
-         * Outbound MCP or A2A calls can use the incoming access token, an embedded access token or token exchange
+         * In this deployment, MCP calls use token exchange and add an mcp scope to get agent attributes into an access token
+         * The token exchange also sets the audience that the target MCP server requires
          */
         public async Task<string?> ExchangeAccessToken(string receivedAccessToken)
         {
@@ -40,6 +41,7 @@ namespace IO.Curity.AutonomousAgent.Security
                     new KeyValuePair<string, string>("client_secret", this.configuration.TokenExchangeClientSecret),
                     new KeyValuePair<string, string>("subject_token", receivedAccessToken),
                     new KeyValuePair<string, string>("subject_token_type", "urn:ietf:params:oauth:token-type:access_token"),
+                    new KeyValuePair<string, string>("scope", this.configuration.TokenExchangeTargetScope),
                     new KeyValuePair<string, string>("audience", this.configuration.TokenExchangeTargetAudience),
                 };
 

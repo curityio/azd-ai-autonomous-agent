@@ -14,9 +14,8 @@ namespace IO.Curity.PortfolioMcpServer
         public string Issuer {get; private set;}
         public string Audience {get; private set;}
         public string Algorithm {get; private set;}
-        public string Scope {get; private set;}
         public string JwksUri {get; private set;}
-
+        public string[] RequiredScopes {get; private set;}
 
         public Configuration()
         {
@@ -27,8 +26,9 @@ namespace IO.Curity.PortfolioMcpServer
             this.Issuer = ReadEnvironmentVariable("ISSUER");
             this.Audience = ReadEnvironmentVariable("AUDIENCE");
             this.Algorithm = ReadEnvironmentVariable("ALGORITHM");
-            this.Scope = ReadEnvironmentVariable("SCOPE");
             this.JwksUri = ReadEnvironmentVariable("JWKS_URI", false);
+            var requiredScopesString = ReadEnvironmentVariable("REQUIRED_SCOPES");
+            this.RequiredScopes = [.. requiredScopesString.Split(' ').Select(s => s.Trim())];
         }
 
         private static string ReadEnvironmentVariable(string name, bool required = true)

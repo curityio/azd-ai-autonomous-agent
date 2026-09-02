@@ -20,13 +20,9 @@ namespace IO.Curity.PortfolioMcpServer
          */
         public static async Task Main()
         {
-            // Load configuration settings
             var configuration = new Configuration();
-            
-            // View error details during development
             IdentityModelEventSource.ShowPII = configuration.IsLocalDevelopment;
 
-            // The MCP server runs in an internal network
             var builder = WebApplication.CreateBuilder();
             builder.Configuration.AddJsonFile("appSettings.json");
             builder.WebHost
@@ -35,7 +31,6 @@ namespace IO.Curity.PortfolioMcpServer
                     options.Listen(IPAddress.Any, configuration.Port);
                 });
 
-            // The MCP server validates a JWT access token on every request and uses audience restrictions
             builder.Services
                 .AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
                 .AddJwtBearer(options =>
@@ -73,31 +68,30 @@ namespace IO.Curity.PortfolioMcpServer
 
             builder.Services.AddAuthorization(options =>
             {
-                // All endpoints require JWTs except the resource metadata endpoint which uses [AllowAnonymous]
                 options.FallbackPolicy = new AuthorizationPolicyBuilder().RequireAuthenticatedUser().Build();
 
-                // Authorized endpoints check for the MCP server's required scope
                 options.AddPolicy("scope", policy =>
+                {   
                     policy.RequireAssertion(context =>
-                        context.User.HasClaim(claim =>
-                            claim.Type == "scope" && claim.Value.Split(' ').Any(c => c == configuration.Scope)
-                        )
-                    )
-                );
+                    {
+                        var receivedScopes = context.User
+                            .FindAll("scope")
+                            .SelectMany(c => c.Value.Split(' '));
+                        
+                        return configuration.RequiredScopes.All(scope => receivedScopes.Contains(scope));
+                    });
+                });
             });
 
-            // Add injectable objects
             builder.Services.AddSingleton(configuration);
             builder.Services.AddSingleton(new StocksRepository());
 
-            // Expose endpoints as an MCP server over HTTP
             builder.Services.AddControllers();
             builder.Services
                 .AddMcpServer()
                 .WithHttpTransport()
                 .WithTools<StocksToolsService>();
 
-            // Run the MCP server as a web API
             var app = builder.Build();
             app.UseAuthentication();
             app.UseAuthorization();

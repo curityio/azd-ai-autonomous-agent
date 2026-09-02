@@ -14,7 +14,7 @@ namespace IO.Curity.AutonomousAgent
 
     /*
      * The autonomous agent receives a natural language request from an external app or agent
-     * The autonomous agent calls the LLM which can select outbound MCP or A2A requests that require security
+     * The autonomous agent calls the LLM which can trigger secured MCP requests
      * - https://github.com/a2aproject/a2a-dotnet
      */
     public class AutonomousAgent : IAgentHandler
@@ -72,7 +72,7 @@ namespace IO.Curity.AutonomousAgent
                             TokenUrl = configuration.TokenUrl,
                             Scopes = new Dictionary<string, string>
                             {
-                                [configuration.Scope] = "Read only access to a user portfolio",
+                                [configuration.RequiredScope] = "Read only access to a user portfolio",
                             },
                         }
                     }

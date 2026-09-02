@@ -21,8 +21,6 @@ namespace IO.Curity.AutonomousAgent
         public static async Task Main()
         {
             var configuration = new Configuration();
-
-            // View error details during development
             IdentityModelEventSource.ShowPII = configuration.IsLocalDevelopment;
             
             var builder = WebApplication.CreateBuilder();
@@ -33,7 +31,6 @@ namespace IO.Curity.AutonomousAgent
                     options.Listen(IPAddress.Any, configuration.Port);
                 });
 
-            // The agent validates a JWT access token on every request, to protect access to the Azure LLM, and uses audience restrictions
             builder.Services
                 .AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
                 .AddJwtBearer(options =>
@@ -50,22 +47,20 @@ namespace IO.Curity.AutonomousAgent
             
             builder.Services.AddAuthorization(options =>
             {
-                // All endpoints require JWTs except the agent card endpoint
                 options.FallbackPolicy = new AuthorizationPolicyBuilder()
                     .RequireAuthenticatedUser()
                     .AddRequirements(new AllowAnonymousAgentCardRequirement())
                     .Build();
 
-                // Authorized endpoints check for the agent's required scope
                 options.AddPolicy("scope", policy =>
                     policy.RequireAssertion(context =>
                         context.User.HasClaim(claim =>
-                            claim.Type == "scope" && claim.Value.Split(' ').Any(c => c == configuration.Scope)
+                            claim.Type == "scope" && claim.Value.Split(' ').Any(c => c == configuration.RequiredScope)
                         )
                     )
                 );
             });
-            
+
             builder.Services.AddA2AAgent<AutonomousAgent>(AutonomousAgent.GetAgentCard(configuration));
             builder.Services.AddHttpContextAccessor();
             builder.Services.AddDistributedMemoryCache();

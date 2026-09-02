@@ -134,6 +134,7 @@
               <client>
                 <id>autonomous-agent</id>
                 <secret>#{AGENT_TOKEN_EXCHANGE_SECRET}</secret>
+                <scope>mcp</scope>
                 <scope>stocks/read</scope>
                 <capabilities>
                   <oauth-token-exchange/>
@@ -141,8 +142,12 @@
                 <access-token-ttl>900</access-token-ttl>
                 <properties>
                   <property>
-                    <key>client_type</key>
-                    <value>ai-agent</value>
+                    <key>agent_role</key>
+                    <value>analyst</value>
+                  </property>
+                  <property>
+                    <key>agent_department</key>
+                    <value>finance</value>
                   </property>
                 </properties>
               </client>
@@ -154,6 +159,13 @@
               <description>Standard OpenID Connect scope</description>
             </scope>
             <scope>
+              <id>mcp</id>
+              <description>A scope to trigger issuance of agent attributes</description>
+              <claims>agent_id</claims>
+              <claims>agent_role</claims>
+              <claims>agent_department</claims>
+            </scope>
+            <scope>
               <id>stocks/read</id>
               <description>Read only access to a stock portfolio</description>
               <claims>customer_id</claims>
@@ -162,6 +174,27 @@
             </scope>
           </scopes>
           <claims>
+            <claim>
+              <name>agent_id</name>
+              <value-provided-by>script-claims-provider</value-provided-by>
+              <transformation>
+                <input-attribute-names>agent_id</input-attribute-names>
+              </transformation>
+            </claim>
+            <claim>
+              <name>agent_department</name>
+              <value-provided-by>script-claims-provider</value-provided-by>
+              <transformation>
+                <input-attribute-names>agent_department</input-attribute-names>
+              </transformation>
+            </claim>
+            <claim>
+              <name>agent_role</name>
+              <value-provided-by>script-claims-provider</value-provided-by>
+              <transformation>
+                <input-attribute-names>agent_role</input-attribute-names>
+              </transformation>
+            </claim>
             <claim>
               <name>customer_id</name>
               <value-provided-by>authentication-context-claims-provider</value-provided-by>
@@ -187,10 +220,22 @@
               <id>authentication-context-claims-provider</id>
               <authentication-context-claims-provider xmlns="https://curity.se/ns/ext-conf/authentication-context-claims-provider"/>
             </claims-value-provider>
+            <claims-value-provider>
+              <id>script-claims-provider</id>
+              <script-claims-provider xmlns="https://curity.se/ns/ext-conf/script-claims-provider">
+                <data-source>
+                  <data-source>default-datasource</data-source>
+                </data-source>
+                <procedure>script-claims-provider-proc</procedure>
+              </script-claims-provider>
+            </claims-value-provider>
             <claims-mappers>
               <claims-mapper>
                 <id>default</id>
                 <access_token>
+                  <claim>agent_id</claim>
+                  <claim>agent_role</claim>
+                  <claim>agent_department</claim>
                   <claim>customer_id</claim>
                   <claim>idp_access_token</claim>
                   <claim>region</claim>

@@ -15,9 +15,10 @@ namespace IO.Curity.AutonomousAgent
         public string Algorithm {get; private set;}
         public string AuthorizationUrl {get; private set;}
         public string TokenUrl {get; private set;}
-        public string Scope {get; private set;}
+        public string RequiredScope {get; private set;}
         public string TokenExchangeClientId {get; private set;}
         public string TokenExchangeClientSecret {get; private set;}
+        public string TokenExchangeTargetScope {get; private set;}
         public string TokenExchangeTargetAudience {get; private set;}
         public int TokenExchangeCacheSeconds  {get; private set;}
         public string PortfolioMcpServerUrl {get; private set;}
@@ -34,9 +35,10 @@ namespace IO.Curity.AutonomousAgent
             this.Algorithm = ReadEnvironmentVariable("ALGORITHM");
             this.AuthorizationUrl = ReadEnvironmentVariable("AUTHORIZATION_URL");
             this.TokenUrl = ReadEnvironmentVariable("TOKEN_URL");
-            this.Scope = ReadEnvironmentVariable("SCOPE");
+            this.RequiredScope = ReadEnvironmentVariable("REQUIRED_SCOPE");
             this.TokenExchangeClientId = ReadEnvironmentVariable("TOKEN_EXCHANGE_CLIENT_ID");
             this.TokenExchangeClientSecret = ReadEnvironmentVariable("TOKEN_EXCHANGE_CLIENT_SECRET");
+            this.TokenExchangeTargetScope = ReadEnvironmentVariable("TOKEN_EXCHANGE_TARGET_SCOPE");
             this.TokenExchangeTargetAudience = ReadEnvironmentVariable("TOKEN_EXCHANGE_TARGET_AUDIENCE");
             this.TokenExchangeCacheSeconds = int.Parse(ReadEnvironmentVariable("TOKEN_EXCHANGE_CACHE_SECONDS"));
             this.PortfolioMcpServerUrl = ReadEnvironmentVariable("PORTFOLIO_MCP_SERVER_URL");

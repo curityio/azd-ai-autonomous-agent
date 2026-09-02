@@ -85,8 +85,8 @@ resource portfoliomcpserver 'Microsoft.App/containerApps@2025-07-01' = {
               value: 'ES256'
             }
             {
-              name: 'SCOPE'
-              value: 'stocks/read'
+              name: 'REQUIRED_SCOPE'
+              value: 'mcp stocks/read'
             }
           ]
         }

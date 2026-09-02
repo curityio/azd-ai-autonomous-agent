@@ -88,7 +88,10 @@ namespace IO.Curity.PortfolioMcpServer.SecurityTests
                 { "sub", options.Subject },
                 { "customer_id", options.CustomerId },
                 { "region", options.Region },
-                { "client_type", "ai-agent" },
+                { "client_id", "console-client" },
+                { "agent_id", "autonomous-agent" },
+                { "agent_role", "analyst" },
+                { "agent_department", "finance" },
             };
 
             return JWT.Encode(payload, this.tokenSigningPrivateKey, JwsAlgorithm.ES256, headers);

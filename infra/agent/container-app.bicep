@@ -84,7 +84,7 @@ resource autonomousagent 'Microsoft.App/containerApps@2025-07-01' = {
               value: 'https://idsvr-runtime-${environmentName}.${externalDomainName}/oauth/v2/oauth-token'
             }
             {
-              name: 'SCOPE'
+              name: 'REQUIRED_SCOPE'
               value: 'stocks/read'
             }
             {
@@ -94,6 +94,10 @@ resource autonomousagent 'Microsoft.App/containerApps@2025-07-01' = {
             {
               name: 'TOKEN_EXCHANGE_CLIENT_SECRET'
               value: tokenExchangeClientSecret
+            }
+            {
+              name: 'TOKEN_EXCHANGE_TARGET_SCOPE'
+              value: 'mcp stocks/read'
             }
             {
               name: 'TOKEN_EXCHANGE_TARGET_AUDIENCE'

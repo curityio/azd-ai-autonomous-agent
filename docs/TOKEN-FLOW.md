@@ -66,8 +66,9 @@ The Portfolio MCP Server only accepts tokens with an audience restriction of `ht
   "customer_id": "178",
   "region": "USA",
   "client_id": "console-client",
-  "client_type": "ai-agent",
-  "agent_id": "autonomous-agent"
+  "agent_id": "autonomous-agent",
+  "agent_role": "analyst",
+  "agent_department": "finance"
 }
 ```
 

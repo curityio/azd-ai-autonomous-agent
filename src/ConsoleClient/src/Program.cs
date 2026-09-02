@@ -17,17 +17,13 @@
         {
             try
             {
-                // Load configuration
                 var configuration = new Configuration();
-
-                // Download the autonomous agent's A2A agent card
                 var agentUrl = new Uri(configuration.AutonomousAgentUrl);
                 
                 Console.WriteLine("Downloading A2A agent card metadata ...");
                 var cardResolver = new A2ACardResolver(baseUrl: agentUrl, agentCardPath: $"{agentUrl.AbsolutePath}/.well-known/agent-card.json");
                 var agentCard = await cardResolver.GetAgentCardAsync();
 
-                // Create an OAuth Client that uses the OAuth security scheme of the A2A server and authenticate the user
                 var oauthInfo = agentCard?.SecuritySchemes?.FirstOrDefault(s => s.Key == "oauth2").Value;
                 var oauthClient = new OAuthClient(configuration, oauthInfo);
                 Console.WriteLine("Authenticating the user, to get an access token ...");
