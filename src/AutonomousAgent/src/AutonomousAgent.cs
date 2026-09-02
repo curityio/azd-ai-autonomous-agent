@@ -60,20 +60,27 @@ namespace IO.Curity.AutonomousAgent
                 Tags = ["stocks", "portfolio"],
             };
 
+            var scopes = new Dictionary<string, string>
+            {
+                [configuration.RequiredScope] = "Read only access to stocks",
+            };
+
             var oauth2Scheme = new SecurityScheme
             {
                 OAuth2SecurityScheme = new OAuth2SecurityScheme
                 {
                     Flows = new OAuthFlows
                     {
+                        ClientCredentials = new ClientCredentialsOAuthFlow
+                        {
+                            TokenUrl = configuration.TokenUrl,
+                            Scopes = scopes,
+                        },
                         AuthorizationCode = new AuthorizationCodeOAuthFlow
                         {
                             AuthorizationUrl = configuration.AuthorizationUrl,
                             TokenUrl = configuration.TokenUrl,
-                            Scopes = new Dictionary<string, string>
-                            {
-                                [configuration.RequiredScope] = "Read only access to a user portfolio",
-                            },
+                            Scopes = scopes,
                         }
                     }
                 }
