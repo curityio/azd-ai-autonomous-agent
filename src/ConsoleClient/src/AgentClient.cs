@@ -34,7 +34,7 @@ namespace IO.Curity.ConsoleClient
         /*
          * Send a command to the agent, and use long running tasks when required
          */
-        public async Task<string> SendNaturalLanguageCommandAsync(string command)
+        public async Task SendNaturalLanguageCommandAsync(string command, Action<string> onMessage)
         {
             var request = new SendMessageRequest
             {
@@ -47,8 +47,17 @@ namespace IO.Curity.ConsoleClient
             
             try
             {
-                var response = await this.a2aClient.SendMessageAsync(request);
-                return response?.Message?.Parts?[0]?.Text ?? string.Empty;
+                await foreach (var response in this.a2aClient.SendStreamingMessageAsync(request))
+                {
+                    if (response.PayloadCase == StreamResponseCase.Message)
+                    {
+                        var text = response.Message?.Parts?[0]?.Text;
+                        if (!string.IsNullOrWhiteSpace(text))
+                        {
+                            onMessage(text);
+                        }
+                    }
+                }
             }
             catch (A2AException e)
             {

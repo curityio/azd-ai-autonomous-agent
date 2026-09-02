@@ -35,8 +35,7 @@
                 """;
                 Console.WriteLine($"- {userCommand}");
                 var agentClient = new AgentClient(agentUrl, oauthClient);
-                var agentResponse = await agentClient.SendNaturalLanguageCommandAsync(userCommand);
-                Console.WriteLine(agentResponse);
+                await agentClient.SendNaturalLanguageCommandAsync(userCommand, message => Console.Write(message));
             }
             catch (ClientError error)
             {

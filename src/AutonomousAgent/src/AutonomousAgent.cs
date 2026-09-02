@@ -102,27 +102,24 @@ namespace IO.Curity.AutonomousAgent
             var userCommand = context.UserText ?? string.Empty;
             this.logger.LogDebug($">>> LLM request: {userCommand}");
 
+            var responder = new MessageResponder(eventQueue, context.ContextId);
+            Func<string, Task> onChunk  = async chunk => await responder.ReplyAsync(chunk, cancellationToken);
+
             try
             {
-                var responseText = await this.CallFoundryModel(userCommand);
-                this.logger.LogDebug($">>> LLM response received");
-
-                var responder = new MessageResponder(eventQueue, context.ContextId);
-                await responder.ReplyAsync(responseText, cancellationToken);
+                await this.CallFoundryModelAsync(userCommand, onChunk, cancellationToken);
             }
             catch (Exception e)
             {
                 this.logger.LogDebug($">>> LLM error response: {e.Message}");
-
-                var responder = new MessageResponder(eventQueue, context.ContextId);
-                await responder.ReplyAsync("Server problem encountered", cancellationToken);
+                await onChunk("Server problem encountered");
             }
         }
 
         /*
          * Call Foundry using the OpenAI responses API and handle any LLM responses that trigger MCP tools
          */
-        private async Task<string> CallFoundryModel(string userCommand)
+        private async Task CallFoundryModelAsync(string userCommand, Func<string, Task> onChunk, CancellationToken cancellationToken)
         {
             var options = new CreateResponseOptions
             {
@@ -133,53 +130,57 @@ namespace IO.Curity.AutonomousAgent
                 ReasoningOptions = new ResponseReasoningOptions
                 {
                     ReasoningEffortLevel = ResponseReasoningEffortLevel.None
-                }
+                },
+                StreamingEnabled = true
             };
 
             var mcpToolsClient = new McpToolsClient(this.configuration, this.oauthHttpClientHandler);
             await mcpToolsClient.AddFunctionTools(options.Tools);
 
-            while (true)
+            for (var round = 0; round < 5; round++)
             {
-                var finalText = new StringBuilder();
                 var functionCalls = new List<FunctionCallResponseItem>();
-            
-                var response = await this.responsesClient.CreateResponseAsync(options);
-                foreach (var output in response.Value.OutputItems)
-                {
-                    switch (output)
-                    {
-                        case FunctionCallResponseItem call:
-                            this.logger.LogDebug($">>> LLM triggered MCP request: {call.CallId}, {call.FunctionName}");
-                            functionCalls.Add(call);
-                            break;
 
-                        case MessageResponseItem message:
-                            this.logger.LogDebug(">>> LLM received final response");
-                            foreach (var content in message.Content)
+                await foreach (var update in this.responsesClient.CreateResponseStreamingAsync(options, cancellationToken))
+                {
+                    switch (update)
+                    {
+                        case StreamingResponseOutputTextDeltaUpdate textUpdate:
+                            
+                            if (!string.IsNullOrEmpty(textUpdate.Delta))
                             {
-                                finalText.Append(content.Text);
+                                this.logger.LogDebug(">>> LLM response chunk received");
+                                await onChunk(textUpdate.Delta);
                             }
                             break;
+                    
+                        case StreamingResponseOutputItemDoneUpdate doneUpdate:
 
-                        default:
-                            this.logger.LogDebug($">>> LLM unhandled response: {output.GetType().Name}");
+                            options.InputItems.Add(doneUpdate.Item);
+                            if (doneUpdate.Item is FunctionCallResponseItem call)
+                            {
+                                this.logger.LogDebug($">>> LLM triggered MCP request: {call.CallId}, {call.FunctionName}");
+                                functionCalls.Add(call);
+                            }
                             break;
                     }
-
-                    options.InputItems.Add(output);
-                }
-
-                foreach (var call in functionCalls)
-                {
-                    var jsonData = await mcpToolsClient.CallToolAsync(call);
-                    var jsonResponseItem = new FunctionCallOutputResponseItem(call.CallId, jsonData);
-                    options.InputItems.Add(jsonResponseItem);
                 }
 
                 if (functionCalls.Count == 0)
                 {
-                    return finalText.ToString();
+                    return;
+                }
+
+                var mcpToolTasks = functionCalls.Select(async call =>
+                {
+                    var jsonData = await mcpToolsClient.CallToolAsync(call);
+                    return new FunctionCallOutputResponseItem(call.CallId, jsonData);
+                });
+
+                var mcpToolResults = await Task.WhenAll(mcpToolTasks);
+                foreach (var result in mcpToolResults)
+                {
+                    options.InputItems.Add(result);
                 }
             }
         }
