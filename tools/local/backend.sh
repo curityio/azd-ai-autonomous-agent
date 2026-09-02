@@ -86,11 +86,8 @@ cd -
 #
 # Build a custom Docker image for the Curity Identity Server, with local configuration
 #
-cd ../idsvr/docker
-rm *.xml 2>/dev/null
-cp ../config-base.xml .
-cp ../config-local.xml .
-docker build --no-cache -t idsvr:1.0.0 .
+cd ../idsvr
+docker build --no-cache -f Dockerfile.local -t idsvr:1.0.0 .
 if [ $? -ne 0 ]; then
   exit 1
 fi
