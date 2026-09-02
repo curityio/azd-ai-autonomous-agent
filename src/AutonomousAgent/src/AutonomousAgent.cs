@@ -118,8 +118,8 @@ namespace IO.Curity.AutonomousAgent
             }
             catch (Exception e)
             {
-                this.logger.LogDebug($">>> LLM error response: {e.Message}");
-                await onChunk("Server problem encountered");
+                this.logger.LogDebug($">>> Error response: {e.Message}");
+                await onChunk("The agent experienced a problem during AI processing");
             }
         }
 
@@ -156,7 +156,6 @@ namespace IO.Curity.AutonomousAgent
                             
                             if (!string.IsNullOrEmpty(textUpdate.Delta))
                             {
-                                this.logger.LogDebug(">>> LLM response chunk received");
                                 await onChunk(textUpdate.Delta);
                             }
                             break;

@@ -27,21 +27,17 @@ namespace IO.Curity.AutonomousAgent.Security
         protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
         {
             var receivedAccessToken = this.GetAccessToken();
-            if (!string.IsNullOrWhiteSpace(receivedAccessToken))
+            if (string.IsNullOrWhiteSpace(receivedAccessToken))
             {
-                var exchangedAccessToken = await this.tokenExchangeClient.ExchangeAccessToken(receivedAccessToken);
-                if (!string.IsNullOrWhiteSpace(exchangedAccessToken))
-                {
-                    this.logger.LogDebug($">>> Agent remote request: {request.Method} {request.RequestUri} ");
-                    request.Headers.Add("Authorization", $"Bearer {exchangedAccessToken}");
-                    var response = await base.SendAsync(request, cancellationToken);
-                    this.logger.LogDebug($">>> Agent remote response status: {response.StatusCode}");
-                    return response;
-                }
-            }
+                throw new UnauthorizedAccessException();
+            } 
+
+            var exchangedAccessToken = await this.tokenExchangeClient.ExchangeAccessToken(receivedAccessToken);
+            request.Headers.Add("Authorization", $"Bearer {exchangedAccessToken}");
             
-            logger.LogError($"Unable to get an access token with which to call the MCP server");
-            throw new InvalidOperationException($"Agent problem encountered during data access");
+            var response = await base.SendAsync(request, cancellationToken);
+            this.logger.LogDebug($">>> Agent remote response status: {response.StatusCode}");
+            return response;
         }
 
         /*
