@@ -38,7 +38,7 @@ function result(context) {
     scope: scopes,
     access_token: issuedAccessToken,
     token_type: 'bearer',
-    expires_in: secondsUntil(tokenData.exp),
+    expires_in: secondsUntil(newTokenData.exp),
     issued_token_type: 'urn:ietf:params:oauth:token-type:access_token',
   };
 }
