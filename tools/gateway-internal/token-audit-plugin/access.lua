@@ -14,6 +14,10 @@ local jwt = require 'resty.jwt'
 local function audit_request(jwt_access_token)
 
     local data = jwt:load_jwt(jwt_access_token, nil)
+
+    local payload = data.payload or {}
+    local act = payload.act or {}
+
     if data.valid then
 
         local audit_data = { 
@@ -22,13 +26,15 @@ local function audit_request(jwt_access_token)
             target_host = ngx.var.host,
             target_path = ngx.var.request_uri,
             target_method = ngx.req.get_method(),
-            client_id = data.payload.client_id,
-            agent_id = data.payload.agent_id,
-            scope = data.payload.scope,
-            audience = data.payload.aud,
-            delegation_id = data.payload.delegationId,
-            customer_id = data.payload.customer_id,
-            region = data.payload.region
+            client_id = payload.client_id,
+            audience = payload.aud,
+            scope = payload.scope,
+            delegation_id = payload.delegationId,
+            customer_id = payload.customer_id,
+            region = payload.region,
+            agent_id = act.sub,
+            agent_role = act.agent_role,
+            agent_department = act.agent_department,
         };
         local audit_json = cjson.encode(audit_data)
         ngx.log(ngx.WARN, audit_json)

@@ -2,6 +2,7 @@ namespace IO.Curity.AutonomousAgent.Security
 {
     using System.Net;
     using System.Net.Http;
+    using System.Text.Json;
     using System.Text.Json.Nodes;
     using Microsoft.Extensions.Logging;
     using IO.Curity.AutonomousAgent.Utilities;
@@ -25,7 +26,7 @@ namespace IO.Curity.AutonomousAgent.Security
 
         /*
          * First do token exchange to get agent attributes into the access token
-         * Then call MCP tools with the new access token
+         * Then call MCP tools with the new access token, so that the agent passes authorization checks
          */
         protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
         {
@@ -51,13 +52,15 @@ namespace IO.Curity.AutonomousAgent.Security
 
             if (!response.IsSuccessStatusCode)
             {
-                var responseText = await response.Content.ReadAsStringAsync();
-                var responseData = JsonNode.Parse(responseText);
-                
-                this.LogRemoteError(response.StatusCode, responseData);
-                if(response.StatusCode == HttpStatusCode.Unauthorized)
+                await this.LogRemoteError(response);
+
+                if (response.StatusCode == HttpStatusCode.Unauthorized)
                 {
                     throw ErrorFactory.CreateUnauthorizedError();
+                }
+                else if (response.StatusCode == HttpStatusCode.Forbidden)
+                {
+                    throw ErrorFactory.CreateForbiddenError();
                 }
                 else
                 {
@@ -89,13 +92,23 @@ namespace IO.Curity.AutonomousAgent.Security
         /*
          * Log details from the external system
          */
-        private void LogRemoteError(HttpStatusCode statusCode, JsonNode? responseData)
+        private async Task LogRemoteError(HttpResponseMessage response)
         {
-            var error = responseData?["error"]?.GetValue<string>() ??
-                "token_exchange_error";
-            var errorDescription = responseData?["error_description"]?.GetValue<string>() ??
-                "Problem encountered calling an MCP tool";
-            this.logger.LogError($">>> MCP tool response error: {statusCode}, {error}, {errorDescription} ");
+            var error = string.Empty;
+            var errorDescription = string.Empty;
+            
+            try
+            {
+                var responseText = await response.Content.ReadAsStringAsync();
+                var responseData = JsonNode.Parse(responseText);
+                error = responseData?["error"]?.GetValue<string>();
+                errorDescription = responseData?["error_description"]?.GetValue<string>();
+            }
+            catch (JsonException)
+            {
+            }
+
+            this.logger.LogError($">>> MCP tool response error: {response.StatusCode}, {error}, {errorDescription} ");
         }
     }
 }

@@ -1,6 +1,7 @@
 namespace IO.Curity.AutonomousAgent.Security
 {
     using System.Net;
+    using System.Text.Json;
     using System.Text.Json.Nodes;
     using Microsoft.Extensions.Logging;
     using IO.Curity.AutonomousAgent.Utilities;
@@ -57,12 +58,10 @@ namespace IO.Curity.AutonomousAgent.Security
                     throw ErrorFactory.CreateServerError();
                 }
 
-                var responseText = await response.Content.ReadAsStringAsync();
-                var responseData = JsonNode.Parse(responseText);
-
                 if (!response.IsSuccessStatusCode)
                 {
-                    this.LogRemoteError(response.StatusCode, responseData);
+                    await this.LogRemoteError(response);
+
                     if(response.StatusCode == HttpStatusCode.Unauthorized)
                     {
                         throw ErrorFactory.CreateUnauthorizedError();
@@ -73,6 +72,8 @@ namespace IO.Curity.AutonomousAgent.Security
                     }
                 }
 
+                var responseText = await response.Content.ReadAsStringAsync();
+                var responseData = JsonNode.Parse(responseText);
                 var exchangedAccessToken = responseData?["access_token"]?.GetValue<string>();
                 if (string.IsNullOrWhiteSpace(exchangedAccessToken))
                 {
@@ -81,17 +82,33 @@ namespace IO.Curity.AutonomousAgent.Security
                 }
                 
                 await this.cache.SetItemAsync(receivedAccessToken, exchangedAccessToken);
+                Console.WriteLine(receivedAccessToken);
+                Console.WriteLine(exchangedAccessToken);
+
                 return exchangedAccessToken;
             }
         }
 
-        private void LogRemoteError(HttpStatusCode statusCode, JsonNode? responseData)
+        /*
+         * Log details from the external system
+         */
+        private async Task LogRemoteError(HttpResponseMessage response)
         {
-            var error = responseData?["error"]?.GetValue<string>() ??
-                "token_exchange_error";
-            var errorDescription = responseData?["error_description"]?.GetValue<string>() ??
-                "Problem encountered exchanging the access token";
-            this.logger.LogError($">>> Token exchange response error: {statusCode}, {error}, {errorDescription} ");
+            var error = string.Empty;
+            var errorDescription = string.Empty;
+            
+            try
+            {
+                var responseText = await response.Content.ReadAsStringAsync();
+                var responseData = JsonNode.Parse(responseText);
+                error = responseData?["error"]?.GetValue<string>();
+                errorDescription = responseData?["error_description"]?.GetValue<string>();
+            }
+            catch (JsonException)
+            {
+            }
+
+            this.logger.LogError($">>> Token exchange response error: {response.StatusCode}, {error}, {errorDescription} ");
         }
     }
 }

@@ -104,19 +104,21 @@ The example deployment writes JSON audit logs that include business-centric clai
 You can ship such logs to a log aggregation system to provide visibility of large scale agent access to secured resources.  
 
 ```json
-{ 
-    "log_type": "audit",
-    "time": "2026-02-22T15:18:09Z",
-    "target_host": "localhost",
-    "target_path": "/mcp",
-    "target_method": "POST",
-    "client_id": "console-client",
-    "agent_id": "autonomous-agent",
-    "scope": "stocks/read",
-    "audience": "https://mcp.demo.example",
-    "delegation_id": "f8b69837-1d3e-4c8a-886f-82923c35955a",
-    "customer_id": "178",
-    "region": "USA"
+{
+  "log_type":"audit",
+  "time":"2026-09-04T15:53:51Z",
+  "target_host":"gateway-internal",
+  "target_path":"/portfolio-mcp-server",
+  "target_method":"POST",
+  "audience":"https://mcp.demo.example",
+  "scope":"stocks/read",
+  "client_id": "console-client",
+  "delegation_id":"b1148748-749b-4aef-bdde-2892258fabc6",
+  "customer_id":"2109",
+  "region":"USA",
+  "agent_id":"autonomous-agent",
+  "agent_role":"analyst",
+  "agent_department":"finance"
 }
 ```
 

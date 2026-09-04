@@ -2,8 +2,8 @@ namespace IO.Curity.PortfolioMcpServer
 {
     using System.ComponentModel;
     using System.Security.Claims;
-    using IO.Curity.PortfolioMcpServer.Entities;
     using ModelContextProtocol.Server;
+    using IO.Curity.PortfolioMcpServer.Entities;
 
     /*
      * The MCP server authorizes access to stocks using customer_id and region claims in the user's access token

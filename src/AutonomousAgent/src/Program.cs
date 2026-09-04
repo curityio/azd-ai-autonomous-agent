@@ -3,6 +3,7 @@ namespace IO.Curity.AutonomousAgent
     using System.Net;
     using A2A.AspNetCore;
     using IO.Curity.AutonomousAgent.Security;
+    using IO.Curity.AutonomousAgent.Utilities;
     using Microsoft.AspNetCore.Authentication.JwtBearer;
     using Microsoft.AspNetCore.Authorization;
     using Microsoft.AspNetCore.Builder;
@@ -49,18 +50,16 @@ namespace IO.Curity.AutonomousAgent
                         OnChallenge = async context =>
                         {
                             context.HandleResponse();
-
-                            var error = "invalid_token";
-                            var description = "The access token is missing, invalid, or expired";
-
                             context.Response.StatusCode = StatusCodes.Status401Unauthorized;
                             context.Response.ContentType = "application/json";
-                            context.Response.Headers.WWWAuthenticate = $"Bearer error=\"{error}\", error_description=\"{description}\"";
+                            
+                            var error = ErrorFactory.CreateUnauthorizedError();
+                            context.Response.Headers.WWWAuthenticate = $"Bearer error=\"{error.Code}\", error_description=\"{error.Message}\"";
 
                             await context.Response.WriteAsJsonAsync(new
                             {
-                                error,
-                                error_description = description
+                                error = error.Code,
+                                error_description = error.Message,
                             });
                         }
                     };

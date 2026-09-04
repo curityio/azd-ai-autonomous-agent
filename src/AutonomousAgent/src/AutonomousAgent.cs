@@ -11,6 +11,7 @@ namespace IO.Curity.AutonomousAgent
     using OpenAI.Responses;
     using IO.Curity.AutonomousAgent.Security;
     using IO.Curity.AutonomousAgent.Utilities;
+    using System.Text.Json;
 
     /*
      * The autonomous agent receives a natural language request from an external app or agent
@@ -118,7 +119,15 @@ namespace IO.Curity.AutonomousAgent
             }
             catch (AgentError ex)
             {
-                await onChunk($"The agent experienced a problem during AI processing: {ex.StatusCode}, {ex.Code}, {ex.Message}");
+                var data = new
+                {
+                    type = "error",
+                    message = ex.Message,
+                    statusCode = ex.StatusCode,
+                    error = ex.Code,
+                    error_description = ex.Message,
+                };
+                await onChunk(JsonSerializer.Serialize(data));
             }
         }
 
@@ -155,7 +164,13 @@ namespace IO.Curity.AutonomousAgent
                             
                             if (!string.IsNullOrEmpty(textUpdate.Delta))
                             {
-                                await onChunk(textUpdate.Delta);
+                                var data = new
+                                {
+                                    type = "message",
+                                    message = textUpdate.Delta,
+                                };
+                                
+                                await onChunk(JsonSerializer.Serialize(data));
                             }
                             break;
                     

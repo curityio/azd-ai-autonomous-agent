@@ -2,6 +2,7 @@ namespace IO.Curity.PortfolioMcpServer
 {
     using System.Net;
     using System.Threading.Tasks;
+    using IO.Curity.PortfolioMcpServer.Utilities;
     using Microsoft.AspNetCore.Authentication.JwtBearer;
     using Microsoft.AspNetCore.Authorization;
     using Microsoft.AspNetCore.Builder;
@@ -65,7 +66,22 @@ namespace IO.Curity.PortfolioMcpServer
                                 error,
                                 error_description = description
                             });
-                        }
+                        },
+                        OnForbidden = async context =>
+                        {
+                            var error = "insufficient_scope";
+                            var description = "The access token has insufficient privileges";
+
+                            context.Response.StatusCode = StatusCodes.Status403Forbidden;
+                            context.Response.ContentType = "application/json";
+                            context.Response.Headers.WWWAuthenticate = $"Bearer error=\"{error}\", error_description=\"{description}\"";
+
+                            await context.Response.WriteAsJsonAsync(new
+                            {
+                                error,
+                                error_description = description
+                            });
+                        },
                     };
 
                     options.TokenValidationParameters.IssuerSigningKeyResolver = (token, securityToken, kid, parameters) =>
@@ -94,6 +110,18 @@ namespace IO.Curity.PortfolioMcpServer
                         )
                     )
                 );
+
+                options.AddPolicy("agent", policy =>
+                    policy.RequireAssertion(context =>
+                    {
+                        var agentClaims = context.User.GetAgentClaims();
+                        if (agentClaims == null)
+                        {
+                            return false;
+                        }
+
+                        return agentClaims.AgentDepartment == "finance";
+                    }));
             });
 
             builder.Services.AddSingleton(configuration);
@@ -109,7 +137,7 @@ namespace IO.Curity.PortfolioMcpServer
             app.UseAuthentication();
             app.UseAuthorization();
             app.MapControllers();
-            app.MapMcp().RequireAuthorization("scope");
+            app.MapMcp().RequireAuthorization("scope", "agent");
             app.Run();
         }
     }

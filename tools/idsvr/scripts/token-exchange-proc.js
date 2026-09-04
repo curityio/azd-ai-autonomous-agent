@@ -5,7 +5,7 @@ function result(context) {
   
   var tokenData = context.getPresentedSubjectToken();
   var presentedDelegation = context.getPresentedSubjectTokenDelegation();
-  
+
   var newAudience = context.request.getFormParameter('audience');
   if (newAudience) {
     tokenData.aud = [newAudience];
@@ -26,6 +26,10 @@ function result(context) {
   );
 
   var newTokenData = fullContext.getDefaultAccessTokenData();
+  if (!newTokenData.client_id) {
+    newTokenData.client_id = presentedDelegation.clientId;
+  }
+
   if (fullContext.client.properties.agent_role && fullContext.client.properties.agent_department) {
     newTokenData.act = {
       sub: fullContext.client.id,

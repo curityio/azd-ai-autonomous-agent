@@ -72,7 +72,24 @@ namespace IO.Curity.ConsoleClient
                         var text = response.Message?.Parts?[0]?.Text;
                         if (!string.IsNullOrWhiteSpace(text))
                         {
-                            onMessage(text);
+                            var data = JsonNode.Parse(text);
+                            var message = data?["message"]?.GetValue<string>() ?? string.Empty;
+                            if (!string.IsNullOrWhiteSpace(message))
+                            {
+                                var type = data?["type"]?.GetValue<string>() ?? string.Empty;
+                                if (type == "message")
+                                {
+                                    onMessage(message);
+                                }
+
+                                if (type == "error")
+                                {
+                                    var statusCode = data?["statusCode"]?.GetValue<int>() ?? 0;
+                                    var error = data?["error"]?.GetValue<string>() ?? string.Empty;
+                                    var errorDescription = data?["error_description"]?.GetValue<string>() ?? string.Empty;
+                                    onMessage($"Agent problem encountered: {statusCode}, {error}: {errorDescription}");
+                                }
+                            }
                         }
                     }
                 }
