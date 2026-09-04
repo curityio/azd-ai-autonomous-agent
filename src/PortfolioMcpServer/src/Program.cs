@@ -47,22 +47,39 @@ namespace IO.Curity.PortfolioMcpServer
                     options.RequireHttpsMetadata = false;
                     options.MapInboundClaims = false;
 
-                    // This example uses an explicit JWKS URI that can be overridden for testing
-                    if (!string.IsNullOrWhiteSpace(configuration.JwksUri))
+                    options.Events = new JwtBearerEvents
                     {
-                        options.TokenValidationParameters.IssuerSigningKeyResolver = (token, securityToken, kid, parameters) =>
+                        OnChallenge = async context =>
                         {
-                            var httpClient = new HttpClient();
-                            var response = httpClient.GetStringAsync(configuration.JwksUri).Result;
-                            var keys = new JsonWebKeySet(response).GetSigningKeys();
-                            var matchingKeys = keys.Where(key => key.KeyId == kid).ToList();
-                            if (matchingKeys.Count == 0)
-                            {
-                                throw new SecurityTokenException($"The kid {kid} in the JWT header was not found");
-                            }
+                            context.HandleResponse();
 
-                            return matchingKeys;
-                        };
+                            var error = "invalid_token";
+                            var description = "The access token is missing, invalid, or expired";
+
+                            context.Response.StatusCode = StatusCodes.Status401Unauthorized;
+                            context.Response.ContentType = "application/json";
+                            context.Response.Headers.WWWAuthenticate = $"Bearer error=\"{error}\", error_description=\"{description}\"";
+
+                            await context.Response.WriteAsJsonAsync(new
+                            {
+                                error,
+                                error_description = description
+                            });
+                        }
+                    };
+
+                    options.TokenValidationParameters.IssuerSigningKeyResolver = (token, securityToken, kid, parameters) =>
+                    {
+                        var httpClient = new HttpClient();
+                        var response = httpClient.GetStringAsync(configuration.JwksUri).Result;
+                        var keys = new JsonWebKeySet(response).GetSigningKeys();
+                        var matchingKeys = keys.Where(key => key.KeyId == kid).ToList();
+                        if (matchingKeys.Count == 0)
+                        {
+                            throw new SecurityTokenException($"The kid {kid} in the JWT header was not found");
+                        }
+
+                        return matchingKeys;
                     };
                 });
 

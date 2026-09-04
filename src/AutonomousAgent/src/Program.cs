@@ -43,8 +43,29 @@ namespace IO.Curity.AutonomousAgent
                     };
                     options.RequireHttpsMetadata = false;
                     options.MapInboundClaims = false;
+                    
+                    options.Events = new JwtBearerEvents
+                    {
+                        OnChallenge = async context =>
+                        {
+                            context.HandleResponse();
+
+                            var error = "invalid_token";
+                            var description = "The access token is missing, invalid, or expired";
+
+                            context.Response.StatusCode = StatusCodes.Status401Unauthorized;
+                            context.Response.ContentType = "application/json";
+                            context.Response.Headers.WWWAuthenticate = $"Bearer error=\"{error}\", error_description=\"{description}\"";
+
+                            await context.Response.WriteAsJsonAsync(new
+                            {
+                                error,
+                                error_description = description
+                            });
+                        }
+                    };
                 });
-            
+
             builder.Services.AddAuthorization(options =>
             {
                 options.FallbackPolicy = new AuthorizationPolicyBuilder()

@@ -8,4 +8,4 @@ cd "$(dirname "${BASH_SOURCE[0]}")"
 
 . ./.env
 rm *.sln 2>/dev/null
-dotnet run
+dotnet watch

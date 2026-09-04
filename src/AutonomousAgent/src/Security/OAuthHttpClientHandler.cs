@@ -2,6 +2,7 @@ namespace IO.Curity.AutonomousAgent.Security
 {
     using System.Net;
     using System.Net.Http;
+    using System.Text.Json.Nodes;
     using Microsoft.Extensions.Logging;
     using IO.Curity.AutonomousAgent.Utilities;
 
@@ -23,37 +24,48 @@ namespace IO.Curity.AutonomousAgent.Security
         }
 
         /*
-         * Outbound calls use token exchange and send an access token with agent attributes to the MCP server
+         * First do token exchange to get agent attributes into the access token
+         * Then call MCP tools with the new access token
          */
         protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
         {
             var receivedAccessToken = this.GetAccessToken();
             if (string.IsNullOrWhiteSpace(receivedAccessToken))
             {
-                return new HttpResponseMessage(HttpStatusCode.Unauthorized);
+                throw ErrorFactory.CreateUnauthorizedError();
             }
 
-            try {
+            var exchangedAccessToken = await this.tokenExchangeClient.ExchangeAccessToken(receivedAccessToken);
 
-                var (statusCode, exchangedAccessToken) = await this.tokenExchangeClient.ExchangeAccessToken(receivedAccessToken);
-                if (statusCode != HttpStatusCode.OK)
-                {
-                    return new HttpResponseMessage(HttpStatusCode.Unauthorized);
-                }
-
+            HttpResponseMessage response;
+            try
+            {
                 request.Headers.Add("Authorization", $"Bearer {exchangedAccessToken}");
-                var response = await base.SendAsync(request, cancellationToken);
-                this.logger.LogDebug($">>> Agent remote response status: {response.StatusCode}");
-                return response;
+                response = await base.SendAsync(request, cancellationToken);
             }
-            catch (UnauthorizedAccessException)
+            catch (Exception ex)
             {
-                return new HttpResponseMessage(HttpStatusCode.Unauthorized);
+                this.logger.LogDebug($">>> MCP tool request error: {ex.Message}");
+                throw ErrorFactory.CreateServerError();
             }
-            catch (Exception)
+
+            if (!response.IsSuccessStatusCode)
             {
-                return new HttpResponseMessage(HttpStatusCode.InternalServerError);
+                var responseText = await response.Content.ReadAsStringAsync();
+                var responseData = JsonNode.Parse(responseText);
+                
+                this.LogRemoteError(response.StatusCode, responseData);
+                if(response.StatusCode == HttpStatusCode.Unauthorized)
+                {
+                    throw ErrorFactory.CreateUnauthorizedError();
+                }
+                else
+                {
+                    throw ErrorFactory.CreateServerError();
+                }
             }
+
+            return response;
         }
 
         /*
@@ -72,6 +84,18 @@ namespace IO.Curity.AutonomousAgent.Security
             }
 
             return string.Empty;
+        }
+
+        /*
+         * Log details from the external system
+         */
+        private void LogRemoteError(HttpStatusCode statusCode, JsonNode? responseData)
+        {
+            var error = responseData?["error"]?.GetValue<string>() ??
+                "token_exchange_error";
+            var errorDescription = responseData?["error_description"]?.GetValue<string>() ??
+                "Problem encountered calling an MCP tool";
+            this.logger.LogError($">>> MCP tool response error: {statusCode}, {error}, {errorDescription} ");
         }
     }
 }

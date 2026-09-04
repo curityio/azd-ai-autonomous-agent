@@ -2,6 +2,7 @@ namespace IO.Curity.ConsoleClient
 {
     using System;
     using System.Net;
+    using System.Text.Json.Nodes;
     using A2A;
     using IO.Curity.ConsoleClient.Security;
 
@@ -28,7 +29,24 @@ namespace IO.Curity.ConsoleClient
         protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
         {
             request.Headers.Add("Authorization", $"Bearer {oauthClient.GetAccessToken()}");
-            return await base.SendAsync(request, cancellationToken);
+            
+            var response = await base.SendAsync(request, cancellationToken);
+
+            if (response.StatusCode != HttpStatusCode.OK)
+            {
+                var json = await response.Content.ReadAsStringAsync();
+                var errorData = JsonNode.Parse(json);
+
+                var error = errorData?["error"]?.GetValue<string>() ?? "http_error";
+                var errorDescription = errorData?["error_description"]?.GetValue<string>() ?? "Problem encountered in an HTTP request";
+
+                throw new ClientError(error, errorDescription)
+                {
+                    StatusCode = (int)response.StatusCode
+                };
+            };
+
+            return response;
         }
 
         /*
@@ -59,26 +77,9 @@ namespace IO.Curity.ConsoleClient
                     }
                 }
             }
-            catch (A2AException e)
+            catch (A2AException ex)
             {
-                throw new ClientError(e.ErrorCode.ToString(), e.Message);
-            }
-            catch (HttpRequestException e)
-            {   
-                if (e.StatusCode == HttpStatusCode.Unauthorized)
-                {
-                    throw new ClientError("invalid_token", "Missing, invalid or expired access token")
-                    {
-                        StatusCode = 401
-                    };
-                }
-
-                var error = new ClientError("connection_error", e.Message);
-                if (e.StatusCode != null)
-                {
-                    error.StatusCode = (int)e.StatusCode;
-                }
-                throw error;
+                throw new ClientError(ex.ErrorCode.ToString(), ex.Message);
             }
         }
     }

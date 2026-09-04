@@ -3,6 +3,7 @@ namespace IO.Curity.AutonomousAgent.Security
     using System.Net;
     using System.Text.Json.Nodes;
     using Microsoft.Extensions.Logging;
+    using IO.Curity.AutonomousAgent.Utilities;
 
     /*
      * Implement token exchange to enable the agent to call an upstream MCP server
@@ -24,12 +25,12 @@ namespace IO.Curity.AutonomousAgent.Security
          * In this deployment, MCP calls use token exchange and add an mcp scope to get agent attributes into an access token
          * The token exchange also sets the audience that the target MCP server requires
          */
-        public async Task<(HttpStatusCode, string)> ExchangeAccessToken(string receivedAccessToken)
+        public async Task<string> ExchangeAccessToken(string receivedAccessToken)
         {
             var cachedToken = await this.cache.GetItemAsync(receivedAccessToken);
             if (!string.IsNullOrWhiteSpace(cachedToken))
             {
-                return (HttpStatusCode.OK, cachedToken);
+                return cachedToken;
             }
 
             using (var client = new HttpClient())
@@ -45,30 +46,52 @@ namespace IO.Curity.AutonomousAgent.Security
                     new KeyValuePair<string, string>("audience", this.configuration.TokenExchangeTargetAudience),
                 };
 
-                var response = await client.PostAsync(this.configuration.TokenUrl, new FormUrlEncodedContent(requestData));
+                HttpResponseMessage response;
+                try
+                {
+                    response = await client.PostAsync(this.configuration.TokenUrl, new FormUrlEncodedContent(requestData));
+                }
+                catch (Exception ex)
+                {
+                    this.logger.LogError($">>> Token exchange request error: {ex.Message}");
+                    throw ErrorFactory.CreateServerError();
+                }
+
                 var responseText = await response.Content.ReadAsStringAsync();
                 var responseData = JsonNode.Parse(responseText);
 
                 if (!response.IsSuccessStatusCode)
                 {
-                    var tokenErrorCode = responseData?["error"]?.GetValue<string>() ??
-                        "token_exchange_error";
-                    var tokenErrorDescription = responseData?["error_description"]?.GetValue<string>() ??
-                        "Problem encountered exchanging the access token";
-                    this.logger.LogError($">>> Token exchange error: {tokenErrorCode} {tokenErrorDescription} ");
-                    return (response.StatusCode, string.Empty);
+                    this.LogRemoteError(response.StatusCode, responseData);
+                    if(response.StatusCode == HttpStatusCode.Unauthorized)
+                    {
+                        throw ErrorFactory.CreateUnauthorizedError();
+                    }
+                    else
+                    {
+                        throw ErrorFactory.CreateServerError();
+                    }
                 }
 
                 var exchangedAccessToken = responseData?["access_token"]?.GetValue<string>();
                 if (string.IsNullOrWhiteSpace(exchangedAccessToken))
                 {
                     this.logger.LogError(">>> No access token was received in a token exchange response");
-                    return (HttpStatusCode.InternalServerError, string.Empty);
+                    throw ErrorFactory.CreateServerError();
                 }
                 
                 await this.cache.SetItemAsync(receivedAccessToken, exchangedAccessToken);
-                return (HttpStatusCode.OK, exchangedAccessToken);
+                return exchangedAccessToken;
             }
+        }
+
+        private void LogRemoteError(HttpStatusCode statusCode, JsonNode? responseData)
+        {
+            var error = responseData?["error"]?.GetValue<string>() ??
+                "token_exchange_error";
+            var errorDescription = responseData?["error_description"]?.GetValue<string>() ??
+                "Problem encountered exchanging the access token";
+            this.logger.LogError($">>> Token exchange response error: {statusCode}, {error}, {errorDescription} ");
         }
     }
 }

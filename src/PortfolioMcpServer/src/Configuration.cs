@@ -26,7 +26,7 @@ namespace IO.Curity.PortfolioMcpServer
             this.Issuer = ReadEnvironmentVariable("ISSUER");
             this.Audience = ReadEnvironmentVariable("AUDIENCE");
             this.Algorithm = ReadEnvironmentVariable("ALGORITHM");
-            this.JwksUri = ReadEnvironmentVariable("JWKS_URI", false);
+            this.JwksUri = ReadEnvironmentVariable("JWKS_URI");
             this.RequiredScope = ReadEnvironmentVariable("REQUIRED_SCOPE");
         }
 

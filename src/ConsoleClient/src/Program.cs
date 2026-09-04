@@ -6,7 +6,7 @@
     using IO.Curity.ConsoleClient.Security;
 
     /*
-     * The example program is a simple A2A console app, and you could use the same approach in a web or mobile app
+     * The example client is a simple A2A console app
      */
     public static class Program
     {
@@ -37,10 +37,9 @@
                 var agentClient = new AgentClient(agentUrl, oauthClient);
                 await agentClient.SendNaturalLanguageCommandAsync(userCommand, message => Console.Write(message));
             }
-            catch (ClientError error)
+            catch (ClientError ex)
             {
-                // Report error details in a JSON format
-                var json = JsonSerializer.Serialize(error.ToJson(), new JsonSerializerOptions { WriteIndented = true });
+                var json = JsonSerializer.Serialize(ex.ToJson(), new JsonSerializerOptions { WriteIndented = true });
                 Console.WriteLine(json);
             }
         }

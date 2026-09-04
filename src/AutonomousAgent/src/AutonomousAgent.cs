@@ -2,7 +2,6 @@
 namespace IO.Curity.AutonomousAgent
 {
     using System;
-    using System.Text;
     using System.Threading.Tasks;
     using A2A;
     using Azure.AI.Extensions.OpenAI;
@@ -11,6 +10,7 @@ namespace IO.Curity.AutonomousAgent
     using Microsoft.Extensions.Logging;
     using OpenAI.Responses;
     using IO.Curity.AutonomousAgent.Security;
+    using IO.Curity.AutonomousAgent.Utilities;
 
     /*
      * The autonomous agent receives a natural language request from an external app or agent
@@ -116,10 +116,9 @@ namespace IO.Curity.AutonomousAgent
             {
                 await this.CallFoundryModelAsync(userCommand, onChunk, cancellationToken);
             }
-            catch (Exception e)
+            catch (AgentError ex)
             {
-                this.logger.LogDebug($">>> Error response: {e.Message}");
-                await onChunk("The agent experienced a problem during AI processing");
+                await onChunk($"The agent experienced a problem during AI processing: {ex.StatusCode}, {ex.Code}, {ex.Message}");
             }
         }
 

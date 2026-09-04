@@ -85,6 +85,10 @@ resource portfoliomcpserver 'Microsoft.App/containerApps@2025-07-01' = {
               value: 'ES256'
             }
             {
+              name: 'JWKS_URI'
+              value: 'https://idsvr-runtime-${environmentName}.${externalDomainName}/oauth/v2/oauth-anonymous/jwks'
+            }
+            {
               name: 'REQUIRED_SCOPE'
               value: 'stocks/read'
             }
