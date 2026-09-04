@@ -1,11 +1,12 @@
 namespace IO.Curity.AutonomousAgent.Security
 {
+    using System.Net;
     using System.Net.Http;
     using Microsoft.Extensions.Logging;
     using IO.Curity.AutonomousAgent.Utilities;
 
     /*
-     * An HTTP handler to add OAuth access tokens to outbound MCP client or A2A requests
+     * An HTTP handler to add OAuth access tokens to outbound MCP tool requests
      */
     public sealed class OAuthHttpClientHandler : DelegatingHandler
     {
@@ -22,26 +23,41 @@ namespace IO.Curity.AutonomousAgent.Security
         }
 
         /*
-         * Outbound MCP or A2A calls can use the incoming access token, an embedded access token or token exchange
+         * Outbound calls use token exchange and send an access token with agent attributes to the MCP server
          */
         protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
         {
             var receivedAccessToken = this.GetAccessToken();
             if (string.IsNullOrWhiteSpace(receivedAccessToken))
             {
-                throw new UnauthorizedAccessException();
-            } 
+                return new HttpResponseMessage(HttpStatusCode.Unauthorized);
+            }
 
-            var exchangedAccessToken = await this.tokenExchangeClient.ExchangeAccessToken(receivedAccessToken);
-            request.Headers.Add("Authorization", $"Bearer {exchangedAccessToken}");
-            
-            var response = await base.SendAsync(request, cancellationToken);
-            this.logger.LogDebug($">>> Agent remote response status: {response.StatusCode}");
-            return response;
+            try {
+
+                var (statusCode, exchangedAccessToken) = await this.tokenExchangeClient.ExchangeAccessToken(receivedAccessToken);
+                if (statusCode != HttpStatusCode.OK)
+                {
+                    return new HttpResponseMessage(HttpStatusCode.Unauthorized);
+                }
+
+                request.Headers.Add("Authorization", $"Bearer {exchangedAccessToken}");
+                var response = await base.SendAsync(request, cancellationToken);
+                this.logger.LogDebug($">>> Agent remote response status: {response.StatusCode}");
+                return response;
+            }
+            catch (UnauthorizedAccessException)
+            {
+                return new HttpResponseMessage(HttpStatusCode.Unauthorized);
+            }
+            catch (Exception)
+            {
+                return new HttpResponseMessage(HttpStatusCode.InternalServerError);
+            }
         }
 
         /*
-         * Get the received access token from the external client that sent a secured A2A request
+         * Get the access token from the external client that sent an A2A request
          */
         private string GetAccessToken()
         {

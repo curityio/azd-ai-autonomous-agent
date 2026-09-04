@@ -71,16 +71,12 @@ namespace IO.Curity.PortfolioMcpServer
                 options.FallbackPolicy = new AuthorizationPolicyBuilder().RequireAuthenticatedUser().Build();
 
                 options.AddPolicy("scope", policy =>
-                {   
                     policy.RequireAssertion(context =>
-                    {
-                        var receivedScopes = context.User
-                            .FindAll("scope")
-                            .SelectMany(c => c.Value.Split(' '));
-                        
-                        return configuration.RequiredScopes.All(scope => receivedScopes.Contains(scope));
-                    });
-                });
+                        context.User.HasClaim(claim =>
+                            claim.Type == "scope" && claim.Value.Split(' ').Any(c => c == configuration.RequiredScope)
+                        )
+                    )
+                );
             });
 
             builder.Services.AddSingleton(configuration);

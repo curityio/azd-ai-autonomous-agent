@@ -96,10 +96,6 @@ resource autonomousagent 'Microsoft.App/containerApps@2025-07-01' = {
               value: tokenExchangeClientSecret
             }
             {
-              name: 'TOKEN_EXCHANGE_TARGET_SCOPE'
-              value: 'mcp stocks/read'
-            }
-            {
               name: 'TOKEN_EXCHANGE_TARGET_AUDIENCE'
               value: 'https://mcp.demo.example'
             }

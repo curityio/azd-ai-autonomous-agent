@@ -5,10 +5,6 @@ function result(context) {
   
   var tokenData = context.getPresentedSubjectToken();
   var presentedDelegation = context.getPresentedSubjectTokenDelegation();
-
-  if (!tokenData.client_id) {
-    tokenData.client_id = presentedDelegation.clientId;
-  }
   
   var newAudience = context.request.getFormParameter('audience');
   if (newAudience) {
@@ -30,6 +26,14 @@ function result(context) {
   );
 
   var newTokenData = fullContext.getDefaultAccessTokenData();
+  if (fullContext.client.properties.agent_role && fullContext.client.properties.agent_department) {
+    newTokenData.act = {
+      sub: fullContext.client.id,
+      agent_role: fullContext.client.properties.agent_role,
+      agent_department: fullContext.client.properties.agent_department,
+    };
+  }
+
   var issuedAccessToken = fullContext
     .getDefaultAccessTokenJwtIssuer()
     .issue(newTokenData, presentedDelegation);

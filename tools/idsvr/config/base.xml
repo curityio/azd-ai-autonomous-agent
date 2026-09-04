@@ -134,7 +134,6 @@
               <client>
                 <id>autonomous-agent</id>
                 <secret>#{AGENT_TOKEN_EXCHANGE_SECRET}</secret>
-                <scope>mcp</scope>
                 <scope>stocks/read</scope>
                 <capabilities>
                   <oauth-token-exchange/>
@@ -157,13 +156,6 @@
             <scope>
               <id>openid</id>
               <description>Standard OpenID Connect scope</description>
-            </scope>
-            <scope>
-              <id>mcp</id>
-              <description>A scope to trigger issuance of agent attributes</description>
-              <claims>agent_id</claims>
-              <claims>agent_role</claims>
-              <claims>agent_department</claims>
             </scope>
             <scope>
               <id>stocks/read</id>

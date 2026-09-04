@@ -9,6 +9,7 @@ function result(context) {
   var accessTokenIssuer = (accessTokenType === 'jwt') ? context.getDefaultAccessTokenJwtIssuer() : context.accessTokenIssuer;
 
   var accessTokenData = context.getDefaultAccessTokenData();
+  accessTokenData.client_id = context.client.id;
   var issuedAccessToken = accessTokenIssuer.issue(accessTokenData, issuedDelegation);
 
   var refreshTokenData = context.getDefaultRefreshTokenData();

@@ -1,5 +1,6 @@
 namespace IO.Curity.AutonomousAgent.Security
 {
+    using System.Net;
     using System.Text.Json.Nodes;
     using Microsoft.Extensions.Logging;
 
@@ -23,12 +24,12 @@ namespace IO.Curity.AutonomousAgent.Security
          * In this deployment, MCP calls use token exchange and add an mcp scope to get agent attributes into an access token
          * The token exchange also sets the audience that the target MCP server requires
          */
-        public async Task<string> ExchangeAccessToken(string receivedAccessToken)
+        public async Task<(HttpStatusCode, string)> ExchangeAccessToken(string receivedAccessToken)
         {
             var cachedToken = await this.cache.GetItemAsync(receivedAccessToken);
             if (!string.IsNullOrWhiteSpace(cachedToken))
             {
-                return cachedToken;
+                return (HttpStatusCode.OK, cachedToken);
             }
 
             using (var client = new HttpClient())
@@ -41,7 +42,6 @@ namespace IO.Curity.AutonomousAgent.Security
                     new KeyValuePair<string, string>("client_secret", this.configuration.TokenExchangeClientSecret),
                     new KeyValuePair<string, string>("subject_token", receivedAccessToken),
                     new KeyValuePair<string, string>("subject_token_type", "urn:ietf:params:oauth:token-type:access_token"),
-                    new KeyValuePair<string, string>("scope", this.configuration.TokenExchangeTargetScope),
                     new KeyValuePair<string, string>("audience", this.configuration.TokenExchangeTargetAudience),
                 };
 
@@ -55,20 +55,19 @@ namespace IO.Curity.AutonomousAgent.Security
                         "token_exchange_error";
                     var tokenErrorDescription = responseData?["error_description"]?.GetValue<string>() ??
                         "Problem encountered exchanging the access token";
-
                     this.logger.LogError($">>> Token exchange error: {tokenErrorCode} {tokenErrorDescription} ");
-                    throw new UnauthorizedAccessException();
+                    return (response.StatusCode, string.Empty);
                 }
 
                 var exchangedAccessToken = responseData?["access_token"]?.GetValue<string>();
                 if (string.IsNullOrWhiteSpace(exchangedAccessToken))
                 {
                     this.logger.LogError(">>> No access token was received in a token exchange response");
-                    throw new UnauthorizedAccessException();
+                    return (HttpStatusCode.InternalServerError, string.Empty);
                 }
                 
                 await this.cache.SetItemAsync(receivedAccessToken, exchangedAccessToken);
-                return exchangedAccessToken;
+                return (HttpStatusCode.OK, exchangedAccessToken);
             }
         }
     }
