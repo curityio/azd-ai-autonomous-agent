@@ -10,15 +10,15 @@ namespace IO.Curity.PortfolioMcpServer
     public sealed class StocksRepository
     {
         static string USA = "USA";
-        static string EUROPE = "Europe";
-        static string ASIA = "Asia";
+        static string EUROPE = "EUROPE";
+        static string ASIA = "ASIA";
 
         /*
          * Generate an example history of transaction using access token claims
          */
         public Portfolio GetPortfolio(string customerId, string region)
         {
-            var stocks = this.GetCurrentStockPrices(region);
+            var stocks = this.GetStocks(region);
             if (stocks.Length < 2)
             {
                 return new Portfolio()
@@ -91,7 +91,7 @@ namespace IO.Curity.PortfolioMcpServer
         /*
          * Generate example stocks and their current prices to enable a portfolio value
          */
-        public Stock[] GetCurrentStockPrices(string region)
+        public Stock[] GetStocks(string region)
         {
             if (region != USA && region != EUROPE && region != ASIA)
             {

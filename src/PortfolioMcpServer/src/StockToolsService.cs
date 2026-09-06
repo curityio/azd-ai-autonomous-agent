@@ -40,13 +40,13 @@ namespace IO.Curity.PortfolioMcpServer
         }
 
         [McpServerTool, Description("""
-            Returns all current stock prices for the customer's region.
+            Returns all stocks for the customer's region with current prices.
         """)]
-        public Stock[] GetCurrentStockPrices()
+        public Stock[] GetStocks()
         {
             var region = this.GetClaim("region");
-            this.logger.LogDebug($"Returning prices for region {region}");
-            return this.repository.GetCurrentStockPrices(region);
+            this.logger.LogDebug($"Returning stocks and current prices for region {region}");
+            return this.repository.GetStocks(region);
         }
 
         private string GetClaim(string name)

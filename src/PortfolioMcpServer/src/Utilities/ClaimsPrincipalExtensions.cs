@@ -2,6 +2,7 @@ namespace IO.Curity.PortfolioMcpServer.Utilities
 {
     using System.Security.Claims;
     using System.Text.Json;
+    using IO.Curity.PortfolioMcpServer.Entities;
 
     /*
      * Read the act claim from the access token to get agent claims

@@ -1,4 +1,4 @@
-namespace IO.Curity.PortfolioMcpServer.Utilities
+namespace IO.Curity.PortfolioMcpServer.Entities
 {
     using System.Text.Json.Serialization;
 

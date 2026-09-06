@@ -1,7 +1,8 @@
-namespace IO.Curity.PortfolioMcpServer.SecurityTests
+namespace IO.Curity.PortfolioMcpServer.Tests
 {
     using System;
     using Xunit;
+    using IO.Curity.PortfolioMcpServer.Tests.Utilities;
 
     /*
      * Manages setup before running tests and teardown afterwards
@@ -19,7 +20,7 @@ namespace IO.Curity.PortfolioMcpServer.SecurityTests
 
         public void Dispose()
         {
-            this.AccessTokenIssuer.Dispose();
+            this.AccessTokenIssuer?.Dispose();
         }
     }
 }

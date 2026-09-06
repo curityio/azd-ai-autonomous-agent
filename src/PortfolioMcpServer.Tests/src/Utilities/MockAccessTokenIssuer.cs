@@ -1,4 +1,4 @@
-namespace IO.Curity.PortfolioMcpServer.SecurityTests
+namespace IO.Curity.PortfolioMcpServer.Tests.Utilities
 {
     using System;
     using System.Collections.Generic;
@@ -21,11 +21,13 @@ namespace IO.Curity.PortfolioMcpServer.SecurityTests
         private readonly string keyId;
         private HttpListener httpServer;
 
+        /*
+         * Create the keypair and begin listening at a JWKS URI
+         */
         public MockAccessTokenIssuer(Configuration configuration, ITestContext testContext)
         {
             this.testContext = testContext;
-            this.testContext.SendDiagnosticMessage(">>> Starting mock access token issuer ...");
-            
+            this.testContext.SendDiagnosticMessage(">> Starting mock access token issuer ...");
             this.keypair = ECDsa.Create(ECCurve.NamedCurves.nistP256);
             this.tokenSigningPrivateKey = new Jwk(this.keypair, true);
             this.keyId = Guid.NewGuid().ToString();
@@ -103,7 +105,8 @@ namespace IO.Curity.PortfolioMcpServer.SecurityTests
                 });
             }
 
-            return JWT.Encode(payload, this.tokenSigningPrivateKey, JwsAlgorithm.ES256, headers);
+            var signingKey = options.SigningKey ?? this.tokenSigningPrivateKey;
+            return JWT.Encode(payload, signingKey, JwsAlgorithm.ES256, headers);
         }
 
         /*
@@ -111,7 +114,7 @@ namespace IO.Curity.PortfolioMcpServer.SecurityTests
          */
         public void Dispose()
         {
-            this.testContext.SendDiagnosticMessage(">>> Stopping mock access token issuer ...");
+            this.testContext.SendDiagnosticMessage(">> Stopping mock access token issuer ...");
             this.keypair.Dispose();
             this.httpServer.Stop();
             this.httpServer.Close();
