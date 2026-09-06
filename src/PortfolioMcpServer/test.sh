@@ -17,4 +17,4 @@ rm *.sln 2>/dev/null
 # - https://learn.microsoft.com/en-us/dotnet/core/tools/dotnet-test?tabs=dotnet-test-with-vstest
 #
 . ./.env
-dotnet test --logger "console;verbosity=normal" --tl:off
+dotnet test --logger "console;verbosity=detailed" --tl:off

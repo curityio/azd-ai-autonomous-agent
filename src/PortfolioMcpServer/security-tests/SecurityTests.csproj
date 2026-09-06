@@ -8,11 +8,13 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\PortfolioMcpServer.csproj" />
     <PackageReference Include="jose-jwt" Version="5.2.0" />
-    <PackageReference Include="ModelContextProtocol" Version="0.8.0-preview.1" />
 
     <!-- https://xunit.net/docs/getting-started/v3/getting-started -->
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="18.0.1" />
+    
+    <!-- TODO: v4.0.0 -->
     <PackageReference Include="xunit.v3" Version="3.2.2" />
     <PackageReference Include="xunit.runner.visualstudio" Version="3.1.5" />
 

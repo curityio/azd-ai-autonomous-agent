@@ -9,7 +9,7 @@ namespace IO.Curity.PortfolioMcpServer.SecurityTests
     public class Configuration
     {
         public string PortfolioMcpServerUrl {get; private set;}
-        public string JwksUri {get; private set;}
+        public int JwksUriPort {get; private set;}
         public string Issuer {get; private set;}
         public string Audience {get; private set;}
         public string Algorithm {get; private set;}
@@ -18,7 +18,7 @@ namespace IO.Curity.PortfolioMcpServer.SecurityTests
         public Configuration()
         {
             this.PortfolioMcpServerUrl = ReadEnvironmentVariable("PORTFOLIO_MCP_SERVER_URL");
-            this.JwksUri = ReadEnvironmentVariable("JWKS_URI");
+            this.JwksUriPort = int.Parse(ReadEnvironmentVariable("JWKS_URI_PORT"));
             this.Issuer = ReadEnvironmentVariable("ISSUER");
             this.Audience = ReadEnvironmentVariable("AUDIENCE");
             this.Algorithm = ReadEnvironmentVariable("ALGORITHM");

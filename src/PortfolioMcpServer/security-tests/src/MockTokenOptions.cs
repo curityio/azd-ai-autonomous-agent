@@ -1,12 +1,16 @@
 namespace IO.Curity.PortfolioMcpServer.SecurityTests
 {
     using System;
+    using IO.Curity.PortfolioMcpServer.Utilities;
 
     /*
      * Token settings for a particular test
      */
     public sealed class MockTokenOptions
     {
+        /*
+         * Set defaults
+          */
         public MockTokenOptions(Configuration configuration)
         {
             this.Issuer = configuration.Issuer;
@@ -16,6 +20,8 @@ namespace IO.Curity.PortfolioMcpServer.SecurityTests
             this.Subject = Guid.NewGuid().ToString();
             this.CustomerId = string.Empty;
             this.Region = string.Empty;
+            this.AgentClaims = null;
+            
         }
 
         public string Issuer { get; set; }
@@ -25,5 +31,6 @@ namespace IO.Curity.PortfolioMcpServer.SecurityTests
         public string Subject { get; set; }
         public string CustomerId { get; set; }
         public string Region { get; set; }
+        public AgentClaims? AgentClaims { get; set; }
     }
 }

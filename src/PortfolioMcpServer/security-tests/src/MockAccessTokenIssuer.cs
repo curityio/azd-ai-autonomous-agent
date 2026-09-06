@@ -12,7 +12,7 @@ namespace IO.Curity.PortfolioMcpServer.SecurityTests
     /*
      * A simple HTTP server that uses a keypair to serve a JWKS URI and to issue mock access tokens
      */
-    public class MockAuthorizationServer : IDisposable
+    public class MockAccessTokenIssuer : IDisposable
     {
         private readonly ITestContext testContext;
         private readonly ECDsa keypair;
@@ -21,10 +21,10 @@ namespace IO.Curity.PortfolioMcpServer.SecurityTests
         private readonly string keyId;
         private HttpListener httpServer;
 
-        public MockAuthorizationServer(Configuration configuration, ITestContext testContext)
+        public MockAccessTokenIssuer(Configuration configuration, ITestContext testContext)
         {
             this.testContext = testContext;
-            this.testContext.SendDiagnosticMessage(">>> Starting mock authorization server ...");
+            this.testContext.SendDiagnosticMessage(">>> Starting mock access token issuer ...");
             
             this.keypair = ECDsa.Create(ECCurve.NamedCurves.nistP256);
             this.tokenSigningPrivateKey = new Jwk(this.keypair, true);
@@ -38,15 +38,15 @@ namespace IO.Curity.PortfolioMcpServer.SecurityTests
             this.jwks = new JwkSet(tokenSigningPublicKey);
 
             this.httpServer = new HttpListener();
-            this.httpServer.Prefixes.Add($"{configuration.JwksUri}/");
+            this.httpServer.Prefixes.Add($"http://localhost:{configuration.JwksUriPort}/");
             this.httpServer.Start();
-            this.httpServer.BeginGetContext(this.onJwksRequest, this.httpServer);
+            this.httpServer.BeginGetContext(this.OnJwksRequest, this.httpServer);
         }
 
         /*
          * Serve a JWKS URI at http://localhost:3002/jwks to provide the token signing public key to the MCP server
          */
-        private void onJwksRequest(IAsyncResult request)
+        private void OnJwksRequest(IAsyncResult request)
         {
             var context = this.httpServer.EndGetContext(request);
 
@@ -63,7 +63,7 @@ namespace IO.Curity.PortfolioMcpServer.SecurityTests
                 }
             }
 
-            this.httpServer.BeginGetContext(this.onJwksRequest, this.httpServer);
+            this.httpServer.BeginGetContext(this.OnJwksRequest, this.httpServer);
         }
 
         /*
@@ -89,20 +89,29 @@ namespace IO.Curity.PortfolioMcpServer.SecurityTests
                 { "customer_id", options.CustomerId },
                 { "region", options.Region },
                 { "client_id", "console-client" },
-                { "agent_id", "autonomous-agent" },
                 { "agent_role", "analyst" },
                 { "agent_department", "finance" },
             };
+
+            if (options.AgentClaims != null)
+            {
+                payload.Add("act", new
+                {
+                    agent_id = options.AgentClaims.AgentId,
+                    agent_role = options.AgentClaims.AgentRole,
+                    agent_department = options.AgentClaims.AgentDepartment,
+                });
+            }
 
             return JWT.Encode(payload, this.tokenSigningPrivateKey, JwsAlgorithm.ES256, headers);
         }
 
         /*
-         * Free resources
+         * Free resources when the test run completes
          */
         public void Dispose()
         {
-            this.testContext.SendDiagnosticMessage(">>> Stopping mock authorization server ...");
+            this.testContext.SendDiagnosticMessage(">>> Stopping mock access token issuer ...");
             this.keypair.Dispose();
             this.httpServer.Stop();
             this.httpServer.Close();

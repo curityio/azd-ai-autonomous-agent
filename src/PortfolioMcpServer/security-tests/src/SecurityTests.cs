@@ -1,7 +1,6 @@
 namespace IO.Curity.PortfolioMcpServer.SecurityTests
 {
     using System;
-    using System.Collections.Generic;
     using System.Linq;
     using System.Net;
     using System.Net.Http;
@@ -11,6 +10,7 @@ namespace IO.Curity.PortfolioMcpServer.SecurityTests
     using ModelContextProtocol.Client;
     using ModelContextProtocol.Protocol;
     using Xunit;
+    using IO.Curity.PortfolioMcpServer.Entities;
 
     /*
      * Demonstrates how developers can test MCP client to MCP server security
@@ -19,39 +19,12 @@ namespace IO.Curity.PortfolioMcpServer.SecurityTests
     public class SecurityTests : IClassFixture<SecurityTestFixture>
     {
         private SecurityTestFixture data;
+        private readonly ITestOutputHelper output;
 
-        public SecurityTests(SecurityTestFixture data)
+        public SecurityTests(SecurityTestFixture data, ITestOutputHelper output)
         {
             this.data = data;
-        }
-
-        /*
-         * List tools fails when the access token has an invalid audience
-         * The Portfolio MCP Server requires an audience of https://mcp.demo.example so does not accept the below access token
-         */
-        [Fact]
-        [Trait("Category", "Security")]
-        public async Task SecureMcpRequest_ListTools_Returns401ForAccessTokenWithInvalidAudience()
-        {
-            var options = new MockTokenOptions(this.data.Configuration)
-            {
-                CustomerId = "898",
-                Region = "Europe",
-                Audience = "https://agent.demo.example",
-            };
-
-            var accessToken = this.data.AuthorizationServer.IssueAccessToken(options);
-            try
-            {
-                var mcpClient = await this.CreateMcpClient(accessToken);
-                IList<McpClientTool> mcpTools = await mcpClient.ListToolsAsync(cancellationToken: CancellationToken.None);
-                Assert.Fail("The tools request did not fail as expected");
-                await mcpClient.DisposeAsync();
-            }
-            catch (HttpRequestException ex)
-            {
-                Assert.Equal(HttpStatusCode.Unauthorized, ex.StatusCode);
-            }
+            this.output = output;
         }
 
         /*
@@ -59,27 +32,87 @@ namespace IO.Curity.PortfolioMcpServer.SecurityTests
          */
         [Fact]
         [Trait("Category", "Security")]
-        public async Task SecureMcpRequest_GetCurrentStockPrices_SucceedsWithValidAccessToken()
+        public async Task SecurityTests_GetCurrentStockPrices_SucceedsWithValidAccessToken()
         {
             var options = new MockTokenOptions(this.data.Configuration)
             {
                 CustomerId = "195",
-                Region = "Europe"
+                Region = "Europe",
+                AgentClaims = new Utilities.AgentClaims()
+                {
+                    AgentId = "example-agent",
+                    AgentRole = "analyst",
+                    AgentDepartment = "finance"
+                }
             };
 
-            var accessToken = this.data.AuthorizationServer.IssueAccessToken(options);
-            
-            var mcpClient = await this.CreateMcpClient(accessToken);
-            var response = await mcpClient.CallToolAsync(toolName: "get_current_stock_prices", cancellationToken: CancellationToken.None);
-            var responseText = response?.Content?.OfType<TextContentBlock>().First().Text ?? string.Empty;
-
-            var stocks = JsonSerializer.Deserialize<Stock[]>(responseText, new JsonSerializerOptions
+            Func<McpClient, Task> mcpToolAction = async (mcpClient) =>
             {
-                PropertyNameCaseInsensitive = true
-            });
+                var result = await mcpClient.CallToolAsync("get_current_stock_prices");
+                var stocks = this.DeserializeReponse<Stock[]>(result);
+                Assert.Equal(2, stocks?.Length);
+            };
 
-            Assert.Equal(2, stocks?.Length);
-            await mcpClient.DisposeAsync();
+            await this.RunTest(options, mcpToolAction);
+        }
+
+        /*
+         * An access token with an invalid audience is rejected with a 401 error
+         */
+        [Fact]
+        [Trait("Category", "Security")]
+        public async Task SecurityTests_ListTools_Returns401ForAccessTokenWithInvalidAudience()
+        {
+            var options = new MockTokenOptions(this.data.Configuration)
+            {
+                CustomerId = "898",
+                Region = "Europe",
+                Audience = "https://untrusted.audience",
+            };
+
+            Func<McpClient, Task> mcpToolAction = async (mcpClient) =>
+            {
+                await mcpClient.ListToolsAsync(cancellationToken: CancellationToken.None);
+            };
+
+            Action<HttpRequestException> errorAction = async (ex) =>
+            {
+                Assert.Equal(HttpStatusCode.Unauthorized, ex.StatusCode);
+            };
+
+            await this.RunTest(options, mcpToolAction, errorAction);
+        }
+
+        /*
+         * A test template to reduce repeated code
+         */
+        private async Task RunTest(MockTokenOptions options, Func<McpClient, Task> mcpToolAction, Action<HttpRequestException>? errorAction = null)
+        {
+            try
+            {   
+                var accessToken = this.data.AccessTokenIssuer.IssueAccessToken(options);
+                var mcpClient = await this.CreateMcpClient(accessToken);
+                try
+                {
+                    await mcpToolAction(mcpClient);
+                    if (errorAction != null)
+                    {
+                        Assert.Fail("The tool request succeeded expectedly");
+                    }
+                }
+                finally
+                {
+                    await mcpClient.DisposeAsync();
+                }
+            }
+            catch (HttpRequestException ex)
+            {
+                if (errorAction == null)
+                {
+                    Assert.Fail("The tool request failed unexpectedly");
+                }
+                errorAction(ex);
+            }
         }
 
         /*
@@ -98,6 +131,19 @@ namespace IO.Curity.PortfolioMcpServer.SecurityTests
             (
                 new HttpClientTransport(transportOptions, httpClient)
             );
+        }
+
+        /*
+         * Deserialize an MCP response
+         */
+        private T? DeserializeReponse<T>(CallToolResult result)
+        {
+            var responseText = result?.Content?.OfType<TextContentBlock>().First().Text ?? string.Empty;
+            return JsonSerializer.Deserialize<T>(responseText, new JsonSerializerOptions
+            {
+                PropertyNameCaseInsensitive = true
+            });
+            
         }
     }
 }
