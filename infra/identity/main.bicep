@@ -406,4 +406,4 @@ module containerAppRuntime 'idsvr/idsvr-container-app.bicep' = {
 // Outputs are written to a location like .azure/dev/.env and can be used for subsequent service deployments
 output IDSVR_ADMIN_URL string = '${containerAppAdmin.outputs.uri}/admin'
 output IDSVR_RUNTIME_URL string = containerAppRuntime.outputs.uri
-output A2A_EXTERNAL_URL string = externalGatewayContainerApp.outputs.uri
+output AI_EXTERNAL_URL string = externalGatewayContainerApp.outputs.uri

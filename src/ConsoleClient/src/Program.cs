@@ -31,7 +31,7 @@
 
                 Console.WriteLine("Sending a natural language command with an access token ...");
                 var userCommand = """
-                    Give me a markdown report on the last 3 months of stock transactions and the value of my portfolio
+                    Give me a report on the last 3 months of stock transactions and the value of my portfolio
                 """;
                 Console.WriteLine($"- {userCommand}");
                 var agentClient = new AgentClient(agentUrl, oauthClient);

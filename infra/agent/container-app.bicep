@@ -61,7 +61,7 @@ resource autonomousagent 'Microsoft.App/containerApps@2025-07-01' = {
             }
             {
               name: 'EXTERNAL_BASE_URL'
-              value: 'https://gateway-external-${environmentName}.${externalDomainName}/a2a'
+              value: 'https://gateway-external-${environmentName}.${externalDomainName}/autonomous-agent'
             }
             {
               name: 'ISSUER'
@@ -105,7 +105,7 @@ resource autonomousagent 'Microsoft.App/containerApps@2025-07-01' = {
             }
             {
               name: 'PORTFOLIO_MCP_SERVER_URL'
-              value: 'http://gateway-internal-${environmentName}/mcp'
+              value: 'http://gateway-internal-${environmentName}/portfolio-mcp-server'
             }
             {
               name: 'AZURE_AI_FOUNDRY_PROJECT_URL'

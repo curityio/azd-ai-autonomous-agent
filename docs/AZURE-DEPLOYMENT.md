@@ -54,7 +54,7 @@ The parameter files reference parameters that earlier provisioning added to the 
 After a successful deployment you can run the following commands to run the agent against an Azure backend:
 
 ```bash
-export A2A_EXTERNAL_URL=$(azd env get-value A2A_EXTERNAL_URL)
+export AI_EXTERNAL_URL=$(azd env get-value AI_EXTERNAL_URL)
 ./src/ConsoleClient/run.sh
 ```
 

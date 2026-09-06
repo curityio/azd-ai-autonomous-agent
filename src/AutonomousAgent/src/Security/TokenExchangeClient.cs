@@ -82,9 +82,6 @@ namespace IO.Curity.AutonomousAgent.Security
                 }
                 
                 await this.cache.SetItemAsync(receivedAccessToken, exchangedAccessToken);
-                Console.WriteLine(receivedAccessToken);
-                Console.WriteLine(exchangedAccessToken);
-
                 return exchangedAccessToken;
             }
         }

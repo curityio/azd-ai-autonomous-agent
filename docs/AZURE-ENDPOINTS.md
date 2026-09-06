@@ -85,8 +85,8 @@ curl -i http://portfolio-mcp-server-dev
 Call the Portfolio MCP Server via the internal gateway:
 
 ```bash
-curl -s http://gateway-internal-dev/mcp/.well-known/oauth-protected-resource | jq
-curl -i http://gateway-internal-dev/mcp
+curl -s http://gateway-internal-dev/portfolio-mcp-server/.well-known/oauth-protected-resource | jq
+curl -i http://gateway-internal-dev/portfolio-mcp-server
 ```
 
 ## Call External URLs
@@ -100,15 +100,15 @@ source <(azd env get-values)
 Internet applications will connect to external endpoints:
 
 ```bash
-curl -s "$A2A_EXTERNAL_URL/a2a/.well-known/agent-card.json" | jq
+curl -s "$AI_EXTERNAL_URL/autonomous-agent/.well-known/agent-card.json"                | jq
 curl -s "$IDSVR_RUNTIME_URL/oauth/v2/oauth-anonymous/.well-known/openid-configuration" | jq
-curl -s "$IDSVR_RUNTIME_URL/oauth/v2/oauth-anonymous/jwks" | jq
+curl -s "$IDSVR_RUNTIME_URL/oauth/v2/oauth-anonymous/jwks"                             | jq
 ```
 
 In a real deployment you could assign additional external hostnames to container apps, such as:
 
 ```text
-A2A_EXTERNAL_URL=ai.example.com
+AI_EXTERNAL_URL=ai.example.com
 IDSVR_RUNTIME_URL=login.example.com
 ```
 

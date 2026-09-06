@@ -10,7 +10,7 @@ Enables customer users to run internet applications that integrate with Azure AI
 Users can manipulate authorized data in flexible ways, with [rich responses](docs/AI-DATA-REPORTING.md) from the AI model.
 
 ```text
-Give me a markdown report on the last 3 months of stock transactions and the value of my portfolio
+Give me a report on the last 3 months of stock transactions and the value of my portfolio
 ```
 
 ## Features
@@ -145,7 +145,7 @@ Once the deployment completes, re-run the console application, pointing it the A
 Sign in with an Entra ID user account and the configured Entra ID user authentication method:
 
 ```bash
-export A2A_EXTERNAL_URL=$(azd env get-value A2A_EXTERNAL_URL)
+export AI_EXTERNAL_URL=$(azd env get-value AI_EXTERNAL_URL)
 ./src/ConsoleClient/run.sh
 ```
 
