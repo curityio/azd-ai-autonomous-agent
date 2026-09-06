@@ -35,8 +35,8 @@ When you run a local agent, your CLI account now has permissions to call the Azu
 Edit the `src/AutonomousAgent/.env` file and update settings to match your Foundry project URL and model name:
 
 ```bash
-export AZURE_AI_FOUNDRY_PROJECT_URL='https://curity-demo.cognitiveservices.azure.com/api/projects/proj-default'
-export AZURE_AI_MODEL_NAME='gpt-5.4-nano'
+export AZURE_AI_FOUNDRY_PROJECT_URL='https://curity-demo.services.ai.azure.com/api/projects/proj-default'
+export AZURE_AI_MODEL_DEPLOYMENT_NAME='gpt-5.4-nano'
 ```
 
 ## Test the Connection
@@ -44,9 +44,10 @@ export AZURE_AI_MODEL_NAME='gpt-5.4-nano'
 Use commands such as the following to ensure that the connection works:
 
 ```bash
-FOUNDRY_RESOURCE_NAME='curity-demo'
-FOUNDRY_PROJECT_NAME='proj-default'
-FOUNDRY_MODEL_NAME='gpt-5.4-nano'
+AZURE_AI_RESOURCE_NAME='curity-demo'
+AZURE_AI_RESOURCE_NAME='ai-devvnfh4isv54wpu'
+AZURE_AI_PROJECT_NAME='proj-default'
+AZURE_AI_MODEL_DEPLOYMENT_NAME='gpt-5.4-nano'
 
 az login
 
@@ -55,11 +56,11 @@ ACCESS_TOKEN=$(az account get-access-token \
   --query accessToken \
   --output tsv)
 
-curl -s -X POST "https://$FOUNDRY_RESOURCE_NAME.services.ai.azure.com/api/projects/$FOUNDRY_PROJECT_NAME/openai/v1/responses" \
+curl -s -X POST "https://$AZURE_AI_RESOURCE_NAME.services.ai.azure.com/api/projects/$AZURE_AI_PROJECT_NAME/openai/v1/responses" \
   -H "authorization: Bearer $ACCESS_TOKEN" \
   -H "content-type: application/json" \
   -d '{
-      "model": "$FOUNDRY_MODEL_NAME",
+      "model": "$AZURE_AI_MODEL_DEPLOYMENT_NAME",
  "input": "What is the capital of France?"
     }'
 ```

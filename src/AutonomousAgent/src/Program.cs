@@ -61,7 +61,22 @@ namespace IO.Curity.AutonomousAgent
                                 error = error.Code,
                                 error_description = error.Message,
                             });
-                        }
+                        },
+                        OnForbidden = async context =>
+                        {
+                            var error = "insufficient_scope";
+                            var description = "The access token has insufficient privileges";
+
+                            context.Response.StatusCode = StatusCodes.Status403Forbidden;
+                            context.Response.ContentType = "application/json";
+                            context.Response.Headers.WWWAuthenticate = $"Bearer error=\"{error}\", error_description=\"{description}\"";
+
+                            await context.Response.WriteAsJsonAsync(new
+                            {
+                                error,
+                                error_description = description
+                            });
+                        },
                     };
                 });
 

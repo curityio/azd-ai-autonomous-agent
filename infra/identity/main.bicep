@@ -284,6 +284,10 @@ module containerAppAdmin 'idsvr/idsvr-container-app.bicep' = {
         name: 'AGENT_TOKEN_EXCHANGE_SECRET'
         value: agentTokenExchangeClientSecret
       }
+      {
+        name: 'CONSOLE_CLIENT_ACCESS_TOKEN_TYPE'
+        value: 'opaque'
+      }
     ]
   }
 }
@@ -390,6 +394,10 @@ module containerAppRuntime 'idsvr/idsvr-container-app.bicep' = {
       {
         name: 'AGENT_TOKEN_EXCHANGE_SECRET'
         value: agentTokenExchangeClientSecret
+      }
+      {
+        name: 'CONSOLE_CLIENT_ACCESS_TOKEN_TYPE'
+        value: 'opaque'
       }
     ]
   }

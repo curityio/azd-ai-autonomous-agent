@@ -109,19 +109,15 @@ resource autonomousagent 'Microsoft.App/containerApps@2025-07-01' = {
             }
             {
               name: 'AZURE_AI_FOUNDRY_PROJECT_URL'
-              value: 'https://${aiFoundryName}.cognitiveservices.azure.com/api/projects/proj-default'
+              value: 'https://${aiFoundryName}.services.ai.azure.com/api/projects/proj-default'
             }
             {
-              name: 'AZURE_AI_MODEL_NAME'
+              name: 'AZURE_AI_MODEL_DEPLOYMENT_NAME'
               value: 'gpt-5.4-nano'
             }
             {
               name: 'AZURE_CLIENT_ID'
               value: managedIdentityClientId
-            }
-            {
-              name: 'CONSOLE_CLIENT_ACCESS_TOKEN_TYPE'
-              value: 'opaque'
             }
           ]
         }
