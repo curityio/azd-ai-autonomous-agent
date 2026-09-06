@@ -74,7 +74,6 @@ if [ -z "${IDSVR_IMAGE_NAME:-}" ]; then
     exit 1
   fi 
   azd env set IDSVR_IMAGE_NAME "$IMAGE" >/dev/null
-  cd ..
 fi
 
 # ---------------------------
