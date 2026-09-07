@@ -27,7 +27,7 @@ EXTERNAL_DOMAIN_NAME="<generated-name>.<region>.azurecontainerapps.io"
 ## Deploy AZD Identity Infrastructure
 
 The `azd provision identity` command deploys the infrastructure from the `infra/identity` folder.  
-The deployment uses that folder's `main.bicep` objects, which references its `main.parameters` file.
+The deployment uses that folder's `main.bicep` objects, which references its `main.parameters` file.  
 The `./infra/hooks/preprovision.sh` hook implements custom logic and sets some parameters.  
 
 ```bash
@@ -60,8 +60,8 @@ export AI_EXTERNAL_URL=$(azd env get-value AI_EXTERNAL_URL)
 
 Typically though, you need to understand endpoints, configuration and know how to troubleshoot:
 
-- The [Azure Endpoints](AZURE-ENDPOINTS.md) document explains how to identify workloads, view logs and test connections.
-- The [OAuth Configuration](OAUTH-CONFIGURATION.md) document explains the most important OAuth settings.
+- The [Azure Endpoints](4-AZURE-ENDPOINTS.md) document explains how to identify workloads, view logs and test connections.
+- The [OAuth Configuration](6-OAUTH-CONFIGURATION.md) document explains the most important OAuth settings.
 
 ## Base Infrastructure
 

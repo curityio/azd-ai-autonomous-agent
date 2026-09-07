@@ -13,8 +13,7 @@ This access token format prevents internet clients from reading potentially sens
 _0XBPWQQ_2fb1bc61-0e98-413c-a44d-d8a46d3bd2f2
 ```
 
-The underlying token claims would typically be those of a customer support application.  
-In the example deployment these are `openid stocks/read`.  
+The underlying token claims would be those of a customer support application, such as `openid stocks/read`.  
 In many use cases, the customer support application could have multiple scopes that the agent should not have access to.
 
 ## Agent Access Token (AT2)
@@ -24,17 +23,19 @@ The token exchange also converts the format of the incoming access token to a JW
 
 ```json
 {
-  "jti": "152bd3df-7b86-4701-9514-a117cde86165",
-  "delegationId": "cd7119d8-f7bc-4d61-b296-2b117e641bb9",
-  "exp": 1772021039,
-  "nbf": 1772020139,
-  "scope": "stocks/read",
+  "jti": "a1a5fda5-e5a7-4c5a-81be-e95fcbbd1907",
+  "delegationId": "dda57127-6cc2-4e7f-b8ec-ad3d4626a2f2",
+  "exp": 1788769571,
+  "nbf": 1788768671,
+  "scope": "openid stocks/read",
   "iss": "http://localhost:8443/oauth/v2/oauth-anonymous",
   "sub": "934d737304b1bbc5cc0d443749e64a473211cb5af9e88b069abbd0ed728741b9",
-  "aud": "https://agent.demo.example",
-  "iat": 1772020139,
+  "aud": [
+    "https://agent.demo.example"
+  ],
+  "iat": 1788768671,
   "purpose": "access_token",
-  "customer_id": "178",
+  "customer_id": "2109",
   "region": "USA",
   "client_id": "console-client"
 }
@@ -45,63 +46,55 @@ The agent only accepts tokens with an audience restriction of `https://agent.dem
 
 ## Portfolio MCP Server Access Token (AT3)
 
-The autonomous agent then runs its own token exchange, to get a token to send to the Portfolio API.  
-The new token includes the agent identity and an audience that the Portfolio API accepts.  
+The autonomous agent then uses token exchange to authenticate at the authorization server and get a new access token.  
+The authorization server issues agent attributes to the access token, that it stores against the OAuth client.
 
-The Portfolio MCP Server receives the following access token payload.  
+![agent attributes](images/agent-attributes.png)
+
+The Portfolio MCP Server receives the following access token payload, with an updated audience claim.  
 The Portfolio MCP Server only accepts tokens with an audience restriction of `https://mcp.demo.example` and a scope of `stocks/read`.
 
 ```json
 {
-  "jti": "fc7fbe2a-27d1-4a95-ab05-5a95bd236a07",
-  "delegationId": "2818695a-949a-4622-b5cb-9c1a9ba49716",
-  "exp": 1771434954,
-  "nbf": 1771434054,
+  "jti": "6aa2b3a1-20ff-4702-b4fe-6582a53e8df2",
+  "delegationId": "dda57127-6cc2-4e7f-b8ec-ad3d4626a2f2",
+  "exp": 1788769571,
+  "nbf": 1788768671,
   "scope": "stocks/read",
   "iss": "http://localhost:8443/oauth/v2/oauth-anonymous",
-  "sub": "62c839b8214aa1fe8cbcd823948a4bc705fbbba69c7666e334ee5c7fb348b60a",
+  "sub": "934d737304b1bbc5cc0d443749e64a473211cb5af9e88b069abbd0ed728741b9",
   "aud": "https://mcp.demo.example",
-  "iat": 1771434054,
+  "iat": 1788768671,
   "purpose": "access_token",
-  "customer_id": "178",
+  "act": {
+    "sub": "autonomous-agent",
+    "agent_role": "analyst",
+    "agent_department": "finance"
+  },
+  "customer_id": "2109",
   "region": "USA",
-  "client_id": "console-client",
-  "agent_id": "autonomous-agent",
-  "agent_role": "analyst",
-  "agent_department": "finance"
+  "client_id": "console-client"
 }
 ```
 
 In this initial business flow, the Portfolio MCP Server implements the detailed business authorization.  
 To do so it uses the following custom scopes and claims, and filters data by region and customer.  
 
-- The `stocks/read` scope restricts the Azure LLM to read-only stock information.
-- The `region` originates from an Entra ID attribute and restricts stocks to those allowed for the user's region.
-- The `customer_id` originates from an Entra ID attribute for a custom user identity, that the MCP server needs.
-- The `client_type` easily enables APIs to adjust authorization when an AI agent is present.
+- The MCP server requires access tokens to have a `stocks/read` scope.
+- The MCP server requires access tokens to have an `agent_department=finance` claim.
+- The `region` claim restricts authorized stocks to those for the current user's region.
+- The `customer_id` claim restricts authorized transactions to those for the current user.
 
 The Portfolio MCP Server returns authorized user-specific data to the agent and hence to the Azure LLM.  
 The Azure LLM is able to operate on raw data in highly flexible ways, to provide business value.
 
-## Embedded Access Tokens
-
-After Entra ID user authentication, the Curity Identity Server receives a set of Entra ID tokens.  
-The Curity Identity Server's access token can include the Entra ID access token as a custom claim.  
-The autonomous agent could use the Entra ID access token to interact with Azure MCP servers.  
-
-```json
-{
-  "idp_access_token": "eyJ0eXAiOiJKV1QiLCJub2 ..."
-}
-```
-
 ## AI Token Auditing
 
 The autonomous agent routes all backend AI agent requests for secured resources through an internal gateway.  
-The gateway can receive Curity tokens and write audit logs that include token attributes.  
+The gateway can write audit logs that include attributes from access tokens.  
 
-The example deployment writes JSON audit logs that include business-centric claims and the agent identity.  
-You can ship such logs to a log aggregation system to provide visibility of large scale agent access to secured resources.  
+The example deployment writes JSON audit logs that include business-centric claims, including agent attributes.  
+You can ship such logs to a log aggregation system to provide visibility of large scale AI access to secured resources.  
 
 ```json
 {
@@ -122,5 +115,5 @@ You can ship such logs to a log aggregation system to provide visibility of larg
 }
 ```
 
-An internal gateway can also serve as an initial point of authorization for all AI agent requests for secured resources.  
-For example, the gateway could enforce rules like not allowing AI agents to send access tokens with particular scopes.  
+An internal gateway can perform coarse-grained authorization for all AI agent requests for secured resources.  
+The gateway might enforce rules like forbidding AI agent requests with high-privilege access tokens.  

@@ -4,13 +4,13 @@
 [![Availability](https://img.shields.io/badge/availability-source-blue)](https://curity.io/resources/code-examples/status/)
 
 An azd template to showcase an enterprise AI security architecture with OAuth 2.0 token intelligence.  
-Agents can act autonomously, and resource servers enforce administrator controls and human approvals.
+Backend agents can act autonomously, and resource servers enforce administrator controls and human approvals.
 
 Enables customer users to run internet applications that integrate with Azure AI Foundry and enterprise data.  
-Users can manipulate authorized data in flexible ways, with [rich responses](docs/AI-DATA-REPORTING.md) from the AI model.
+Users can manipulate authorized data in flexible ways, with flexible responses from the AI model.
 
 ```text
-Give me a report on the last 3 months of stock transactions and the value of my portfolio
+Give me a report on the last 3 months of stock transactions and the value of my portfolio.
 ```
 
 ## Features
@@ -46,12 +46,12 @@ Resource servers authorize using access token attributes and can apply dynamic r
 ## Getting Started
 
 Use an Azure development account with access to the Azure portal.  
-Follow the [Azure AI README](docs/AZURE-AI-SETUP.md) to get connected to Azure LLMs for development in a compliant Azure region.  
+Follow the [Azure AI README](docs/1-AZURE-AI-SETUP.md) to get connected to Azure LLMs for development in a compliant Azure region.  
 
 ### Create a Project
 
 Create a project from the template, and set an initial environment name of `dev` when prompted.  
-Check the new project into source control, so that you can configure a GitHub workflow later.
+Check the new project into GitHub, so that you can configure a GitHub workflow later.
 
 ```bash
 mkdir my-secure-ai-integration && cd my-secure-ai-integration
@@ -75,13 +75,13 @@ Install the latest versions of the following local computer tools:
 ### Quick Start
 
 The quick start enables you to integrate all C# applications locally, and run an end-to-end flow.  
-Log in to the Azure CLI so that the local agent can present a CLI identity to the Azure AI Foundry:
+Log in to the Azure CLI so that the local agent can present your developer identity to Azure AI Foundry:
 
 ```bash
 az login
 ```
 
-Run a local deployment that runs a deployed MCP server, along with Docker identity infrastructure:
+Run a local deployment with the MCP server and Docker identity infrastructure:
 
 ```bash
 ./tools/local/backend.sh
@@ -89,29 +89,29 @@ Run a local deployment that runs a deployed MCP server, along with Docker identi
 
 The first time you run a deployment, a CLI uses the browser to sign you in at Curity.  
 The CLI then uses an access token to download a trial license for the Curity Identity Server.  
-Next, run the agent for development:
+Next, run the agent locally for development:
 
 ```bash
 ./src/AuthonomousAgent/run.sh
 ```
 
-Then, run a console application that calls the agent.  
+Then, run a console application that calls the backend agent using the A2A protocol.  
 When prompted with a login form, enter any username to simulate real user authentication:
 
 ```bash
 ./src/ConsoleClient/run.sh
 ```
 
-See the [Development README](docs/DEVELOPMENT.md) to learn more about local development behaviors.
+See the [Development README](docs/2-DEVELOPMENT.md) to learn more about local development behaviors.
 
 ## Deployment
 
 This template includes an infrastructure-as-code (IaC) deployment to Azure.   
-Continue to use an Azure development account and ensure that you also have Entra ID resources:
+Continue to use an Azure development account and ensure that you meet the following prerequisites:
 
-- A tenant to which the deployment can add an app registration.
+- Permissions to run an azd deployment that creates managed identities.
+- Am Entra ID tenant to which the deployment can add an app registration.
 - At least one user account with which you can test Entra ID logins.
-
 
 ### Run the Deployment
 
@@ -141,8 +141,8 @@ azd deploy
 
 ### Test the Deployment
 
-Once the deployment completes, re-run the console application, pointing it the Azure backend.  
-Sign in with an Entra ID user account and the configured Entra ID user authentication method:
+Once the deployment completes, re-run the console application, pointing it the backend agent running in Azure.  
+Sign in with your Entra ID test user account and its configured user authentication method:
 
 ```bash
 export AI_EXTERNAL_URL=$(azd env get-value AI_EXTERNAL_URL)
@@ -236,7 +236,7 @@ The deeper behaviors are a future-proof backend AI deployment with security cont
 ### API Gateways
 
 - An external gateway delivers downscoped JWT access tokens to agents.
-- An internal gateway runs between agents and resource servers, as a pattern to govern agent access.
+- An internal gateway runs between agents and MCP servers, to control and govern agent access.
 
 ### Curity Identity Server
 
@@ -247,13 +247,13 @@ The deeper behaviors are a future-proof backend AI deployment with security cont
 ### Entra ID
 
 A specialist token issuer can integrate with existing identity systems.  
-In the example deployment, Entra ID is used for all user account storage and user authentication.
+In the example deployment, Entra ID is used for all user account storage and user authentication.  
 
 ### Learn More
 
-- See the [Token Flow README](docs/TOKEN-FLOW.md) to understand the token details for the customer support use case.
-- See the [OAuth Configuration README](docs/OAUTH-CONFIGURATION.md) to understand OAuth security settings.
-- See the [Advanced Use Cases README](docs/ADVANCED-USE-CASES.md) for flows to meet other enterprise requirements.
+- See the [Token Flow README](docs/5-TOKEN-FLOW.md) to understand the token details for the customer support use case.
+- See the [OAuth Configuration README](docs/6-OAUTH-CONFIGURATION.md) to understand OAuth security settings.
+- See the [Advanced Use Cases README](docs/7-ADVANCED-USE-CASES.md) for flows to meet other enterprise requirements.
 
 ## License
 

@@ -17,7 +17,7 @@ You may need to replace the name `curity-demo` with a globally unique value.
 
 Select `Go to resource` and select the resources's default project, named `proj-default`.  
 Then select `Go to Foundry Portal` and navigate to the `Model Catalog`.  
-Select a low cost model, like `gpt-5.4-nano`, select `Use this model` and deploy it.
+Select `gpt-5.4-nano` as a low cost model, select `Use this model` and deploy it.  
 
 ## Grant AI Permissions
 
@@ -32,7 +32,7 @@ When you run a local agent, your CLI account now has permissions to call the Azu
 
 ## Configure the Autonomous Agent
 
-Edit the `src/AutonomousAgent/.env` file and update settings to match your Foundry project URL and model name:
+Edit the `src/AutonomousAgent/.env` file and use settings that match your Foundry project URL and model deployment name:
 
 ```bash
 export AZURE_AI_FOUNDRY_PROJECT_URL='https://curity-demo.services.ai.azure.com/api/projects/proj-default'
@@ -45,7 +45,6 @@ Use commands such as the following to ensure that the connection works:
 
 ```bash
 AZURE_AI_RESOURCE_NAME='curity-demo'
-AZURE_AI_RESOURCE_NAME='ai-devvnfh4isv54wpu'
 AZURE_AI_PROJECT_NAME='proj-default'
 AZURE_AI_MODEL_DEPLOYMENT_NAME='gpt-5.4-nano'
 
@@ -61,6 +60,6 @@ curl -s -X POST "https://$AZURE_AI_RESOURCE_NAME.services.ai.azure.com/api/proje
   -H "content-type: application/json" \
   -d '{
       "model": "$AZURE_AI_MODEL_DEPLOYMENT_NAME",
- "input": "What is the capital of France?"
+      "input": "What is the capital of France?"
     }'
 ```

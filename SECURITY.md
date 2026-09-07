@@ -27,14 +27,16 @@ The deployment uses the following managed identities:
 
 ## Further Security Hardening
 
-For developer convenience, and to reduce scope / complexity, some connections do not use the strongest security.  
-For production deployments, first tighten firewall rules:  
+The main focus of this azd template is correct use of access tokens to ensure end-to-end security.  
+To enable developer connections, and to reduce scope / complexity, some connections do not use the strongest security.  
+
+For production deployments, you should first tighten firewall rules:  
 
 - Azure SQL connections.
 - Azure AI Foundry project connections.
 
-Also consider using stronger credentials for these secrets:
+Also aim to use stronger credentials for the following connections:
 
-- The JDBC connection from the Curity Identity Server to Azure SQL could use a managed identity.
-- The Admin UI for the Curity Identity Server could use an Entra ID federated login.
-- In supporting environments, token exchange could use JWT workload identities instead of client secrets.
+- The Curity Identity Server could use a [Passwordless JDBC Connection to Azure SQL](https://learn.microsoft.com/en-us/azure/azure-sql/database/authentication-aad-overview).
+- The Admin UI for the Curity Identity Server could use an [Entra ID federated login](https://curity.io/resources/learn/federated-login-to-admin-ui/).
+- In supporting environments, token exchange could use [JWT workload identities](https://curity.io/resources/learn/oauth-client-credentials-kubernetes/) instead of client secrets.

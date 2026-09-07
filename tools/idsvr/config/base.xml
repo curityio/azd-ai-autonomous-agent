@@ -120,6 +120,7 @@
                   </property>
                 </properties>
                 <use-pairwise-subject-identifiers>
+                  <sector-identifier>default</sector-identifier>
                 </use-pairwise-subject-identifiers>
                 <validate-port-on-loopback-interfaces>false</validate-port-on-loopback-interfaces>
               </client>
@@ -149,6 +150,9 @@
                     <value>finance</value>
                   </property>
                 </properties>
+                <use-pairwise-subject-identifiers>
+                  <sector-identifier>default</sector-identifier>
+                </use-pairwise-subject-identifiers>
               </client>
             </config-backed>
           </client-store>

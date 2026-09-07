@@ -19,7 +19,7 @@ After deployment, Docker provides the following backend components:
 - Curity Identity Server OAuth Endpoints: `http://localhost:8443`
 - Curity Identity Server Admin Endpoints: `http://localhost:6749/admin`
 - An external API gateway at `http://localhost` that exchanges incoming opaque access tokens for downscoped JWTs
-- An internal API gateway at `http://localhost:81` that audits secure requests from the autonomous agent
+- An internal API gateway that audits secure requests from the autonomous agent
 
 Run the console client to sign in and get an access token with which to call the Anonymous Agent:
 
@@ -37,25 +37,38 @@ Wait a few seconds and you will get a report that the Azure LLM produces.
 
 ## Use Test-Driven Development
 
-MCP or A2A server developers do not have to run local end-to-end flows as part of normal development.  
-Instead, they can work on a single component at a time, using test-driven development.
-
-To demonstrate test-driven development, first stop the local backend if it is running.  
-Then, use the following commands to run the API with a test configuration and run some integration tests:
+MCP server developers do not have to run local end-to-end flows as part of normal development.  
+Instead, they can work on a single component at a time, using test-driven development.  
+To demonstrate test-driven development, first run the MCP server:
 
 ```bash
 cd src/PortfolioMcpServer
-./test.sh
+./run.sh
 ```
 
-The [OAuth integration tests](../src/PortfolioMcpServer/security-tests/src/SecurityTests.cs) send mock JWT access tokens tp the Portfolio MCP Server.  
-Developers could extend tests to enable productive testing of many access token security conditions:
+In another terminal window, run some integration tests that send mock access tokens:
+
+```bash
+cd src/PortfolioMcpServer.Tests
+./run.sh
+```
+
+The [OAuth security tests](../src/PortfolioMcpServer.Tests/src/SecurityTests.cs) send mock JWT access tokens to the Portfolio MCP Server.  
+Developers can productively test all security conditions without needing to authenticate users or agents:
 
 ```text
-[xUnit.net 00:00:00.26] SecurityTests: >>> Starting mock authorization server ...
-[xUnit.net 00:00:00.47] SecurityTests: >>> Stopping mock authorization server ...
-  Passed SecureMcpRequest_GetAvailableStocks_SucceedsWithValidAccessToken [178 ms]
-  Passed SecureMcpRequest_ListTools_Returns401ForAccessTokenWithInvalidAudience [9 ms]
+xUnit.net v3 In-Process Runner v4.0.0+8bf043c053 (64-bit .NET 10.0.2)
+    [SecurityTests] >> Starting mock access token issuer ...
+    [SecurityTests] >> ListTools_Succeds_WithValidAccessToken PASSED ✓
+    [SecurityTests] >> GetPortfolio_Succeeds_WithValidAccessToken PASSED ✓
+    [SecurityTests] >> GetStocks_Succeeds_WithValidAccessToken PASSED ✓
+    [SecurityTests] >> ListTools_Returns401_ForAccessTokenWithInvalidAudience PASSED ✓
+    [SecurityTests] >> GetPortfolio_Returns401_ForAccessTokenWithInvalidIssuer PASSED ✓
+    [SecurityTests] >> GetStocks_Returns401_ForAccessTokenWithInvalidSigningKey PASSED ✓
+    [SecurityTests] >> GetPortfolio_Returns403_ForMissingRequiredScope PASSED ✓
+    [SecurityTests] >> GetPortfolio_Returns403_ForMissingAgentClaims PASSED ✓
+    [SecurityTests] >> GetStocks_Returns403_ForInvalidAgentDepartment PASSED ✓
+    [SecurityTests] >> Stopping mock access token issuer ...
 ```
 
 ## Microsoft .NET AI Libraries
@@ -63,7 +76,7 @@ Developers could extend tests to enable productive testing of many access token 
 C# and the following Microsoft AI libraries are used to build the application components.  
 As a result, both AI protocol complexity and security protocol complexity are externalized from application code.
 
-- The autonomous AI agent uses the [Microsoft Agent Framework](https://github.com/microsoft/agent-framework), where foundry agents are the most up to date option.  
+- The autonomous AI agent uses the [Microsoft Agent Framework](https://github.com/microsoft/agent-framework), where foundry agents are the future-facing option.  
 
 - To run as an A2A server or make outbound A2A requests, the agent uses the [A2A .NET SDK](https://github.com/a2aproject/a2a-dotnet).
 

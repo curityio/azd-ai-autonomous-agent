@@ -1,12 +1,11 @@
 # OAuth Configuration
 
 In this deployment, the Curity Identity Server does not store user accounts or authenticate users directly.   
-Instead, it acts only as a specialist token issuer and does not use account management features.
+Instead, it acts only as a specialist token issuer that integrates with Entra ID.
 
 ## Entra ID User Accounts
 
-In the example deployment, Entra ID stores user accounts and authenticates users.  
-The Curity Identity Server receives claims containing user attributes, for `region` and `customer_id`.  
+The Curity Identity Server receives claims containing Entra ID user attributes, for `region` and `customer_id`.  
 You can configure these values in your preferred Entra ID attributes:
 
 ![Entra user attributes](images/entra-user-attributes.png)
@@ -107,10 +106,18 @@ For example, the console client could receive name details in its ID tokens:
 - Drag the `given_name` and `family_name` claims into the ID token pane.
 - Use the the claims provider to set name claim values from Entra ID user attributes.
 
+## Agent Attributes
+
+The OAuth client for the autonomous agent includes client-specific attributes.  
+These attibutes get issued to access tokens during token exchange operations.  
+
+![Agent attributes](images/agent-attributes.png)
+
 ## Token Exchange
 
-Once user authentication completes, the console client receives an opaque access token.  
-Tokens sent from the console client undergo 2 token exchanges that apply custom logic.  
-To view the token exchange logic, navigate to `System / Procedures / Token Procedures`.  
+When the autonomous agent calls the MCP server it makes a [token exchange request](../src/AutonomousAgent/src/Security/TokenExchangeClient.cs) to the Curity Identity Server.  
+The agent authenticates and then gets an updated access token that contains agent attributes in its `act` claim.  
+Custom [token procedure logic](../tools/idsvr/scripts/token-exchange-proc.js) executes, to enable control over the access token that the MCP server receives.  
+Navigate to `System / Procedures / Token Procedures` in the Admin UI, to view or edit the token exchange logic. 
 
 ![Token exchange logic](images/token-exchange-logic.png)

@@ -18,7 +18,7 @@ if [ -z "${DBINIT_IMAGE_NAME:-}" ]; then
   cd dbinit
   echo 'Getting SQL scripts ...'
 
-  # Use a utility Docker container to get the script
+  # Use a utility Docker container to get the schema creation script
   docker pull curity.azurecr.io/curity/idsvr
   docker run --name curity -d -e PASSWORD=Password1 curity.azurecr.io/curity/idsvr
   docker cp curity:/opt/idsvr/etc/mssql-create_database.sql .

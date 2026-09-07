@@ -6,6 +6,12 @@ function result(context) {
   var tokenData = context.getPresentedSubjectToken();
   var presentedDelegation = context.getPresentedSubjectTokenDelegation();
 
+  logger.error("*** DEBUG ***");
+  logger.error("*** DEBUG ***");
+  logger.error("*** DEBUG ***");
+  logger.error(tokenData);
+  logger.error("*** DEBUG DONE ***");
+
   var newAudience = context.request.getFormParameter('audience');
   if (newAudience) {
     tokenData.aud = [newAudience];
@@ -26,6 +32,7 @@ function result(context) {
   );
 
   var newTokenData = fullContext.getDefaultAccessTokenData();
+  newTokenData.sub = tokenData.sub;
   if (!newTokenData.client_id) {
     newTokenData.client_id = presentedDelegation.clientId;
   }

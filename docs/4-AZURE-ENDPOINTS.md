@@ -11,7 +11,7 @@ az containerapp list -g rg-dev --query "[].name"
 ```
 
 For container apps that provide HTTP endpoints, the results provide load-balanced internal hostnames.  
-You can call those container apps using a hostname without a port.
+You can call those container apps using HTTP and a hostname without a port.
 
 ```json
 [
@@ -121,7 +121,7 @@ Use the Azure Portal to look up secret values, like the `ADMIN_PASSWORD` for the
 
 ## View OAuth Settings
 
-Follow the [OAuth Configuration README](OAUTH-CONFIGURATION.md) to understand OAuth settings:
+Follow the [OAuth Configuration README](6-OAUTH-CONFIGURATION.md) to understand OAuth settings:
 
 - Use the Azure Portal to view Entra ID configuration.
 - Use the Admin UI to view Curity Identity Server configuration.
