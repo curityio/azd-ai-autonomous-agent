@@ -2,7 +2,7 @@
 
 Each backend component receives optimal tokens with security context, to enable correct business authorization.
 
-![Internet Environment](docs/images/internet-environment.png)
+![Internet Environment](images/internet-environment.png)
 
 ## Initial Access Token (AT1)
 
