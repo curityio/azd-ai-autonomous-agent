@@ -2,7 +2,7 @@
 
 Each backend component receives optimal tokens with security context, to enable correct business authorization.
 
-![Initial Technical Flow](images/initial-technical-flow.png)
+![Internet Environment](docs/images/internet-environment.png)
 
 ## Initial Access Token (AT1)
 

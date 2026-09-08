@@ -42,7 +42,7 @@ The azd template deploys an internet environment that uses the following compone
 Developers use productive programming languages to build applications that use Microsoft AI technology.  
 Resource servers authorize using access token attributes and can apply rules dynamically when required.   
 
-![Internet Environment](docs/images/internet-environment.svg)
+![Internet Environment](docs/images/internet-environment.png)
 
 ## Getting Started
 
