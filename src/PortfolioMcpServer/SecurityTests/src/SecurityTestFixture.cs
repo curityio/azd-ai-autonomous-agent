@@ -1,8 +1,8 @@
-namespace IO.Curity.PortfolioMcpServer.Tests
+namespace IO.Curity.PortfolioMcpServer.SecurityTests
 {
     using System;
     using Xunit;
-    using IO.Curity.PortfolioMcpServer.Tests.Utilities;
+    using IO.Curity.PortfolioMcpServer.SecurityTests.Utilities;
 
     /*
      * Manages setup before running tests and teardown afterwards

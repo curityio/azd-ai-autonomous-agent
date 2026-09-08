@@ -1,10 +1,10 @@
-namespace IO.Curity.PortfolioMcpServer.Tests
+namespace IO.Curity.PortfolioMcpServer.SecurityTests
 {
     using System.Threading;
     using System.Threading.Tasks;
     using System.Net.Http;
     using System.Text.Json.Nodes;
-    using IO.Curity.PortfolioMcpServer.Tests.Utilities;
+    using IO.Curity.PortfolioMcpServer.SecurityTests.Utilities;
 
     /*
      * An HTTP handler to send the access token for the current test in MCP client requests

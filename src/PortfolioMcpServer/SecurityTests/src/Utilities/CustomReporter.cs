@@ -1,4 +1,4 @@
-namespace IO.Curity.PortfolioMcpServer.Tests.Utilities
+namespace IO.Curity.PortfolioMcpServer.SecurityTests.Utilities
 {
     using System.Threading.Tasks;
     using Xunit.Runner.Common;

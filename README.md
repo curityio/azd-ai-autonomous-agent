@@ -38,10 +38,11 @@ The resources support multiple deployment scenarios:
 
 ## Architecture
 
-Enterprises use productive programming languages to build applications that use Microsoft AI technology.  
-Resource servers authorize using access token attributes and can apply dynamic runtime access controls.
+The azd template deploys an internet environment that uses the following components.  
+Developers use productive programming languages to build applications that use Microsoft AI technology.  
+Resource servers authorize using access token attributes and can apply rules dynamically when required.   
 
-![Initial Technical Flow](docs/images/initial-technical-flow.png)
+![Internet Environment](docs/images/internet-environment.svg)
 
 ## Getting Started
 

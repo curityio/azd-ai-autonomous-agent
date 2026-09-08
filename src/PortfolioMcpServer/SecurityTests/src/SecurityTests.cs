@@ -1,4 +1,4 @@
-namespace IO.Curity.PortfolioMcpServer.Tests
+namespace IO.Curity.PortfolioMcpServer.SecurityTests
 {
     using System;
     using System.Linq;
@@ -13,7 +13,7 @@ namespace IO.Curity.PortfolioMcpServer.Tests
     using ModelContextProtocol.Protocol;
     using Xunit;
     using IO.Curity.PortfolioMcpServer.Entities;
-    using IO.Curity.PortfolioMcpServer.Tests.Utilities;
+    using IO.Curity.PortfolioMcpServer.SecurityTests.Utilities;
 
     /*
      * Example tests to demonstrate how developers can test MCP server security with access token attributes

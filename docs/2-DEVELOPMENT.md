@@ -49,11 +49,11 @@ cd src/PortfolioMcpServer
 In another terminal window, run some integration tests that send mock access tokens:
 
 ```bash
-cd src/PortfolioMcpServer.Tests
+cd src/PortfolioMcpServer/SecurityTests
 ./run.sh
 ```
 
-The [OAuth security tests](../src/PortfolioMcpServer.Tests/src/SecurityTests.cs) send mock JWT access tokens to the Portfolio MCP Server.  
+The [OAuth security tests](../src/PortfolioMcpServer/SecurityTests/src/SecurityTests.cs) send mock JWT access tokens to the Portfolio MCP Server.  
 Developers can productively test all security conditions without needing to authenticate users or agents:
 
 ```text

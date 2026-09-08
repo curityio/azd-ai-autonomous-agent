@@ -1,4 +1,4 @@
-namespace IO.Curity.PortfolioMcpServer.Tests.Utilities
+namespace IO.Curity.PortfolioMcpServer.SecurityTests.Utilities
 {
     using Xunit.Runner.Common;
     using Xunit.Sdk;

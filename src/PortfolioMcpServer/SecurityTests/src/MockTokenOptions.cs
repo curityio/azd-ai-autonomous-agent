@@ -1,4 +1,4 @@
-namespace IO.Curity.PortfolioMcpServer.Tests
+namespace IO.Curity.PortfolioMcpServer.SecurityTests
 {
     using System;
     using IO.Curity.PortfolioMcpServer.Entities;
