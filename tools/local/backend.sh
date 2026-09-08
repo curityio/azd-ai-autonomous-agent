@@ -7,30 +7,6 @@ cd "$(dirname "${BASH_SOURCE[0]}")"
 #################################################################################################################
 
 #
-# Get the platform
-#
-case "$(uname -s)" in
-
-  Darwin)
-    PLATFORM="MACOS"
- 	;;
-
-  MINGW64*)
-    PLATFORM="WINDOWS"
-	;;
-
-  Linux)
-    PLATFORM="LINUX"
-	;;
-esac
-
-#
-# First create secrets for components that need them
-# Also supply a path to the license file for the Curity Identity Server
-#
-. ./generate-secrets.sh
-
-#
 # If required, run a tool to download the license file for the Curity Identity Server
 #
 ../idsvr/download-license.sh
@@ -39,33 +15,89 @@ if [ $? -ne 0 ]; then
 fi
 
 #
-# When running locally, the Portfolio MCP Server gets token signing public keys from the local authorization server
+# Generate secrets for components that need them
 #
-cd ../..
-cd ./src/PortfolioMcpServer
-cp .env.default .env
-echo "export JWKS_URI='http://localhost:8443/oauth/v2/oauth-anonymous/jwks'" >> ./.env
-cd ../..
+. ./generate-secrets.sh
 
 #
-# Run supporting Docker components, with the Autonomous Agent and Portfolio MCP Server on the local computer
+# If required, run a tool to download the license file for the Curity Identity Server
 #
-if [ "$PLATFORM" == 'MACOS' ]; then
+cd ../idsvr
+./download-license.sh
+if [ $? -ne 0 ]; then
+  exit 1
+fi
 
-  open -a Terminal ./tools/local/docker-infrastructure.sh
-  open -a Terminal ./src/PortfolioMcpServer/run.sh
-  open -a Terminal ./src/AutonomousAgent/run.sh
+if [ ! -f license.json ]; then
+  echo 'Unable to find a license file for the Curity Identity Server'
+  exit 1
+fi
 
-elif [ "$PLATFORM" == 'WINDOWS' ]; then
+LICENSE_KEY="$(cat license.json | jq -r .License)"
+if [ "$LICENSE_KEY" == '' ]; then
+  echo 'Unable to find a license key for the Curity Identity Server'
+  exit 1
+fi
+cd -
 
-  GIT_BASH='C:\Program Files\Git\git-bash.exe'
-  "$GIT_BASH" -c ./tools/local/docker-infrastructure.sh &
-  "$GIT_BASH" -c ./src/PortfolioMcpServer/run.sh &
-  "$GIT_BASH" -c ./src/AutonomousAgent/run.sh &
+#
+# Supply other environment variables for the local deployment
+#
+export IDSVR_ADMIN_URL='http://localhost:6749'
+export IDSVR_RUNTIME_URL='http://localhost:8443'
+export LICENSE_KEY
 
-elif [ "$PLATFORM" == 'LINUX' ]; then
+#
+# Pull up to date Docker images
+#
+docker pull kong/kong:3.9-ubuntu
+docker pull curity.azurecr.io/curity/idsvr:latest
 
-  gnome-terminal -- ./tools/local/docker-infrastructure.sh
-  gnome-terminal -- ./src/PortfolioMcpServer/run.sh
-  gnome-terminal -- ./src/AutonomousAgent/run.sh
+#
+# Build the Docker image for the Portfolio MCP server
+#
+cd ../../src/PortfolioMcpServer
+docker build --no-cache -t portfolio-mcp-server:1.0.0 .
+if [ $? -ne 0 ]; then
+  exit 1
+fi
+cd -
+
+#
+# Build the external API gateway Docker image, with a token exchange plugin
+#
+cd ../gateway-external
+docker build --no-cache -t gateway-external:1.0.0 .
+if [ $? -ne 0 ]; then
+  exit 1
+fi
+cd -
+
+#
+# Build the internal API gateway Docker image, with a token auditing plugin
+#
+cd ../gateway-internal
+docker build --no-cache -t gateway-internal:1.0.0 .
+if [ $? -ne 0 ]; then
+  exit 1
+fi
+cd -
+
+#
+# Build a custom Docker image for the Curity Identity Server, with local configuration
+#
+cd ../idsvr
+docker build --no-cache -f Dockerfile.local -t idsvr:1.0.0 .
+if [ $? -ne 0 ]; then
+  exit 1
+fi
+cd -
+
+#
+# Create a local deployed environment with components to support agent development
+#
+docker compose up --force-recreate
+if [ $? -ne 0 ]; then
+  read -n 1  
+  exit 1
 fi

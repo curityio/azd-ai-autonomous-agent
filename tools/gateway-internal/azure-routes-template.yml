@@ -12,7 +12,7 @@ services:
     hosts:
     - gateway-internal-$AZURE_ENV_NAME
     paths:
-    - /mcp/.well-known/oauth-protected-resource
+    - /portfolio-mcp-server/.well-known/oauth-protected-resource
 
 #
 # Use a plugin to write an audit log with token details for secured agent requests
@@ -24,7 +24,7 @@ services:
     hosts:
     - gateway-internal-$AZURE_ENV_NAME
     paths:
-    - /mcp
+    - /portfolio-mcp-server
   plugins:
   - name: request-transformer
     config:

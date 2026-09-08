@@ -14,8 +14,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Compile Remove="security-tests\**" />
-    <Content Remove="security-tests\**" />
+    <Compile Remove="SecurityTests\**" />
+    <Content Remove="SecurityTests\**" />
   </ItemGroup>
 
 </Project>

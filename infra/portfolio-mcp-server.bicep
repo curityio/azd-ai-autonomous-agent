@@ -66,7 +66,7 @@ resource portfoliomcpserver 'Microsoft.App/containerApps@2025-07-01' = {
             }
             {
               name: 'EXTERNAL_BASE_URL'
-              value: 'https://gateway-external-${environmentName}.${externalDomainName}/mcp'
+              value: 'https://gateway-external-${environmentName}.${externalDomainName}/portfolio-mcp-server'
             }
             {
               name: 'AUTHORIZATION_SERVER_BASE_URL'
@@ -85,7 +85,11 @@ resource portfoliomcpserver 'Microsoft.App/containerApps@2025-07-01' = {
               value: 'ES256'
             }
             {
-              name: 'SCOPE'
+              name: 'JWKS_URI'
+              value: 'https://idsvr-runtime-${environmentName}.${externalDomainName}/oauth/v2/oauth-anonymous/jwks'
+            }
+            {
+              name: 'REQUIRED_SCOPE'
               value: 'stocks/read'
             }
           ]

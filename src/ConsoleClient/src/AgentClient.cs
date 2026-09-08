@@ -2,6 +2,7 @@ namespace IO.Curity.ConsoleClient
 {
     using System;
     using System.Net;
+    using System.Text.Json.Nodes;
     using A2A;
     using IO.Curity.ConsoleClient.Security;
 
@@ -28,13 +29,30 @@ namespace IO.Curity.ConsoleClient
         protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
         {
             request.Headers.Add("Authorization", $"Bearer {oauthClient.GetAccessToken()}");
-            return await base.SendAsync(request, cancellationToken);
+            
+            var response = await base.SendAsync(request, cancellationToken);
+
+            if (response.StatusCode != HttpStatusCode.OK)
+            {
+                var json = await response.Content.ReadAsStringAsync();
+                var errorData = JsonNode.Parse(json);
+
+                var error = errorData?["error"]?.GetValue<string>() ?? "http_error";
+                var errorDescription = errorData?["error_description"]?.GetValue<string>() ?? "Problem encountered in an HTTP request";
+
+                throw new ClientError(error, errorDescription)
+                {
+                    StatusCode = (int)response.StatusCode
+                };
+            };
+
+            return response;
         }
 
         /*
          * Send a command to the agent, and use long running tasks when required
          */
-        public async Task<string> SendNaturalLanguageCommandAsync(string command)
+        public async Task SendNaturalLanguageCommandAsync(string command, Action<string> onMessage)
         {
             var request = new SendMessageRequest
             {
@@ -47,29 +65,38 @@ namespace IO.Curity.ConsoleClient
             
             try
             {
-                var response = await this.a2aClient.SendMessageAsync(request);
-                return response?.Message?.Parts?[0]?.Text ?? string.Empty;
-            }
-            catch (A2AException e)
-            {
-                throw new ClientError(e.ErrorCode.ToString(), e.Message);
-            }
-            catch (HttpRequestException e)
-            {   
-                if (e.StatusCode == HttpStatusCode.Unauthorized)
+                await foreach (var response in this.a2aClient.SendStreamingMessageAsync(request))
                 {
-                    throw new ClientError("invalid_token", "Missing, invalid or expired access token")
+                    if (response.PayloadCase == StreamResponseCase.Message)
                     {
-                        StatusCode = 401
-                    };
-                }
+                        var text = response.Message?.Parts?[0]?.Text;
+                        if (!string.IsNullOrWhiteSpace(text))
+                        {
+                            var data = JsonNode.Parse(text);
+                            var message = data?["message"]?.GetValue<string>() ?? string.Empty;
+                            if (!string.IsNullOrWhiteSpace(message))
+                            {
+                                var type = data?["type"]?.GetValue<string>() ?? string.Empty;
+                                if (type == "message")
+                                {
+                                    onMessage(message);
+                                }
 
-                var error = new ClientError("connection_error", e.Message);
-                if (e.StatusCode != null)
-                {
-                    error.StatusCode = (int)e.StatusCode;
+                                if (type == "error")
+                                {
+                                    var statusCode = data?["statusCode"]?.GetValue<int>() ?? 0;
+                                    var error = data?["error"]?.GetValue<string>() ?? string.Empty;
+                                    var errorDescription = data?["error_description"]?.GetValue<string>() ?? string.Empty;
+                                    onMessage($"Agent problem encountered: {statusCode}, {error}: {errorDescription}");
+                                }
+                            }
+                        }
+                    }
                 }
-                throw error;
+            }
+            catch (A2AException ex)
+            {
+                throw new ClientError(ex.ErrorCode.ToString(), ex.Message);
             }
         }
     }

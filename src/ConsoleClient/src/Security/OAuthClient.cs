@@ -172,9 +172,9 @@ namespace IO.Curity.ConsoleClient.Security
 
                     this.accessToken = accessToken;
                 }
-                catch (HttpRequestException exception)
+                catch (HttpRequestException ex)
                 {
-                    throw new ClientError("token_request_error", "Unable to connect to the token endpoint", exception);
+                    throw new ClientError("token_request_error", $"Unable to connect to the token endpoint: {ex.Message}");
                 }
             }
         }

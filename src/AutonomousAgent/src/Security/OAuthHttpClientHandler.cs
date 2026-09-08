@@ -1,10 +1,14 @@
 namespace IO.Curity.AutonomousAgent.Security
 {
+    using System.Net;
     using System.Net.Http;
+    using System.Text.Json;
+    using System.Text.Json.Nodes;
     using Microsoft.Extensions.Logging;
+    using IO.Curity.AutonomousAgent.Utilities;
 
     /*
-     * An HTTP handler to add OAuth access tokens to outbound MCP client or A2A requests
+     * An HTTP handler to add OAuth access tokens to outbound MCP tool requests
      */
     public sealed class OAuthHttpClientHandler : DelegatingHandler
     {
@@ -21,30 +25,54 @@ namespace IO.Curity.AutonomousAgent.Security
         }
 
         /*
-         * Outbound MCP or A2A calls can use the incoming access token, an embedded access token or token exchange
+         * First do token exchange to get agent attributes into the access token
+         * Then call MCP tools with the new access token, so that the agent passes authorization checks
          */
         protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
         {
             var receivedAccessToken = this.GetAccessToken();
-            if (!string.IsNullOrWhiteSpace(receivedAccessToken))
+            if (string.IsNullOrWhiteSpace(receivedAccessToken))
             {
-                var exchangedAccessToken = await this.tokenExchangeClient.ExchangeAccessToken(receivedAccessToken);
-                if (!string.IsNullOrWhiteSpace(exchangedAccessToken))
+                throw ErrorFactory.CreateUnauthorizedError();
+            }
+
+            var exchangedAccessToken = await this.tokenExchangeClient.ExchangeAccessToken(receivedAccessToken);
+
+            HttpResponseMessage response;
+            try
+            {
+                request.Headers.Add("Authorization", $"Bearer {exchangedAccessToken}");
+                response = await base.SendAsync(request, cancellationToken);
+            }
+            catch (Exception ex)
+            {
+                this.logger.LogDebug($">>> MCP tool request error: {ex.Message}");
+                throw ErrorFactory.CreateServerError();
+            }
+
+            if (!response.IsSuccessStatusCode)
+            {
+                await this.LogRemoteError(response);
+
+                if (response.StatusCode == HttpStatusCode.Unauthorized)
                 {
-                    this.logger.LogDebug($">>> Agent remote request: {request.Method} {request.RequestUri} ");
-                    request.Headers.Add("Authorization", $"Bearer {exchangedAccessToken}");
-                    var response = await base.SendAsync(request, cancellationToken);
-                    this.logger.LogDebug($">>> Agent remote response status: {response.StatusCode}");
-                    return response;
+                    throw ErrorFactory.CreateUnauthorizedError();
+                }
+                else if (response.StatusCode == HttpStatusCode.Forbidden)
+                {
+                    throw ErrorFactory.CreateForbiddenError();
+                }
+                else
+                {
+                    throw ErrorFactory.CreateServerError();
                 }
             }
-            
-            logger.LogError($"Unable to get an access token with which to call the MCP server");
-            throw new InvalidOperationException($"Agent problem encountered during data access");
+
+            return response;
         }
 
         /*
-         * Get the received access token from the external client that sent a secured A2A request
+         * Get the access token from the external client that sent an A2A request
          */
         private string GetAccessToken()
         {
@@ -59,6 +87,28 @@ namespace IO.Curity.AutonomousAgent.Security
             }
 
             return string.Empty;
+        }
+
+        /*
+         * Log details from the external system
+         */
+        private async Task LogRemoteError(HttpResponseMessage response)
+        {
+            var error = string.Empty;
+            var errorDescription = string.Empty;
+            
+            try
+            {
+                var responseText = await response.Content.ReadAsStringAsync();
+                var responseData = JsonNode.Parse(responseText);
+                error = responseData?["error"]?.GetValue<string>();
+                errorDescription = responseData?["error_description"]?.GetValue<string>();
+            }
+            catch (JsonException)
+            {
+            }
+
+            this.logger.LogError($">>> MCP tool response error: {response.StatusCode}, {error}, {errorDescription} ");
         }
     }
 }

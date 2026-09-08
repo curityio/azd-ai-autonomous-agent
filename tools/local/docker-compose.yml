@@ -8,8 +8,6 @@ services:
     ports:
       - 6749:6749
       - 8443:8443
-    volumes:
-      - ../idsvr/cdb:/opt/idsvr/var/cdb
     environment:
       ADMIN: 'true'
       ADMIN_PASSWORD: '${ADMIN_PASSWORD}'
@@ -17,17 +15,16 @@ services:
       IDSVR_ADMIN_URL: '${IDSVR_ADMIN_URL}'
       GATEWAY_TOKEN_EXCHANGE_SECRET: '${GATEWAY_TOKEN_EXCHANGE_SECRET}'
       AGENT_TOKEN_EXCHANGE_SECRET: '${AGENT_TOKEN_EXCHANGE_SECRET}'
+      CONSOLE_CLIENT_ACCESS_TOKEN_TYPE: 'jwt'
       LICENSE_KEY: '${LICENSE_KEY}'
 
   #
-  # The external gateway exposes the autonomous agent to the internet
+  # The external gateway exposes the Portfolio MCP server and security components
   # The external gateway exchanges incoming opaque access tokens and delivers a downscoped JWT access token to the autonomous agent
   #
   external-gateway:
     image: gateway-external:1.0.0
     hostname: gateway-external
-    extra_hosts:
-      - "host.docker.internal:host-gateway"
     ports:
       - 80:8000
     volumes:
@@ -41,16 +38,12 @@ services:
       KONG_NGINX_HTTP_LUA_SHARED_DICT: 'token-exchange 10m'
 
   #
-  # The internal gateway intercepts all requests from the autonomous agent to secured resources, using MCP or A2A
+  # The internal gateway intercepts all requests from the autonomous agent to secured resources
   # The internal gateway performs generic security tasks like token-based auditing of secured requests
   #
   internal-gateway:
     image: gateway-internal:1.0.0
     hostname: gateway-internal
-    extra_hosts:
-      - "host.docker.internal:host-gateway"
-    ports:
-      - 81:8000
     volumes:
       - ../gateway-internal/local-routes.yml:/usr/local/kong/declarative/kong.yml
     environment:
@@ -61,3 +54,12 @@ services:
       KONG_PLUGINS: 'bundled,token-audit'
       KONG_NGINX_HTTP_LOG_FORMAT: "json_combined escape=json '{ \"time_iso8601\": \"$$time_iso8601\", \"remote_addr\": \"$$remote_addr\", \"method\": \"$$request_method\", \"uri\": \"$$request_uri\", \"status\": $$status, \"body_bytes_sent\": $$body_bytes_sent, \"request_time\": $$request_time, \"upstream_response_time\": \"$$upstream_response_time\", \"upstream_addr\": \"$$upstream_addr\", \"http_x_forwarded_for\": \"$$http_x_forwarded_for\", \"kong_request_id\": \"$$http_kong_request_id\" }'"
       KONG_PROXY_ACCESS_LOG: "/dev/stdout json_combined"
+
+#
+  # The local agent calls a Portfolio MCP server that runs in Docker behind gateways
+  #
+  portfolio-mcp-server:
+    image: portfolio-mcp-server:1.0.0
+    hostname: portfolio-mcp-server
+    env_file:
+      - ../../src/PortfolioMcpServer/.env.dockercompose

@@ -3,6 +3,7 @@ namespace IO.Curity.AutonomousAgent
     using System.Net;
     using A2A.AspNetCore;
     using IO.Curity.AutonomousAgent.Security;
+    using IO.Curity.AutonomousAgent.Utilities;
     using Microsoft.AspNetCore.Authentication.JwtBearer;
     using Microsoft.AspNetCore.Authorization;
     using Microsoft.AspNetCore.Builder;
@@ -16,17 +17,13 @@ namespace IO.Curity.AutonomousAgent
     public static class Program
     {
         /*
-         * The agent is an A2A service, where A2A endpoints are protected by JWT access tokens
+         * Create the autonomous agent as an A2A service
          */
         public static async Task Main()
         {
-            // Load configuration settings
             var configuration = new Configuration();
-            
-            // The agent can log OAuth error details but does not return them to the caller
             IdentityModelEventSource.ShowPII = configuration.IsLocalDevelopment;
-
-            // The MCP server runs in an internal network
+            
             var builder = WebApplication.CreateBuilder();
             builder.Configuration.AddJsonFile("appSettings.json");
             builder.WebHost
@@ -35,7 +32,6 @@ namespace IO.Curity.AutonomousAgent
                     options.Listen(IPAddress.Any, configuration.Port);
                 });
 
-            // The agent validates a JWT access token on every request, to protect access to the Azure LLM, and uses audience restrictions
             builder.Services
                 .AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
                 .AddJwtBearer(options =>
@@ -48,36 +44,62 @@ namespace IO.Curity.AutonomousAgent
                     };
                     options.RequireHttpsMetadata = false;
                     options.MapInboundClaims = false;
+                    
+                    options.Events = new JwtBearerEvents
+                    {
+                        OnChallenge = async context =>
+                        {
+                            context.HandleResponse();
+                            context.Response.StatusCode = StatusCodes.Status401Unauthorized;
+                            context.Response.ContentType = "application/json";
+                            
+                            var error = ErrorFactory.CreateUnauthorizedError();
+                            context.Response.Headers.WWWAuthenticate = $"Bearer error=\"{error.Code}\", error_description=\"{error.Message}\"";
+
+                            await context.Response.WriteAsJsonAsync(new
+                            {
+                                error = error.Code,
+                                error_description = error.Message,
+                            });
+                        },
+                        OnForbidden = async context =>
+                        {
+                            var error = "insufficient_scope";
+                            var description = "The access token has insufficient privileges";
+
+                            context.Response.StatusCode = StatusCodes.Status403Forbidden;
+                            context.Response.ContentType = "application/json";
+                            context.Response.Headers.WWWAuthenticate = $"Bearer error=\"{error}\", error_description=\"{description}\"";
+
+                            await context.Response.WriteAsJsonAsync(new
+                            {
+                                error,
+                                error_description = description
+                            });
+                        },
+                    };
                 });
-            
+
             builder.Services.AddAuthorization(options =>
             {
-                // All endpoints require JWTs except the agent card endpoint
                 options.FallbackPolicy = new AuthorizationPolicyBuilder()
                     .RequireAuthenticatedUser()
                     .AddRequirements(new AllowAnonymousAgentCardRequirement())
                     .Build();
 
-                // Authorized endpoints check for the agent's required scope
                 options.AddPolicy("scope", policy =>
                     policy.RequireAssertion(context =>
                         context.User.HasClaim(claim =>
-                            claim.Type == "scope" && claim.Value.Split(' ').Any(c => c == configuration.Scope)
+                            claim.Type == "scope" && claim.Value.Split(' ').Any(c => c == configuration.RequiredScope)
                         )
                     )
                 );
             });
 
-            // Expose endpoints as an A2A server over HTTP
+            builder.Services.AddA2AAgent<AutonomousAgent>(AutonomousAgent.GetAgentCard(configuration));
             builder.Services.AddHttpContextAccessor();
             builder.Services.AddDistributedMemoryCache();
-
-            // Add the agent
-            builder.Services.AddA2AAgent<AutonomousAgent>(AutonomousAgent.GetAgentCard(configuration));
-
-            // Define injectable objects
             builder.Services.AddSingleton(configuration);
-            builder.Services.AddSingleton<AIAgentFactory>();
             builder.Services.AddSingleton<OAuthHttpClientHandler>();
             builder.Services.AddSingleton<TokenExchangeClient>();
             builder.Services.AddSingleton<TokenCache>();
@@ -85,8 +107,7 @@ namespace IO.Curity.AutonomousAgent
             var app = builder.Build();
             app.UseAuthentication();
             app.UseAuthorization();
-            
-            // Map A2A paths and apply a policy to check for the required scope
+
             app.MapA2A(path: "/").RequireAuthorization("scope");
             app.MapWellKnownAgentCard(AutonomousAgent.GetAgentCard(configuration));
             app.Run();

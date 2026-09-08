@@ -18,7 +18,7 @@ if [ -z "${DBINIT_IMAGE_NAME:-}" ]; then
   cd dbinit
   echo 'Getting SQL scripts ...'
 
-  # Use a utility Docker container to get the script
+  # Use a utility Docker container to get the schema creation script
   docker pull curity.azurecr.io/curity/idsvr
   docker run --name curity -d -e PASSWORD=Password1 curity.azurecr.io/curity/idsvr
   docker cp curity:/opt/idsvr/etc/mssql-create_database.sql .
@@ -59,14 +59,10 @@ fi
 if [ -z "${IDSVR_IMAGE_NAME:-}" ]; then
 
   echo 'Creating a custom Docker image for the Curity Identity Server ...'
-  cd docker
-  rm *.xml 2>/dev/null
-  cp ../config-base.xml .
-  cp ../config-azure.xml .
   
   az acr login --name "$CONTAINER_REGISTRY_NAME"
   TAG="$(date +%Y%m%d%H%M%S)"
-  docker build --no-cache --platform linux/amd64 -t "idsvr:$TAG" .
+  docker build --no-cache -f Dockerfile.azure --platform linux/amd64 -t "idsvr:$TAG" .
   if [ $? -ne 0 ]; then
     exit 1
   fi 
@@ -78,7 +74,6 @@ if [ -z "${IDSVR_IMAGE_NAME:-}" ]; then
     exit 1
   fi 
   azd env set IDSVR_IMAGE_NAME "$IMAGE" >/dev/null
-  cd ..
 fi
 
 # ---------------------------

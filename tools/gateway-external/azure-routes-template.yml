@@ -12,7 +12,7 @@ services:
     hosts:
     - gateway-external-$AZURE_ENV_NAME.$EXTERNAL_DOMAIN_NAME
     paths:
-    - /a2a/.well-known/agent-card.json
+    - /autonomous-agent/.well-known/agent-card.json
 
 #
 # The gateway uses token exchange to deliver a JWT access token with reduced scopes to the autonomous agent
@@ -24,7 +24,7 @@ services:
     hosts:
     - gateway-external-$AZURE_ENV_NAME.$EXTERNAL_DOMAIN_NAME
     paths:
-    - /a2a
+    - /autonomous-agent
   plugins:
   - name: request-transformer
     config:
