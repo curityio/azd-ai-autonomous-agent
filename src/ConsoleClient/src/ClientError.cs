@@ -4,13 +4,13 @@ namespace IO.Curity.ConsoleClient
     using System.Text.Json.Nodes;
 
     /*
-     * Basic error handling for remote OAuth and A2A remote requests
+     * Basic error handling for remote requests
      */
     public class ClientError : Exception
     {
         private readonly string code;
 
-        public ClientError(string code, string message, Exception? cause = null) : base(message, cause)
+        public ClientError(string code, string message) : base(message)
         {
             this.code = code;
             this.StatusCode = 0;
@@ -22,18 +22,13 @@ namespace IO.Curity.ConsoleClient
         {
             var data = new JsonObject
             {
-                ["code"] = this.code,
-                ["message"] = this.Message,
+                ["error"] = this.code,
+                ["error_description"] = this.Message,
             };
 
             if (this.StatusCode != 0)
             {
                 data["status"] = this.StatusCode;
-            }
-
-            if (this.InnerException != null)
-            {
-                data["detail"] = this.InnerException.Message;
             }
 
             return data;

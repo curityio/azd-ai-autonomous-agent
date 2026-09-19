@@ -1,0 +1,136 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1456 816" width="1456" height="816">
+  <defs>
+    <style>@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&amp;display=swap');</style>
+    <marker id="arr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#4d556a"/>
+    </marker>
+  </defs>
+
+  <!-- 1. Container (system boundary) -->
+  <rect x="353" y="257" width="1058" height="384" rx="16" fill="#f3f4f6" stroke="#d8dce4" stroke-width="1.5"/>
+  <text x="1312" y="232" text-anchor="middle" font-family="Roboto,sans-serif" font-size="18" font-weight="400" fill="#4d556a">Backend Environment</text>
+
+  <!-- 2. Connection arrows -->
+
+  <!-- Step 1: User → Auth Server (L-shape) -->
+  <polyline points="63,430 63,575 378,575" fill="none" stroke="#4d556a" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arr)"/>
+
+  <!-- Step 2: Web Portal → Gateway1 -->
+  <line x1="197" y1="393" x2="431" y2="393" stroke="#4d556a" stroke-width="1.5" stroke-linecap="round" marker-end="url(#arr)"/>
+
+  <!-- Step 3: Gateway1 → Auth Server -->
+  <line x1="444" y1="473" x2="444" y2="543" stroke="#4d556a" stroke-width="1.5" stroke-linecap="round" marker-end="url(#arr)"/>
+
+  <!-- Step 4: Gateway1 → Agent (JWT AT2) -->
+  <line x1="457" y1="390" x2="662" y2="390" stroke="#4d556a" stroke-width="1.5" stroke-linecap="round" marker-end="url(#arr)"/>
+
+  <!-- Step 5a: Agent → Cloud LLM (up) -->
+  <line x1="685" y1="323" x2="685" y2="175" stroke="#4d556a" stroke-width="1.5" stroke-linecap="round" marker-end="url(#arr)"/>
+
+  <!-- Step 5b: Cloud LLM → Agent (response) -->
+  <line x1="739" y1="175" x2="739" y2="323" stroke="#4d556a" stroke-width="1.5" stroke-linecap="round" marker-end="url(#arr)"/>
+
+  <!-- Step 6: Agent → Auth Server (token exchange for agent attributes) -->
+  <line x1="706" y1="450" x2="706" y2="543" stroke="#4d556a" stroke-width="1.5" stroke-linecap="round" marker-end="url(#arr)"/>
+
+  <!-- Step 7: Agent → Gateway2 (MCP requests) -->
+  <line x1="760" y1="390" x2="938" y2="390" stroke="#4d556a" stroke-width="1.5" stroke-linecap="round" marker-end="url(#arr)"/>
+
+  <!-- Step 9: Gateway2 → MCP -->
+  <line x1="964" y1="390" x2="1179" y2="390" stroke="#4d556a" stroke-width="1.5" stroke-linecap="round" marker-end="url(#arr)"/>
+
+  <!-- Step 10: MCP → API -->
+  <line x1="1271" y1="387" x2="1290" y2="387" stroke="#4d556a" stroke-width="1.5" stroke-linecap="round" marker-end="url(#arr)"/>
+
+  <!-- 3. Nodes -->
+
+  <!-- ===== PERSON ICON (user actor) ===== -->
+  <!-- Head -->
+  <ellipse cx="65" cy="369" rx="13" ry="12" fill="#ffffff" stroke="#4d556a" stroke-width="1.5"/>
+    <!-- Body (shoulders/torso silhouette) -->
+    <path d="M 40,428 L 45,398 L 65,383 L 84,396 L 90,428 Z"
+          fill="#f3f4f6"
+          stroke="#4d556a"
+          stroke-width="1.5"
+          stroke-linecap="round"
+          stroke-linejoin="round"/>
+
+
+
+  <!-- Web Portal -->
+  <rect x="104" y="323" width="93" height="140" rx="16" fill="#ffffff" stroke="#4d556a" stroke-width="1.5"/>
+  <text x="150" y="386" text-anchor="middle" font-family="Roboto,sans-serif" font-size="18" font-weight="500" fill="#4d556a">Web</text>
+  <text x="150" y="409" text-anchor="middle" font-family="Roboto,sans-serif" font-size="18" font-weight="500" fill="#4d556a">Portal</text>
+
+  <!-- Gateway1 (vertical pill) -->
+  <rect x="431" y="308" width="26" height="165" rx="13" fill="#e5e7eb" stroke="#cbd0d9" stroke-width="1.5"/>
+
+  <!-- Agent -->
+  <rect x="662" y="323" width="98" height="127" rx="16" fill="#ffffff" stroke="#4d556a" stroke-width="1.5"/>
+  <text x="711" y="393" text-anchor="middle" font-family="Roboto,sans-serif" font-size="18" font-weight="500" fill="#4d556a">Agent</text>
+
+  <!-- Cloud LLM -->
+  <rect x="664" y="103" width="101" height="72" rx="16" fill="#ffffff" stroke="#4d556a" stroke-width="1.5"/>
+  <text x="714" y="145" text-anchor="middle" font-family="Roboto,sans-serif" font-size="16" font-weight="500" fill="#4d556a">Cloud LLM</text>
+
+  <!-- Gateway2 (vertical pill) -->
+  <rect x="938" y="313" width="26" height="144" rx="13" fill="#e5e7eb" stroke="#cbd0d9" stroke-width="1.5"/>
+
+  <!-- MCP -->
+  <rect x="1179" y="323" width="92" height="129" rx="16" fill="#ffffff" stroke="#4d556a" stroke-width="1.5"/>
+  <text x="1225" y="393" text-anchor="middle" font-family="Roboto,sans-serif" font-size="18" font-weight="500" fill="#4d556a">MCP</text>
+
+  <!-- API -->
+  <rect x="1290" y="323" width="85" height="129" rx="16" fill="#ffffff" stroke="#4d556a" stroke-width="1.5"/>
+  <text x="1332" y="393" text-anchor="middle" font-family="Roboto,sans-serif" font-size="18" font-weight="500" fill="#4d556a">API</text>
+
+  <!-- Auth Server -->
+  <rect x="378" y="543" width="600" height="64" rx="16" fill="#ffffff" stroke="#4d556a" stroke-width="1.5"/>
+  <text x="678" y="580" text-anchor="middle" font-family="Roboto,sans-serif" font-size="18" font-weight="500" fill="#4d556a">Authorization Server</text>
+
+  <!-- 4. Token boxes (white fill covers arrow endpoints cleanly) -->
+
+  <!-- AT1 (between Portal and Gateway1) -->
+  <rect x="262" y="355" width="55" height="28" rx="8" fill="#ffffff" stroke="#4d556a" stroke-width="1.5"/>
+  <text x="289" y="374" text-anchor="middle" font-family="Roboto,sans-serif" font-size="14" font-weight="500" fill="#4d556a">AT1</text>
+
+  <!-- AT2 (between Gateway1 and Agent) -->
+  <rect x="549" y="355" width="55" height="28" rx="8" fill="#ffffff" stroke="#4d556a" stroke-width="1.5"/>
+  <text x="576" y="374" text-anchor="middle" font-family="Roboto,sans-serif" font-size="14" font-weight="500" fill="#4d556a">AT2</text>
+
+  <!-- AT3 (between Agent and Gateway2) -->
+  <rect x="821" y="355" width="55" height="28" rx="8" fill="#ffffff" stroke="#4d556a" stroke-width="1.5"/>
+  <text x="848" y="374" text-anchor="middle" font-family="Roboto,sans-serif" font-size="14" font-weight="500" fill="#4d556a">AT3</text>
+
+  <!-- AT3 (between Gateway2 and MCP) -->
+  <rect x="1076" y="355" width="55" height="28" rx="8" fill="#ffffff" stroke="#4d556a" stroke-width="1.5"/>
+  <text x="1103" y="374" text-anchor="middle" font-family="Roboto,sans-serif" font-size="14" font-weight="500" fill="#4d556a">AT3</text>
+
+  <!-- 5. Step number labels -->
+
+  <text x="100" y="595" font-family="Roboto,sans-serif" font-size="13" font-weight="400" fill="#4d556a">1. User authenticates and consents</text>
+
+  <text x="280" y="413" text-anchor="middle" font-family="Roboto,sans-serif" font-size="13" font-weight="400" fill="#4d556a">2. Opaque access token</text>
+
+  <text x="425" y="502" text-anchor="end" font-family="Roboto,sans-serif" font-size="13" font-weight="400" fill="#4d556a">3. Token exchange</text>
+  <text x="425" y="518" text-anchor="end" font-family="Roboto,sans-serif" font-size="13" font-weight="400" fill="#4d556a">to reduce scopes</text>
+
+  <text x="562" y="413" text-anchor="middle" font-family="Roboto,sans-serif" font-size="13" font-weight="400" fill="#4d556a">4. JWT access token</text>
+
+  <text x="620" y="227" font-family="Roboto,sans-serif" font-size="13" font-weight="400" fill="#4d556a">5. Start AI</text>
+authorization
+  <text x="572" y="502" font-family="Roboto,sans-serif" font-size="13" font-weight="400" fill="#4d556a">6. Token exchange to</text>
+  <text x="572" y="518" font-family="Roboto,sans-serif" font-size="13" font-weight="400" fill="#4d556a">issue agent attributes</text>
+
+  <text x="844" y="413" text-anchor="middle" font-family="Roboto,sans-serif" font-size="13" font-weight="400" fill="#4d556a">7. MCP tool requests</text>
+
+  <text x="888" y="478" font-family="Roboto,sans-serif" font-size="13" font-weight="400" fill="#4d556a">8. High level authorization</text>
+  <text x="888" y="494" font-family="Roboto,sans-serif" font-size="13" font-weight="400" fill="#4d556a">and identity logging</text>
+
+  <text x="1272" y="483" text-anchor="middle" font-family="Roboto,sans-serif" font-size="13" font-weight="400" fill="#4d556a">9. Main authorization</text>
+
+  <!-- Node sub-labels -->
+  <text x="444" y="295" text-anchor="middle" font-family="Roboto,sans-serif" font-size="14" font-weight="600" fill="#6b7280">External Gateway</text>
+  <text x="951" y="295" text-anchor="middle" font-family="Roboto,sans-serif" font-size="14" font-weight="600" fill="#6b7280">Internal Gateway</text>
+
+</svg>

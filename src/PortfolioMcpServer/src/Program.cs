@@ -2,6 +2,7 @@ namespace IO.Curity.PortfolioMcpServer
 {
     using System.Net;
     using System.Threading.Tasks;
+    using IO.Curity.PortfolioMcpServer.Utilities;
     using Microsoft.AspNetCore.Authentication.JwtBearer;
     using Microsoft.AspNetCore.Authorization;
     using Microsoft.AspNetCore.Builder;
@@ -20,13 +21,9 @@ namespace IO.Curity.PortfolioMcpServer
          */
         public static async Task Main()
         {
-            // Load configuration settings
             var configuration = new Configuration();
-            
-            // The MCP server can log OAuth error details but does not return them to the caller
-            IdentityModelEventSource.ShowPII = true;
+            IdentityModelEventSource.ShowPII = configuration.IsLocalDevelopment;
 
-            // The MCP server runs in an internal network
             var builder = WebApplication.CreateBuilder();
             builder.Configuration.AddJsonFile("appSettings.json");
             builder.WebHost
@@ -35,7 +32,6 @@ namespace IO.Curity.PortfolioMcpServer
                     options.Listen(IPAddress.Any, configuration.Port);
                 });
 
-            // The MCP server validates a JWT access token on every request and uses audience restrictions
             builder.Services
                 .AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
                 .AddJwtBearer(options =>
@@ -52,57 +48,96 @@ namespace IO.Curity.PortfolioMcpServer
                     options.RequireHttpsMetadata = false;
                     options.MapInboundClaims = false;
 
-                    // This example uses an explicit JWKS URI that can be overridden for testing
-                    if (!string.IsNullOrWhiteSpace(configuration.JwksUri))
+                    options.Events = new JwtBearerEvents
                     {
-                        options.TokenValidationParameters.IssuerSigningKeyResolver = (token, securityToken, kid, parameters) =>
+                        OnChallenge = async context =>
                         {
-                            var httpClient = new HttpClient();
-                            var response = httpClient.GetStringAsync(configuration.JwksUri).Result;
-                            var keys = new JsonWebKeySet(response).GetSigningKeys();
-                            var matchingKeys = keys.Where(key => key.KeyId == kid).ToList();
-                            if (matchingKeys.Count == 0)
-                            {
-                                throw new SecurityTokenException($"The kid {kid} in the JWT header was not found");
-                            }
+                            context.HandleResponse();
 
-                            return matchingKeys;
-                        };
+                            var error = "invalid_token";
+                            var description = "The access token is missing, invalid, or expired";
+
+                            context.Response.StatusCode = StatusCodes.Status401Unauthorized;
+                            context.Response.ContentType = "application/json";
+                            context.Response.Headers.WWWAuthenticate = $"Bearer error=\"{error}\", error_description=\"{description}\"";
+
+                            await context.Response.WriteAsJsonAsync(new
+                            {
+                                error,
+                                error_description = description
+                            });
+                        },
+                        OnForbidden = async context =>
+                        {
+                            var error = "insufficient_scope";
+                            var description = "The access token has insufficient privileges";
+
+                            context.Response.StatusCode = StatusCodes.Status403Forbidden;
+                            context.Response.ContentType = "application/json";
+                            context.Response.Headers.WWWAuthenticate = $"Bearer error=\"{error}\", error_description=\"{description}\"";
+
+                            await context.Response.WriteAsJsonAsync(new
+                            {
+                                error,
+                                error_description = description
+                            });
+                        },
+                    };
+
+                    options.TokenValidationParameters.IssuerSigningKeyResolver = (token, securityToken, kid, parameters) =>
+                    {
+                        var httpClient = new HttpClient();
+                        var response = httpClient.GetStringAsync(configuration.JwksUri).Result;
+                        var keys = new JsonWebKeySet(response).GetSigningKeys();
+                        var matchingKeys = keys.Where(key => key.KeyId == kid).ToList();
+                        if (matchingKeys.Count == 0)
+                        {
+                            throw new SecurityTokenException($"The kid {kid} in the JWT header was not found");
+                        }
+
+                        return matchingKeys;
                     };
                 });
 
             builder.Services.AddAuthorization(options =>
             {
-                // All endpoints require JWTs except the resource metadata endpoint which uses [AllowAnonymous]
                 options.FallbackPolicy = new AuthorizationPolicyBuilder().RequireAuthenticatedUser().Build();
 
-                // Authorized endpoints check for the MCP server's required scope
                 options.AddPolicy("scope", policy =>
                     policy.RequireAssertion(context =>
                         context.User.HasClaim(claim =>
-                            claim.Type == "scope" && claim.Value.Split(' ').Any(c => c == configuration.Scope)
+                            claim.Type == "scope" && claim.Value.Split(' ').Any(c => c == configuration.RequiredScope)
                         )
                     )
                 );
+
+                options.AddPolicy("agent", policy =>
+                    policy.RequireAssertion(context =>
+                    {
+                        var agentClaims = context.User.GetAgentClaims();
+                        if (agentClaims == null)
+                        {
+                            return false;
+                        }
+
+                        return agentClaims.AgentDepartment == "finance";
+                    }));
             });
 
-            // Add injectable objects
             builder.Services.AddSingleton(configuration);
-            builder.Services.AddSingleton(new DataRepository());
+            builder.Services.AddSingleton(new StocksRepository());
 
-            // Expose endpoints as an MCP server over HTTP
             builder.Services.AddControllers();
             builder.Services
                 .AddMcpServer()
                 .WithHttpTransport()
                 .WithTools<StocksToolsService>();
 
-            // Run the MCP server as a web API
             var app = builder.Build();
             app.UseAuthentication();
             app.UseAuthorization();
             app.MapControllers();
-            app.MapMcp().RequireAuthorization("scope");
+            app.MapMcp().RequireAuthorization("scope", "agent");
             app.Run();
         }
     }

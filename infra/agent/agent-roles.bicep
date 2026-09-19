@@ -19,7 +19,7 @@ resource roleAssignment1 'Microsoft.Authorization/roleAssignments@2022-04-01' = 
   }
 }
 
-// Grant the agent identity the 'Azure AI user' role for Cognitive services
+// Grant the agent identity the 'Foundry user' role for Cognitive services
 resource roleAssignment2 'Microsoft.Authorization/roleAssignments@2022-04-01' =  {
   name: guid(resourceGroup().id, principalId, 'CognitiveServices')
   properties: {

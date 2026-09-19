@@ -12,4 +12,4 @@ cd ../../src/AutonomousAgent
 
 . ./.env
 rm *.sln 2>/dev/null
-dotnet run
+dotnet watch

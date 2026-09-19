@@ -1,35 +1,51 @@
+#pragma warning disable OPENAI001
 namespace IO.Curity.AutonomousAgent
 {
+    using System;
     using System.Threading.Tasks;
     using A2A;
-    using IO.Curity.AutonomousAgent.Security;
-    using Microsoft.Agents.AI;
+    using Azure.AI.Extensions.OpenAI;
+    using Azure.AI.Projects;
+    using Azure.Identity;
     using Microsoft.Extensions.Logging;
+    using OpenAI.Responses;
+    using IO.Curity.AutonomousAgent.Security;
+    using IO.Curity.AutonomousAgent.Utilities;
+    using System.Text.Json;
 
     /*
-     * The autonomous agent receives a natural language request from an external agent like Claude
-     * The autonomous agent calls the LLM which can select outbound MCP or A2A requests that require security
+     * The autonomous agent receives a natural language request from an external app or agent
+     * The autonomous agent calls the LLM which can trigger secured MCP requests
      * - https://github.com/a2aproject/a2a-dotnet
      */
     public class AutonomousAgent : IAgentHandler
     {
         private readonly Configuration configuration;
+        private readonly OAuthHttpClientHandler oauthHttpClientHandler;
         private readonly ILogger<AutonomousAgent> logger;
-        private Lazy<Task<AIAgent>> agentFactory;
+
+        private readonly ProjectResponsesClient responsesClient;
 
         /*
          * Create the agent in a thread safe manner on a background thread, during the first user request
          * The agent can then get tools from the MCP server with the user's access token
          */
-        public AutonomousAgent(Configuration configuration, OAuthHttpClientHandler oauthHttpClientHandler, ILoggerFactory loggerFactory)
+        public AutonomousAgent(
+            Configuration configuration,
+            OAuthHttpClientHandler oauthHttpClientHandler,
+            ILoggerFactory loggerFactory)
         {
             this.configuration = configuration;
+            this.oauthHttpClientHandler = oauthHttpClientHandler;
             this.logger = new Logger<AutonomousAgent>(loggerFactory);
+            
+            var projectClient = new AIProjectClient(
+                new Uri(this.configuration.AzureFoundryProjectUrl),
+                new DefaultAzureCredential());
 
-            this.agentFactory = new Lazy<Task<AIAgent>>(() => Task.Run(() =>
-            {
-                return new AIAgentFactory(this.configuration, oauthHttpClientHandler).CreateAgentAsync();
-            }));
+            this.responsesClient = projectClient
+                .GetProjectOpenAIClient()
+                .GetProjectResponsesClientForModel(this.configuration.AzureAIModelDeploymentName);
         }
 
         /*
@@ -37,13 +53,17 @@ namespace IO.Curity.AutonomousAgent
          */
         public static AgentCard GetAgentCard(Configuration configuration) {
 
-            //".well-known/agent-card.json", 
-            var skill = new A2A.AgentSkill
+            var skill = new AgentSkill
             {
                 Id = "stocks",
                 Name = "Stock portfolio operations",
                 Description = "Manage stocks within a portfolio.",
                 Tags = ["stocks", "portfolio"],
+            };
+
+            var scopes = new Dictionary<string, string>
+            {
+                [configuration.RequiredScope] = "Read only access to stocks",
             };
 
             var oauth2Scheme = new SecurityScheme
@@ -52,14 +72,16 @@ namespace IO.Curity.AutonomousAgent
                 {
                     Flows = new OAuthFlows
                     {
+                        ClientCredentials = new ClientCredentialsOAuthFlow
+                        {
+                            TokenUrl = configuration.TokenUrl,
+                            Scopes = scopes,
+                        },
                         AuthorizationCode = new AuthorizationCodeOAuthFlow
                         {
                             AuthorizationUrl = configuration.AuthorizationUrl,
                             TokenUrl = configuration.TokenUrl,
-                            Scopes = new Dictionary<string, string>
-                            {
-                                [configuration.Scope] = "Read only access to a user portfolio",
-                            },
+                            Scopes = scopes,
                         }
                     }
                 }
@@ -81,19 +103,106 @@ namespace IO.Curity.AutonomousAgent
         }
 
         /*
-         * Process an A2A request and return an A2A response 
+         * Receive an A2A request, call Foundry, then return an A2A response
          */
         public async Task ExecuteAsync(RequestContext context, AgentEventQueue eventQueue, CancellationToken cancellationToken)
         {
-            var command = context.UserText ?? string.Empty;
-            this.logger.LogDebug($">>> LLM request: {command}");
-
-            var agent = await this.agentFactory.Value;
-            var response = await agent.RunAsync(command);
-            this.logger.LogDebug($">>> LLM response: {response.Text}");
+            var userCommand = context.UserText ?? string.Empty;
+            this.logger.LogDebug($">>> LLM request: {userCommand}");
 
             var responder = new MessageResponder(eventQueue, context.ContextId);
-            await responder.ReplyAsync($"Echo: {response.Text}", cancellationToken);
+            Func<string, Task> onChunk  = async chunk => await responder.ReplyAsync(chunk, cancellationToken);
+
+            try
+            {
+                await this.CallFoundryModelAsync(userCommand, onChunk, cancellationToken);
+            }
+            catch (AgentError ex)
+            {
+                var data = new
+                {
+                    type = "error",
+                    message = ex.Message,
+                    statusCode = ex.StatusCode,
+                    error = ex.Code,
+                    error_description = ex.Message,
+                };
+                await onChunk(JsonSerializer.Serialize(data));
+            }
+        }
+
+        /*
+         * Call Foundry using the OpenAI responses API and handle any LLM responses that trigger MCP tools
+         */
+        private async Task CallFoundryModelAsync(string userCommand, Func<string, Task> onChunk, CancellationToken cancellationToken)
+        {
+            var options = new CreateResponseOptions
+            {
+                InputItems =
+                {
+                    ResponseItem.CreateUserMessageItem(userCommand)
+                },
+                ReasoningOptions = new ResponseReasoningOptions
+                {
+                    ReasoningEffortLevel = ResponseReasoningEffortLevel.None
+                },
+                StreamingEnabled = true
+            };
+
+            var mcpToolsClient = new McpToolsClient(this.configuration, this.oauthHttpClientHandler);
+            await mcpToolsClient.AddFunctionTools(options.Tools);
+
+            for (var round = 0; round < 5; round++)
+            {
+                var functionCalls = new List<FunctionCallResponseItem>();
+
+                await foreach (var update in this.responsesClient.CreateResponseStreamingAsync(options, cancellationToken))
+                {
+                    switch (update)
+                    {
+                        case StreamingResponseOutputTextDeltaUpdate textUpdate:
+                            
+                            if (!string.IsNullOrEmpty(textUpdate.Delta))
+                            {
+                                var data = new
+                                {
+                                    type = "message",
+                                    message = textUpdate.Delta,
+                                };
+                                
+                                await onChunk(JsonSerializer.Serialize(data));
+                            }
+                            break;
+                    
+                        case StreamingResponseOutputItemDoneUpdate doneUpdate:
+
+                            options.InputItems.Add(doneUpdate.Item);
+                            if (doneUpdate.Item is FunctionCallResponseItem call)
+                            {
+                                this.logger.LogDebug($">>> LLM triggered MCP request: {call.CallId}, {call.FunctionName}");
+                                functionCalls.Add(call);
+                            }
+                            break;
+                    }
+                }
+
+                if (functionCalls.Count == 0)
+                {
+                    return;
+                }
+
+                var mcpToolTasks = functionCalls.Select(async call =>
+                {
+                    var jsonData = await mcpToolsClient.CallToolAsync(call);
+                    return new FunctionCallOutputResponseItem(call.CallId, jsonData);
+                });
+
+                var mcpToolResults = await Task.WhenAll(mcpToolTasks);
+                foreach (var result in mcpToolResults)
+                {
+                    options.InputItems.Add(result);
+                }
+            }
         }
     }
 }

@@ -61,7 +61,7 @@ resource autonomousagent 'Microsoft.App/containerApps@2025-07-01' = {
             }
             {
               name: 'EXTERNAL_BASE_URL'
-              value: 'https://gateway-external-${environmentName}.${externalDomainName}/a2a'
+              value: 'https://gateway-external-${environmentName}.${externalDomainName}/autonomous-agent'
             }
             {
               name: 'ISSUER'
@@ -84,7 +84,7 @@ resource autonomousagent 'Microsoft.App/containerApps@2025-07-01' = {
               value: 'https://idsvr-runtime-${environmentName}.${externalDomainName}/oauth/v2/oauth-token'
             }
             {
-              name: 'SCOPE'
+              name: 'REQUIRED_SCOPE'
               value: 'stocks/read'
             }
             {
@@ -105,18 +105,18 @@ resource autonomousagent 'Microsoft.App/containerApps@2025-07-01' = {
             }
             {
               name: 'PORTFOLIO_MCP_SERVER_URL'
-              value: 'http://gateway-internal-${environmentName}/mcp'
+              value: 'http://gateway-internal-${environmentName}/portfolio-mcp-server'
             }
             {
               name: 'AZURE_AI_FOUNDRY_PROJECT_URL'
-              value: 'https://${aiFoundryName}.cognitiveservices.azure.com/api/projects/proj-default'
+              value: 'https://${aiFoundryName}.services.ai.azure.com/api/projects/proj-default'
             }
             {
-              name: 'AZURE_AI_MODEL_NAME'
-              value: 'gpt-4.1-mini'
+              name: 'AZURE_AI_MODEL_DEPLOYMENT_NAME'
+              value: 'gpt-5.4-nano'
             }
             {
-              name: 'MANAGED_IDENTITY_CLIENT_ID'
+              name: 'AZURE_CLIENT_ID'
               value: managedIdentityClientId
             }
           ]

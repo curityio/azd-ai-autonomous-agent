@@ -1,0 +1,65 @@
+# Azure AI Foundry Setup
+
+Use these instructions to set up an Azure AI Foundry project for development, similar to [this video](https://www.youtube.com/watch?v=UB3q4OY3pPM).
+
+## Create a Resource Group for Local Development
+
+To develop with Azure AI Foundry you need a local resource group for development.  
+Verify that the Azure region and AI model that you configure are compatible according to the [latest Microsoft documentation](https://learn.microsoft.com/en-us/azure/foundry-classic/agents/concepts/model-region-support?tabs=global-standard).  
+
+## Create a Foundry Project
+
+Create a Foundry resource and give it a globally unique name.  
+The following example uses a name of `curity-demo` in a resource group `rg-local` for the `uksouth` region.  
+You may need to replace the name `curity-demo` with a globally unique value.
+
+<img src="images/foundry-resource.png" alt="Foundry Resource" style="width:50%;" />
+
+Select `Go to resource` and select the resources's default project, named `proj-default`.  
+Then select `Go to Foundry Portal` and navigate to the `Model Catalog`.  
+Select `gpt-5.4-nano` as a low cost model, select `Use this model` and deploy it.  
+
+## Grant AI Permissions
+
+Next, ensure that your user account has [Data Plane Access to Microsoft Foundry](https://learn.microsoft.com/en-us/azure/foundry/concepts/rbac-foundry#minimum-role-assignments-to-get-started), for example:
+
+- In the Foundry Portal, edit the resource, navigate to `Access control (IAM)` and select `Add role assignement`.  
+- Select the `Foundry User` role, add your user account as a member, then assign the role:
+
+<img src="images/azure-ai-role.png" alt="Azure AI Role" style="width:50%;" />
+
+When you run a local agent, your CLI account now has permissions to call the Azure AI Foundry project.  
+
+## Configure the Autonomous Agent
+
+Edit the `src/AutonomousAgent/.env` file and use settings that match your Foundry project URL and model deployment name:
+
+```bash
+export AZURE_AI_FOUNDRY_PROJECT_URL='https://curity-demo.services.ai.azure.com/api/projects/proj-default'
+export AZURE_AI_MODEL_DEPLOYMENT_NAME='gpt-5.4-nano'
+```
+
+## Test the Connection
+
+Use commands such as the following to ensure that the connection works:
+
+```bash
+AZURE_AI_RESOURCE_NAME='curity-demo'
+AZURE_AI_PROJECT_NAME='proj-default'
+AZURE_AI_MODEL_DEPLOYMENT_NAME='gpt-5.4-nano'
+
+az login
+
+ACCESS_TOKEN=$(az account get-access-token \
+  --scope https://ai.azure.com/.default \
+  --query accessToken \
+  --output tsv)
+
+curl -s -X POST "https://$AZURE_AI_RESOURCE_NAME.services.ai.azure.com/api/projects/$AZURE_AI_PROJECT_NAME/openai/v1/responses" \
+  -H "authorization: Bearer $ACCESS_TOKEN" \
+  -H "content-type: application/json" \
+  -d '{
+      "model": "$AZURE_AI_MODEL_DEPLOYMENT_NAME",
+      "input": "What is the capital of France?"
+    }'
+```

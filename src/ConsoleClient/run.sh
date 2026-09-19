@@ -9,10 +9,10 @@ cd "$(dirname "${BASH_SOURCE[0]}")"
 . ./.env
 rm *.sln 2>/dev/null
 
-if [ "$A2A_EXTERNAL_URL" == '' ]; then
-  export AUTONOMOUS_AGENT_URL='http://localhost/a2a'
+if [ "$AI_EXTERNAL_URL" == '' ]; then
+  export AUTONOMOUS_AGENT_URL='http://localhost:3000'
 else
-  export AUTONOMOUS_AGENT_URL="$A2A_EXTERNAL_URL/a2a"
+  export AUTONOMOUS_AGENT_URL="$AI_EXTERNAL_URL/autonomous-agent"
 fi
 
 dotnet run

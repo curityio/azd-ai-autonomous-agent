@@ -1,0 +1,16 @@
+_format_version: '2.1'
+_transform: true
+services:
+
+#
+# The external entry point for lrequests from the local computer's autonomous agent to the MCP server
+# Requests are routed via the internal gateway
+#
+- name: portfolio-mcp-server
+  url: http://gateway-internal:8000/portfolio-mcp-server
+  routes:
+  - name: portfolio-mcp-server
+    hosts:
+    - localhost
+    paths:
+    - /portfolio-mcp-server

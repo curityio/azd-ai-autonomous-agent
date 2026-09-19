@@ -28,7 +28,7 @@ namespace IO.Curity.PortfolioMcpServer
                 ["resource"] = this.configuration.ExternalBaseUrl,
                 ["resource_name"] = "Portfolio MCP Server",
                 ["authorization_servers"] =  this.configuration.AuthorizationServerBaseUrl,
-                ["scopes_supported"] = this.configuration.Scope,
+                ["scopes_supported"] = this.configuration.RequiredScope,
             };
         }
     }
