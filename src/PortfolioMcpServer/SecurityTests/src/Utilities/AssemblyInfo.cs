@@ -1,3 +1,6 @@
+using Xunit;
 using Xunit.Runner.Common;
+using IO.Curity.PortfolioMcpServer.SecurityTests.Utilities;
 
-[assembly: RegisterRunnerReporter(typeof(IO.Curity.PortfolioMcpServer.SecurityTests.Utilities.CustomReporter))]
+[assembly: TestMethodOrderer(typeof(SequentialTestMethodOrderer))]
+[assembly: RegisterRunnerReporter(typeof(CustomReporter))]

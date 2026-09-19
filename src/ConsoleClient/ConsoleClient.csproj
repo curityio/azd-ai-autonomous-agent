@@ -7,6 +7,12 @@
     <ImplicitUsings>enable</ImplicitUsings>
   </PropertyGroup>
 
+  <PropertyGroup>
+    <EnableNETAnalyzers>true</EnableNETAnalyzers>
+    <AnalysisLevel>10.0</AnalysisLevel>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+  </PropertyGroup>
+
   <ItemGroup>
     <PackageReference Include="A2A" Version="1.0.0-preview2" />
   </ItemGroup>

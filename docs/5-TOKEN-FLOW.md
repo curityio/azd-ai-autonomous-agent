@@ -13,7 +13,7 @@ This access token format prevents internet clients from reading potentially sens
 _0XBPWQQ_2fb1bc61-0e98-413c-a44d-d8a46d3bd2f2
 ```
 
-The underlying token claims would be those of a customer support application, such as `openid stocks/read`.  
+The underlying token scopes would be those of a customer support application, such as `openid stocks/read`.  
 In many use cases, the customer support application could have multiple scopes that the agent should not have access to.
 
 ## Agent Access Token (AT2)
@@ -27,7 +27,7 @@ The token exchange also converts the format of the incoming access token to a JW
   "delegationId": "dda57127-6cc2-4e7f-b8ec-ad3d4626a2f2",
   "exp": 1788769571,
   "nbf": 1788768671,
-  "scope": "openid stocks/read",
+  "scope": "stocks/read",
   "iss": "http://localhost:8443/oauth/v2/oauth-anonymous",
   "sub": "934d737304b1bbc5cc0d443749e64a473211cb5af9e88b069abbd0ed728741b9",
   "aud": [

@@ -6,7 +6,7 @@ A couple of particular AI examples are summarized below.
 ## 1. AI Federated Token Flows
 
 The internal gateway can act as a [Token Broker](https://curity.io/resources/learn/agentic-access-control-with-token-vaulting/) that exchanges tokens on behalf of the AI agent.  
-For example, a token broker can managed token exchanges with access tokens from external organizations.  
+For example, a token broker can manage token exchanges with access tokens from external organizations.  
 
 ![Federated Token Flow](images/federated-token-flow.jpg)
 

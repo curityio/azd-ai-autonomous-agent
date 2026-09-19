@@ -4,7 +4,12 @@
     <TargetFramework>net10.0</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
-    <UserSecretsId>d8314581-7a75-409f-8a17-88dbd77d75b6</UserSecretsId>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <EnableNETAnalyzers>true</EnableNETAnalyzers>
+    <AnalysisLevel>10.0</AnalysisLevel>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
   </PropertyGroup>
 
   <ItemGroup>
